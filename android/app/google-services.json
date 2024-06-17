@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "46784719953",
+    "project_id": "copy-paste-app-fxtvnu",
+    "storage_bucket": "copy-paste-app-fxtvnu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46784719953:android:149475ea10803cccfedc70",
+        "android_client_info": {
+          "package_name": "com.mycompany.copypasteapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "46784719953-j86rcvbprfo0br5k20bhs5m9jqo0hg90.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mycompany.copypasteapp",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "46784719953-l4u86droqdgqa6m3s83ceb4khi0l99rs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCunxY7S8HDjiyWWZauU8mNul0fu7-yP6k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46784719953-l4u86droqdgqa6m3s83ceb4khi0l99rs.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "46784719953-ijsgibspgdou9tq32kh03imdvdmf7obv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.copypasteapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
