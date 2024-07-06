@@ -49,7 +49,7 @@ class _IndCopyWidgetState extends State<IndCopyWidget> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
+        color: FlutterFlowTheme.of(context).info,
         boxShadow: const [
           BoxShadow(
             blurRadius: 4.0,
@@ -76,9 +76,9 @@ class _IndCopyWidgetState extends State<IndCopyWidget> {
             child: FlutterFlowIconButton(
               borderRadius: 8.0,
               buttonSize: 40.0,
-              icon: const Icon(
+              icon: Icon(
                 Icons.delete_outline,
-                color: Color(0xFFFF0030),
+                color: FlutterFlowTheme.of(context).primary,
                 size: 30.0,
               ),
               onPressed: () async {
@@ -103,6 +103,7 @@ class _IndCopyWidgetState extends State<IndCopyWidget> {
                   textAlign: TextAlign.start,
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         fontFamily: 'Readex Pro',
+                        color: Colors.black,
                         letterSpacing: 0.0,
                       ),
                 )),
@@ -112,9 +113,9 @@ class _IndCopyWidgetState extends State<IndCopyWidget> {
           FlutterFlowIconButton(
             borderRadius: 8.0,
             buttonSize: 40.0,
-            icon: Icon(
+            icon: const Icon(
               Icons.content_copy,
-              color: FlutterFlowTheme.of(context).primaryText,
+              color: Colors.black,
               size: 24.0,
             ),
             onPressed: () async {

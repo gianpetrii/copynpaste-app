@@ -44,7 +44,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
           : FocusScope.of(context).unfocus(),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).info,
         body: SafeArea(
           top: true,
           child: Align(
@@ -58,8 +58,8 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      FlutterFlowTheme.of(context).secondaryBackground,
-                      FlutterFlowTheme.of(context).secondary
+                      FlutterFlowTheme.of(context).info,
+                      const Color(0x004B39EF)
                     ],
                     stops: const [0.0, 1.0],
                     begin: const AlignmentDirectional(0.0, -1.0),
@@ -99,6 +99,7 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                                     .titleLarge
                                     .override(
                                       fontFamily: 'Outfit',
+                                      color: const Color(0xFF14181B),
                                       letterSpacing: 0.0,
                                     ),
                               ),
@@ -158,10 +159,13 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                                 child: StreamBuilder<List<ElementsRecord>>(
                                   stream: queryElementsRecord(
                                     queryBuilder: (elementsRecord) =>
-                                        elementsRecord.where(
-                                      'user',
-                                      isEqualTo: currentUserReference,
-                                    ),
+                                        elementsRecord
+                                            .where(
+                                              'user',
+                                              isEqualTo: currentUserReference,
+                                            )
+                                            .orderBy('created',
+                                                descending: true),
                                   ),
                                   builder: (context, snapshot) {
                                     // Customize what your widget looks like when it's loading.
@@ -214,32 +218,63 @@ class _HomepageWidgetState extends State<HomepageWidget> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: FFButtonWidget(
-                                onPressed: () {
-                                  print('Button pressed ...');
-                                },
-                                text: 'Erase all',
-                                options: FFButtonOptions(
-                                  height: 40.0,
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      24.0, 0.0, 24.0, 0.0),
-                                  iconPadding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        fontFamily: 'Readex Pro',
-                                        color: Colors.white,
-                                        letterSpacing: 0.0,
-                                      ),
-                                  elevation: 3.0,
-                                  borderSide: const BorderSide(
-                                    color: Colors.transparent,
-                                    width: 1.0,
+                              child: StreamBuilder<List<ElementsRecord>>(
+                                stream: queryElementsRecord(
+                                  queryBuilder: (elementsRecord) =>
+                                      elementsRecord.where(
+                                    'user',
+                                    isEqualTo: currentUserReference,
                                   ),
-                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
+                                builder: (context, snapshot) {
+                                  // Customize what your widget looks like when it's loading.
+                                  if (!snapshot.hasData) {
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 50.0,
+                                        height: 50.0,
+                                        child: CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            FlutterFlowTheme.of(context)
+                                                .primary,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  List<ElementsRecord>
+                                      buttonElementsRecordList = snapshot.data!;
+                                  return FFButtonWidget(
+                                    onPressed: () {
+                                      print('Button pressed ...');
+                                    },
+                                    text: 'Erase all',
+                                    options: FFButtonOptions(
+                                      height: 40.0,
+                                      padding: const EdgeInsetsDirectional.fromSTEB(
+                                          24.0, 0.0, 24.0, 0.0),
+                                      iconPadding:
+                                          const EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            fontFamily: 'Readex Pro',
+                                            color: Colors.white,
+                                            letterSpacing: 0.0,
+                                          ),
+                                      elevation: 3.0,
+                                      borderSide: const BorderSide(
+                                        color: Colors.transparent,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                             Expanded(
