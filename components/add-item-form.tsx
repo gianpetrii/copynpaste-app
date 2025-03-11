@@ -132,11 +132,11 @@ export function AddItemForm() {
   if (!isAuthenticated) {
     return (
       <div className="p-4">
-        <div className="bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md p-6 text-center">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <div className="bg-secondary rounded-[var(--radius)] shadow-soft dark:shadow-soft-dark p-6 text-center">
+          <p className="text-secondary-foreground mb-4">
             Debes iniciar sesión para guardar elementos.
           </p>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             Tus datos se guardarán de forma segura y solo tú podrás acceder a ellos.
           </p>
         </div>
@@ -146,13 +146,13 @@ export function AddItemForm() {
 
   return (
     <div className="p-4">
-      <div className="bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md p-3 mb-2">
+      <div className="bg-secondary/50 rounded-[var(--radius)] shadow-soft dark:shadow-soft-dark p-3 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
-          <TabsList className="grid grid-cols-2 w-full dark:bg-gray-800">
-            <TabsTrigger value="text" className="dark:text-gray-200 dark:data-[state=active]:bg-gray-900">
+          <TabsList className="grid grid-cols-2 w-full bg-muted">
+            <TabsTrigger value="text" className="data-[state=active]:bg-background">
               Texto
             </TabsTrigger>
-            <TabsTrigger value="file" className="dark:text-gray-200 dark:data-[state=active]:bg-gray-900">
+            <TabsTrigger value="file" className="data-[state=active]:bg-background">
               Archivo
             </TabsTrigger>
           </TabsList>
@@ -162,7 +162,7 @@ export function AddItemForm() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'text')}
-              className="min-h-[100px] mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
+              className="min-h-[100px] mb-2 bg-background border-input focus:ring-1 focus:ring-ring"
             />
             <div className="mt-2">
               <Input
@@ -171,11 +171,11 @@ export function AddItemForm() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, 'url')}
-                className="mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                className="mb-2 bg-background border-input focus:ring-1 focus:ring-ring"
               />
             </div>
             <Button
-              className="w-full mt-2 bg-gray-800 hover:bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800"
+              className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
@@ -183,7 +183,7 @@ export function AddItemForm() {
             </Button>
           </TabsContent>
           <TabsContent value="file" className="p-4">
-            <div className="border-2 border-dashed rounded-md p-6 text-center dark:border-gray-600 dark:text-white">
+            <div className="border-2 border-dashed rounded-[var(--radius)] p-6 text-center border-border hover:border-primary/50 transition-colors">
               <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
               <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center justify-center">
                 <svg
@@ -196,14 +196,14 @@ export function AddItemForm() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="mb-2"
+                  className="mb-2 text-primary"
                 >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
                 <span className="text-sm font-medium">Haz clic para seleccionar un archivo</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">O arrastra y suelta aquí</span>
+                <span className="text-xs text-muted-foreground mt-1">O arrastra y suelta aquí</span>
               </label>
             </div>
           </TabsContent>

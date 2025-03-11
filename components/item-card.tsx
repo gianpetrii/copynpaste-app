@@ -190,17 +190,17 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <div 
-      className="border rounded-md p-4 bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm"
+      className="border rounded-[var(--radius)] p-4 bg-card text-card-foreground shadow-soft dark:shadow-soft-dark hover:shadow-md transition-shadow duration-300"
     >
       <div className="flex items-start gap-3">
         <div 
           className="flex-1 cursor-pointer" 
           onClick={handleCopy}
         >
-          <div className="mt-1">{renderIcon()}</div>
+          <div className="mt-1 text-primary">{renderIcon()}</div>
           <div>
             {renderContent()}
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <div className="text-xs text-muted-foreground mt-2">
               Creado: {formatDate(item.createdAt)}
               {item.updatedAt && (
                 typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
@@ -219,7 +219,7 @@ export function ItemCard({ item }: ItemCardProps) {
             size="icon"
             variant="ghost"
             onClick={handleToggleFavorite}
-            className={`${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'dark:text-gray-300'} dark:hover:bg-gray-700`}
+            className={`${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'} hover:bg-secondary`}
           >
             <Star className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
             <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
@@ -229,7 +229,7 @@ export function ItemCard({ item }: ItemCardProps) {
               size="icon"
               variant="ghost"
               onClick={() => setIsEditing(true)}
-              className="dark:text-gray-300 dark:hover:bg-gray-700"
+              className="text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <Edit className="h-4 w-4" />
               <span className="sr-only">Editar</span>
@@ -239,7 +239,7 @@ export function ItemCard({ item }: ItemCardProps) {
             size="icon"
             variant="ghost"
             onClick={handleCopy}
-            className="dark:text-gray-300 dark:hover:bg-gray-700"
+            className="text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copiar</span>
@@ -249,7 +249,7 @@ export function ItemCard({ item }: ItemCardProps) {
               size="icon"
               variant="ghost"
               onClick={handleDownload}
-              className="dark:text-gray-300 dark:hover:bg-gray-700"
+              className="text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <Download className="h-4 w-4" />
               <span className="sr-only">Descargar</span>
@@ -260,7 +260,7 @@ export function ItemCard({ item }: ItemCardProps) {
             variant="ghost"
             onClick={handleDelete}
             disabled={isLoading}
-            className="dark:text-gray-300 dark:hover:bg-gray-700"
+            className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
           >
             <Trash className="h-4 w-4" />
             <span className="sr-only">Eliminar</span>
