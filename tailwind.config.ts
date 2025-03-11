@@ -55,7 +55,22 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+      keyframes: {
+        "slide-down": {
+          "0%": { transform: "translateY(-100%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" }
+        },
+        "push-down": {
+          "0%": { transform: "translateY(0)" },
+          "30%": { transform: "translateY(20px)" },
+          "100%": { transform: "translateY(0)" }
+        }
+      },
+      animation: {
+        "slide-down": "slide-down 1.5s ease-out forwards",
+        "push-down": "push-down 1.5s ease-out"
+      }
   	}
   },
   plugins: [require("tailwindcss-animate")],

@@ -22,14 +22,18 @@ export function AddItemForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Ensure user is authenticated before allowing submissions
+  const isAuthenticated = !!userId
+
   const handleTextSubmit = async () => {
-    if (!text.trim()) return
+    if (!text.trim() || !isAuthenticated) return
 
     try {
       setIsSubmitting(true)
       await addItem({
         type: "text",
         content: text,
+        userId: userId, // Explicitly set userId for security
       })
       setText("")
       toast({
@@ -49,13 +53,14 @@ export function AddItemForm() {
   }
 
   const handleUrlSubmit = async () => {
-    if (!url.trim()) return
+    if (!url.trim() || !isAuthenticated) return
 
     try {
       setIsSubmitting(true)
       await addItem({
         type: "url",
         content: url,
+        userId: userId, // Explicitly set userId for security
       })
       setUrl("")
       toast({
@@ -74,22 +79,33 @@ export function AddItemForm() {
     }
   }
 
+  // Handle key press events for text and URL inputs
+  const handleKeyDown = (e: React.KeyboardEvent, type: 'text' | 'url') => {
+    // Submit on Enter key press (without Shift key for textarea)
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent default behavior (new line in textarea)
+      if (type === 'text' && text.trim()) {
+        handleTextSubmit();
+      } else if (type === 'url' && url.trim()) {
+        handleUrlSubmit();
+      }
+    }
+  };
+
   const handleFileSubmit = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0]) return
+    if (!e.target.files || !e.target.files[0] || !isAuthenticated) return
 
     try {
       setIsSubmitting(true)
       const file = e.target.files[0]
 
-      // Crear una URL para el archivo local
-      const fileUrl = URL.createObjectURL(file)
-
       await addItem({
         type: "file",
+        file: file,
         fileName: file.name,
         fileType: file.type,
         fileSize: file.size,
-        fileUrl: fileUrl,
+        userId: userId, // Explicitly set userId for security
       })
 
       if (fileInputRef.current) {
@@ -112,6 +128,22 @@ export function AddItemForm() {
     }
   }
 
+  // Disable form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="p-4">
+        <div className="bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md p-6 text-center">
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            Debes iniciar sesión para guardar elementos.
+          </p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            Tus datos se guardarán de forma segura y solo tú podrás acceder a ellos.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4">
       <div className="bg-gray-100 dark:bg-gray-700 rounded-xl shadow-md p-3 mb-2">
@@ -129,6 +161,7 @@ export function AddItemForm() {
               placeholder="Ingresa tu texto aquí"
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'text')}
               className="min-h-[100px] mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
             />
             <div className="mt-2">
@@ -137,6 +170,7 @@ export function AddItemForm() {
                 placeholder="O ingresa un enlace"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'url')}
                 className="mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600"
               />
             </div>

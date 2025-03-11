@@ -10,9 +10,11 @@ import {
   where, 
   orderBy,
   Timestamp,
-  serverTimestamp
+  serverTimestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from './firebase';
+import type { Item } from '@/types';
 
 // Función para añadir un documento a una colección
 export const addDocument = async (collectionName: string, data: any) => {
@@ -106,6 +108,54 @@ export const getDocuments = async (
     return documents;
   } catch (error) {
     console.error('Error al obtener documentos:', error);
+    throw error;
+  }
+};
+
+// Función para suscribirse a cambios en tiempo real en una colección
+export const subscribeToItems = (
+  userId: string,
+  callback: (items: Item[]) => void
+) => {
+  try {
+    // Crear una consulta para obtener los elementos del usuario ordenados por fecha de creación
+    const q = query(
+      collection(db, 'items'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    // Crear una suscripción a los cambios en la consulta
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const items: Item[] = [];
+
+      // Procesar cada documento en el resultado de la consulta
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        items.push({
+          id: doc.id,
+          type: data.type,
+          content: data.content || '',
+          userId: data.userId,
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+          fileUrl: data.fileUrl || '',
+          fileName: data.fileName || '',
+          fileType: data.fileType || '',
+          fileSize: data.fileSize || 0,
+          favorite: data.favorite || false,
+          filePath: data.filePath || '',
+        });
+      });
+
+      // Llamar al callback con los elementos actualizados
+      callback(items);
+    });
+
+    // Devolver la función para cancelar la suscripción
+    return unsubscribe;
+  } catch (error) {
+    console.error('Error al suscribirse a los elementos:', error);
     throw error;
   }
 }; 

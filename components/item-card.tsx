@@ -123,11 +123,19 @@ export function ItemCard({ item }: ItemCardProps) {
 
   const renderContent = () => {
     if (isEditing) {
+      const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleUpdate();
+        }
+      };
+      
       return (
         <div className="mt-2">
           <Textarea
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-600"
           />
           <div className="flex gap-2">
@@ -181,22 +189,29 @@ export function ItemCard({ item }: ItemCardProps) {
   }
 
   return (
-    <div className="border rounded-md p-4 bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm">
+    <div 
+      className="border rounded-md p-4 bg-white dark:bg-gray-800 dark:border-gray-700 shadow-sm"
+    >
       <div className="flex items-start gap-3">
-        <div className="mt-1">{renderIcon()}</div>
-        <div className="flex-1">
-          {renderContent()}
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Creado: {formatDate(item.createdAt)}
-            {item.updatedAt && (
-              typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
-              typeof item.createdAt === 'object' && item.createdAt instanceof Date && 
-              item.updatedAt.getTime() !== item.createdAt.getTime() ? (
-                <> • Modificado: {formatDate(item.updatedAt)}</>
-              ) : (
-                item.updatedAt !== item.createdAt && <> • Modificado: {formatDate(item.updatedAt)}</>
-              )
-            )}
+        <div 
+          className="flex-1 cursor-pointer" 
+          onClick={handleCopy}
+        >
+          <div className="mt-1">{renderIcon()}</div>
+          <div>
+            {renderContent()}
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Creado: {formatDate(item.createdAt)}
+              {item.updatedAt && (
+                typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
+                typeof item.createdAt === 'object' && item.createdAt instanceof Date && 
+                item.updatedAt.getTime() !== item.createdAt.getTime() ? (
+                  <> • Modificado: {formatDate(item.updatedAt)}</>
+                ) : (
+                  item.updatedAt !== item.createdAt && <> • Modificado: {formatDate(item.updatedAt)}</>
+                )
+              )}
+            </div>
           </div>
         </div>
         <div className="flex gap-1">

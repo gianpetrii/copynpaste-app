@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { Item } from "@/types"
-import { addDocument, getDocuments, updateDocument, deleteDocument } from "@/lib/firebase/firestore"
+import { addDocument, getDocuments, updateDocument, deleteDocument, subscribeToItems } from "@/lib/firebase/firestore"
 import { uploadFile, deleteFile } from "@/lib/firebase/storage"
 
 // Hook para gestionar el almacenamiento local
@@ -54,39 +54,29 @@ export function useItems(userId: string) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Cargar los items del usuario desde Firestore
+  // Cargar los items del usuario desde Firestore con actualizaciones en tiempo real
   useEffect(() => {
     if (!userId) {
       setItems([])
       setLoading(false)
-      return
+      return () => {}; // Retornar una función de limpieza vacía
     }
 
-    const loadItems = async () => {
-      try {
-        setLoading(true)
-        const filters = [{ field: "userId", operator: "==", value: userId }]
-        const sortBy = [{ field: "createdAt", direction: "desc" as const }]
-        
-        const itemsData = await getDocuments("items", filters, sortBy)
-        
-        // Convertir timestamps de Firestore a objetos Date
-        const formattedItems = itemsData.map(item => ({
-          ...item,
-          createdAt: item.createdAt?.toDate() || new Date(),
-          updatedAt: item.updatedAt?.toDate() || new Date()
-        })) as Item[]
-        
-        setItems(formattedItems)
-      } catch (error) {
-        console.error("Error al cargar los items:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadItems()
-  }, [userId])
+    setLoading(true)
+    
+    // Usar subscribeToItems para obtener actualizaciones en tiempo real
+    const unsubscribe = subscribeToItems(userId, (updatedItems) => {
+      // Asegurarse de que solo se muestren los items del usuario actual
+      const userItems = updatedItems.filter(item => item.userId === userId);
+      setItems(userItems);
+      setLoading(false);
+    });
+    
+    // Limpiar la suscripción cuando el componente se desmonte o cambie el userId
+    return () => {
+      unsubscribe();
+    };
+  }, [userId]);
 
   const addItem = async (itemData: Partial<Item>) => {
     if (!userId) throw new Error("Usuario no autenticado")
@@ -95,11 +85,8 @@ export function useItems(userId: string) {
       let fileData = {}
       
       // Si es un archivo, subirlo a Firebase Storage
-      if (itemData.type === "file" && itemData.fileUrl) {
-        // Convertir la URL del objeto a un archivo
-        const response = await fetch(itemData.fileUrl)
-        const blob = await response.blob()
-        const file = new File([blob], itemData.fileName || "file", { type: itemData.fileType || "" })
+      if (itemData.type === "file" && itemData.file) {
+        const file = itemData.file
         
         // Subir el archivo a Firebase Storage
         const filePath = `users/${userId}/files/${Date.now()}_${file.name}`
@@ -115,7 +102,7 @@ export function useItems(userId: string) {
       const newItem = {
         type: itemData.type || "text",
         content: itemData.content || "",
-        userId,
+        userId, // Always use the authenticated user's ID
         fileName: itemData.fileName || "",
         fileType: itemData.fileType || "",
         fileSize: itemData.fileSize || 0,
@@ -123,28 +110,9 @@ export function useItems(userId: string) {
         ...fileData
       }
 
-      const itemId = await addDocument("items", newItem)
-      
-      // Obtener el documento recién creado para tener los timestamps
-      const createdItem = await getDocuments("items", [
-        { field: "userId", operator: "==", value: userId },
-        { field: "__name__", operator: "==", value: itemId }
-      ])
-      
-      if (createdItem.length > 0) {
-        const formattedItem = {
-          ...createdItem[0],
-          id: itemId,
-          createdAt: createdItem[0].createdAt?.toDate() || new Date(),
-          updatedAt: createdItem[0].updatedAt?.toDate() || new Date()
-        } as Item
-        
-        // Actualizar el estado local
-        setItems(prevItems => [formattedItem, ...prevItems])
-        return itemId
-      }
-      
-      return itemId
+      // Agregar el documento a Firestore
+      // La suscripción se encargará de actualizar la lista automáticamente
+      return await addDocument("items", newItem)
     } catch (error) {
       console.error("Error al añadir item:", error)
       throw error
@@ -155,16 +123,15 @@ export function useItems(userId: string) {
     if (!userId) throw new Error("Usuario no autenticado")
 
     try {
-      await updateDocument("items", id, data)
+      // Verify the item belongs to the current user
+      const itemToUpdate = items.find(item => item.id === id)
+      if (!itemToUpdate || itemToUpdate.userId !== userId) {
+        throw new Error("No tienes permiso para actualizar este elemento")
+      }
       
-      // Actualizar el estado local
-      setItems(prevItems =>
-        prevItems.map(item => 
-          item.id === id 
-            ? { ...item, ...data, updatedAt: new Date() } 
-            : item
-        )
-      )
+      // Actualizar el documento en Firestore
+      // La suscripción se encargará de actualizar la lista automáticamente
+      await updateDocument("items", id, data)
     } catch (error) {
       console.error("Error al actualizar item:", error)
       throw error
@@ -175,8 +142,11 @@ export function useItems(userId: string) {
     if (!userId) throw new Error("Usuario no autenticado")
 
     try {
-      // Obtener el item para ver si tiene un archivo asociado
+      // Verify the item belongs to the current user
       const itemToDelete = items.find(item => item.id === id)
+      if (!itemToDelete || itemToDelete.userId !== userId) {
+        throw new Error("No tienes permiso para eliminar este elemento")
+      }
       
       // Si tiene un archivo, eliminarlo de Storage
       if (itemToDelete?.type === "file" && itemToDelete.filePath) {
@@ -184,10 +154,8 @@ export function useItems(userId: string) {
       }
       
       // Eliminar el documento de Firestore
+      // La suscripción se encargará de actualizar la lista automáticamente
       await deleteDocument("items", id)
-      
-      // Actualizar el estado local
-      setItems(prevItems => prevItems.filter(item => item.id !== id))
     } catch (error) {
       console.error("Error al eliminar item:", error)
       throw error

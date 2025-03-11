@@ -11,5 +11,6 @@ export interface Item {
   fileSize?: number
   favorite?: boolean
   filePath?: string
+  file?: File
 }
 
