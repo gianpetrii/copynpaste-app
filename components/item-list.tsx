@@ -108,11 +108,11 @@ export function ItemList({ filter = "all" }: ItemListProps) {
   }
 
   return (
-    <div className="p-4 w-full">
-      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-3 mb-2">
-        <div className="flex justify-between mb-4">
+    <div className="w-full">
+      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-2 sm:p-3 mb-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-2 mb-4">
           <Select value={filterType} onValueChange={(value) => setFilterType(value as "all" | "text" | "url" | "file")}>
-            <SelectTrigger className="w-[180px] bg-background border-border text-foreground">
+            <SelectTrigger className="w-full sm:w-[180px] bg-background border-border text-foreground">
               <SelectValue placeholder="Todos los tipos" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
@@ -124,7 +124,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
           </Select>
           
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
-            <SelectTrigger className="w-[180px] bg-background border-border text-foreground">
+            <SelectTrigger className="w-full sm:w-[180px] bg-background border-border text-foreground">
               <SelectValue placeholder="Más reciente" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
@@ -138,7 +138,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
         {filteredAndSortedItems.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">No hay elementos guardados</div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-3">
             {filteredAndSortedItems.map((item, index) => (
               <div 
                 key={item.id} 
