@@ -81,8 +81,8 @@ export function AddItemForm() {
 
   // Handle key press events for text and URL inputs
   const handleKeyDown = (e: React.KeyboardEvent, type: 'text' | 'url') => {
-    // Submit on Enter key press (without Shift key for textarea)
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // Submit on Ctrl+Enter key press (instead of just Enter)
+    if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault(); // Prevent default behavior (new line in textarea)
       if (type === 'text' && text.trim()) {
         handleTextSubmit();
@@ -145,8 +145,8 @@ export function AddItemForm() {
   }
 
   return (
-    <div className="p-4 w-full">
-      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-3 mb-2">
+    <div className="w-full">
+      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-2 sm:p-3 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
           <TabsList className="grid grid-cols-2 w-full bg-muted">
             <TabsTrigger value="text" className="data-[state=active]:bg-background">
@@ -156,9 +156,9 @@ export function AddItemForm() {
               Archivo
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="text" className="p-4">
+          <TabsContent value="text" className="p-2 sm:p-4">
             <Textarea
-              placeholder="Ingresa tu texto aquí"
+              placeholder="Ingresa tu texto aquí (Ctrl+Enter para guardar)"
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'text')}
@@ -167,7 +167,7 @@ export function AddItemForm() {
             <div className="mt-2">
               <Input
                 type="url"
-                placeholder="O ingresa un enlace"
+                placeholder="O ingresa un enlace (Ctrl+Enter)"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, 'url')}
@@ -175,15 +175,15 @@ export function AddItemForm() {
               />
             </div>
             <Button
-              className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 add-button"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
               <Plus className="mr-2 h-4 w-4" /> Agregar
             </Button>
           </TabsContent>
-          <TabsContent value="file" className="p-4">
-            <div className="border-2 border-dashed rounded-md p-6 text-center border-border hover:border-primary/50 transition-colors">
+          <TabsContent value="file" className="p-2 sm:p-4">
+            <div className="border-2 border-dashed rounded-md p-4 sm:p-6 text-center border-border hover:border-primary/50 transition-colors">
               <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
               <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center justify-center">
                 <svg
@@ -208,6 +208,9 @@ export function AddItemForm() {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
+      <div className="text-xs text-muted-foreground text-center mt-1 mb-2">
+        Presiona Ctrl+Enter para guardar o usa el botón Agregar
       </div>
     </div>
   )

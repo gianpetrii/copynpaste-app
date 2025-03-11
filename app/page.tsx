@@ -29,15 +29,15 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
-      <div className="container mx-auto p-4">
-        <header className="flex justify-between items-center mb-8">
+      <div className="container mx-auto px-2 sm:px-4">
+        <header className="flex justify-between items-center mb-6 pt-4">
           <div className="flex items-center">
-            <ClipboardCopy className="h-8 w-8 mr-2 text-foreground" />
-            <h1 className="text-2xl font-bold text-foreground">
+            <ClipboardCopy className="h-7 w-7 mr-2 text-foreground" />
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               Copy & Paste App
             </h1>
           </div>
-          <div className="flex space-x-2 items-center">
+          <div className="flex items-center gap-2">
             <ThemeToggle onToggle={handleThemeToggle} isDark={isDarkMode} />
             <AuthButtons />
           </div>
@@ -46,20 +46,20 @@ export default function Home() {
         {user ? (
           <>
             <AddItemForm />
-            <div className="mt-8">
+            <div className="mt-6">
               <Tabs defaultValue="all" className="w-full">
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 w-full">
                   <TabsTrigger
                     value="all"
                     onClick={() => setActiveTab("all")}
-                    className={activeTab === "all" ? "bg-primary text-primary-foreground" : ""}
+                    className={`flex-1 ${activeTab === "all" ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     Todos
                   </TabsTrigger>
                   <TabsTrigger
                     value="favorites"
                     onClick={() => setActiveTab("favorites")}
-                    className={activeTab === "favorites" ? "bg-primary text-primary-foreground" : ""}
+                    className={`flex-1 ${activeTab === "favorites" ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     Favoritos
                   </TabsTrigger>
@@ -71,15 +71,15 @@ export default function Home() {
         ) : (
           <div className="flex flex-col items-center justify-center h-[60vh]">
             <div className="flex items-center mb-4">
-              <ClipboardCopy className="h-16 w-16 mr-3 text-foreground" />
-              <h2 className="text-3xl font-bold text-foreground">
+              <ClipboardCopy className="h-12 w-12 sm:h-16 sm:w-16 mr-3 text-foreground" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
                 Copy & Paste App
               </h2>
             </div>
-            <p className="text-center text-xl mb-8 max-w-md text-muted-foreground">
+            <p className="text-center text-lg sm:text-xl mb-6 sm:mb-8 px-2 text-muted-foreground">
               Tu espacio personal para guardar y acceder a todo lo importante con un solo clic.
             </p>
-            <p className="text-center mb-8 max-w-lg text-muted-foreground">
+            <p className="text-center mb-6 sm:mb-8 px-2 text-muted-foreground">
               Guarda fragmentos de texto, código, enlaces y archivos para acceder a ellos desde cualquier dispositivo. 
               Inicia sesión para comenzar a organizar tu información.
             </p>

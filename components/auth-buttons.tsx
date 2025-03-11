@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/context/auth-context"
@@ -8,8 +8,23 @@ import { User } from "firebase/auth"
 
 export function AuthButtons() {
   const [isLoading, setIsLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const { toast } = useToast()
   const { user, loginWithGoogle, logout } = useAuth()
+
+  // Detectar si estamos en móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -57,6 +72,8 @@ export function AuthButtons() {
         variant="outline"
         onClick={handleSignOut}
         disabled={isLoading}
+        size={isMobile ? "sm" : "default"}
+        className="auth-button logout-button"
       >
         Cerrar sesión
       </Button>
@@ -69,14 +86,18 @@ export function AuthButtons() {
         variant="outline"
         onClick={handleGoogleSignIn}
         disabled={isLoading}
+        size={isMobile ? "sm" : "default"}
+        className="auth-button"
       >
-        Iniciar sesión
+        {isMobile ? "Entrar" : "Iniciar sesión"}
       </Button>
       <Button 
         onClick={handleGoogleSignIn} 
         disabled={isLoading}
+        size={isMobile ? "sm" : "default"}
+        className="auth-button"
       >
-        Registrarse
+        {isMobile ? "Registro" : "Registrarse"}
       </Button>
     </>
   )
