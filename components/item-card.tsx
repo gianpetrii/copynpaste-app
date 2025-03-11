@@ -136,7 +136,7 @@ export function ItemCard({ item }: ItemCardProps) {
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="mb-2 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+            className="mb-2 bg-background border-border text-foreground"
           />
           <div className="flex gap-2">
             <Button size="sm" onClick={handleUpdate} disabled={isLoading}>
@@ -150,7 +150,7 @@ export function ItemCard({ item }: ItemCardProps) {
                 setEditedContent(item.content || "")
               }}
               disabled={isLoading}
-              className="dark:text-white dark:border-gray-600"
+              className="dark:text-white dark:border-white/30"
             >
               Cancelar
             </Button>
@@ -180,17 +180,17 @@ export function ItemCard({ item }: ItemCardProps) {
             alt={item.fileName || "Imagen"}
             className="max-h-40 rounded-md"
           />
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.fileName}</p>
+          <p className="text-sm text-muted-foreground mt-1">{item.fileName}</p>
         </div>
       )
     }
 
-    return <p className="dark:text-white">{item.content}</p>
+    return <p className="text-foreground">{item.content}</p>
   }
 
   return (
     <div 
-      className="border rounded-[var(--radius)] p-4 bg-card text-card-foreground shadow-soft dark:shadow-soft-dark hover:shadow-md transition-shadow duration-300"
+      className="border border-border rounded-md p-4 bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-300"
     >
       <div className="flex items-start gap-3">
         <div 

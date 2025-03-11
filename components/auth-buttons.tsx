@@ -57,7 +57,6 @@ export function AuthButtons() {
         variant="outline"
         onClick={handleSignOut}
         disabled={isLoading}
-        className="dark:text-white dark:border-gray-600"
       >
         Cerrar sesión
       </Button>
@@ -70,14 +69,12 @@ export function AuthButtons() {
         variant="outline"
         onClick={handleGoogleSignIn}
         disabled={isLoading}
-        className="dark:text-white dark:border-gray-600"
       >
         Iniciar sesión
       </Button>
       <Button 
         onClick={handleGoogleSignIn} 
-        disabled={isLoading} 
-        className="dark:bg-gray-700 dark:hover:bg-gray-600"
+        disabled={isLoading}
       >
         Registrarse
       </Button>

@@ -132,7 +132,7 @@ export function AddItemForm() {
   if (!isAuthenticated) {
     return (
       <div className="p-4">
-        <div className="bg-secondary rounded-[var(--radius)] shadow-soft dark:shadow-soft-dark p-6 text-center">
+        <div className="bg-secondary rounded-xl shadow-sm p-6 text-center">
           <p className="text-secondary-foreground mb-4">
             Debes iniciar sesión para guardar elementos.
           </p>
@@ -145,8 +145,8 @@ export function AddItemForm() {
   }
 
   return (
-    <div className="p-4">
-      <div className="bg-secondary/50 rounded-[var(--radius)] shadow-soft dark:shadow-soft-dark p-3 mb-2">
+    <div className="p-4 w-full">
+      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-3 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
           <TabsList className="grid grid-cols-2 w-full bg-muted">
             <TabsTrigger value="text" className="data-[state=active]:bg-background">
@@ -162,7 +162,7 @@ export function AddItemForm() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'text')}
-              className="min-h-[100px] mb-2 bg-background border-input focus:ring-1 focus:ring-ring"
+              className="min-h-[100px] mb-2 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
             />
             <div className="mt-2">
               <Input
@@ -171,11 +171,11 @@ export function AddItemForm() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, 'url')}
-                className="mb-2 bg-background border-input focus:ring-1 focus:ring-ring"
+                className="mb-2 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
               />
             </div>
             <Button
-              className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
@@ -183,7 +183,7 @@ export function AddItemForm() {
             </Button>
           </TabsContent>
           <TabsContent value="file" className="p-4">
-            <div className="border-2 border-dashed rounded-[var(--radius)] p-6 text-center border-border hover:border-primary/50 transition-colors">
+            <div className="border-2 border-dashed rounded-md p-6 text-center border-border hover:border-primary/50 transition-colors">
               <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
               <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center justify-center">
                 <svg

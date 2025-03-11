@@ -14,7 +14,6 @@ export function ThemeToggle({ onToggle, isDark }: ThemeToggleProps) {
       variant="outline"
       size="icon"
       onClick={onToggle}
-      className="dark:text-white dark:border-gray-600"
     >
       <span className="sr-only">Cambiar tema</span>
       {isDark ? (

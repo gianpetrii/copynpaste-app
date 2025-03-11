@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AuthButtons } from "@/components/auth-buttons"
 import { AddItemForm } from "@/components/add-item-form"
 import { ItemList } from "@/components/item-list"
@@ -11,20 +11,29 @@ import { Clipboard, ClipboardCopy } from "lucide-react"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
   const { user } = useAuth()
+
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   const handleThemeToggle = () => {
     setIsDarkMode(!isDarkMode)
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
   }
 
   return (
-    <main className={`min-h-screen ${isDarkMode ? "dark bg-gray-900" : "bg-gray-100"}`}>
+    <main className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="container mx-auto p-4">
         <header className="flex justify-between items-center mb-8">
           <div className="flex items-center">
-            <ClipboardCopy className={`h-8 w-8 mr-2 ${isDarkMode ? "text-white" : "text-gray-900"}`} />
-            <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+            <ClipboardCopy className="h-8 w-8 mr-2 text-foreground" />
+            <h1 className="text-2xl font-bold text-foreground">
               Copy & Paste App
             </h1>
           </div>
@@ -62,15 +71,15 @@ export default function Home() {
         ) : (
           <div className="flex flex-col items-center justify-center h-[60vh]">
             <div className="flex items-center mb-4">
-              <ClipboardCopy className={`h-16 w-16 mr-3 ${isDarkMode ? "text-white" : "text-gray-900"}`} />
-              <h2 className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              <ClipboardCopy className="h-16 w-16 mr-3 text-foreground" />
+              <h2 className="text-3xl font-bold text-foreground">
                 Copy & Paste App
               </h2>
             </div>
-            <p className={`text-center text-xl mb-8 max-w-md ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+            <p className="text-center text-xl mb-8 max-w-md text-muted-foreground">
               Tu espacio personal para guardar y acceder a todo lo importante con un solo clic.
             </p>
-            <p className={`text-center mb-8 max-w-lg ${isDarkMode ? "text-gray-400" : "text-gray-700"}`}>
+            <p className="text-center mb-8 max-w-lg text-muted-foreground">
               Guarda fragmentos de texto, código, enlaces y archivos para acceder a ellos desde cualquier dispositivo. 
               Inicia sesión para comenzar a organizar tu información.
             </p>

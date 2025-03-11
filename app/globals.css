@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Tema claro - Colores modernos y minimalistas */
-    --background: 0 0% 98%;
+    /* Tema claro - Colores simples */
+    --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -33,38 +33,38 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
-    /* Tema oscuro - Colores modernos y minimalistas */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Tema oscuro - Negro puro con bordes blancos finos */
+    --background: 0 0% 0%; /* Negro puro */
+    --foreground: 0 0% 100%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 0 0% 90%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 5%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 5%;
+    --accent-foreground: 0 0% 90%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 0 0% 90%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 30%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 80%;
   }
 }
 
@@ -75,6 +75,58 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: hsl(var(--background));
+  }
+  
+  /* Asegurar que el body en modo oscuro sea negro puro */
+  .dark body {
+    background-color: black !important;
+  }
+
+  /* Asegurar que el html en modo oscuro también sea negro */
+  .dark html {
+    background-color: black !important;
+  }
+
+  /* Asegurar que el main en modo oscuro sea negro */
+  .dark main {
+    background-color: black !important;
+  }
+
+  /* Asegurar que todos los contenedores en modo oscuro sean negros */
+  .dark .container, 
+  .dark .bg-background, 
+  .dark .bg-card, 
+  .dark .bg-secondary, 
+  .dark .bg-secondary\/50 {
+    background-color: black !important;
+  }
+}
+
+/* Estilos específicos para inputs en modo oscuro */
+.dark input, .dark textarea, .dark select {
+  color: white !important;
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* Estilos específicos para los dropdowns en modo oscuro */
+.dark [data-radix-popper-content-wrapper] {
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark [data-radix-select-trigger] {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* Estilos adicionales para mejorar la apariencia general */
