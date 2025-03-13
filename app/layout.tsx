@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className="dark w-full h-full">
+    <html lang="es" className="w-full h-full">
       <body className={`${inter.className} bg-background text-foreground min-h-screen w-full`}>
         <AuthProvider>
           <div className="mx-auto max-w-3xl px-4 py-4">

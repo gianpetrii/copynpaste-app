@@ -11,19 +11,36 @@ import { Clipboard, ClipboardCopy } from "lucide-react"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    // Check if user has a theme preference stored
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+      // Guardar explícitamente el tema claro si no hay preferencia
+      if (!savedTheme) {
+        localStorage.setItem('theme', 'light');
+      }
+    }
   }, []);
 
   const handleThemeToggle = () => {
-    setIsDarkMode(!isDarkMode)
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-    } else {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    
+    if (newTheme) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }
 

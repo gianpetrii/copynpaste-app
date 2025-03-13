@@ -179,31 +179,50 @@ export function AddItemForm() {
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
-              <Plus className="mr-2 h-4 w-4" /> Agregar
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Agregar
+                </>
+              )}
             </Button>
           </TabsContent>
           <TabsContent value="file" className="p-2 sm:p-4">
             <div className="border-2 border-dashed rounded-md p-4 sm:p-6 text-center border-border hover:border-primary/50 transition-colors">
               <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
-              <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mb-2 text-primary"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                <span className="text-sm font-medium">Haz clic para seleccionar un archivo</span>
-                <span className="text-xs text-muted-foreground mt-1">O arrastra y suelta aquí</span>
+              <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
+                    <span className="text-sm font-medium">Subiendo archivo...</span>
+                    <span className="text-xs text-muted-foreground mt-1">Por favor espera</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mb-2 text-primary"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span className="text-sm font-medium">Haz clic para seleccionar un archivo</span>
+                    <span className="text-xs text-muted-foreground mt-1">O arrastra y suelta aquí</span>
+                  </>
+                )}
               </label>
             </div>
           </TabsContent>

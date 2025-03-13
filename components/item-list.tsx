@@ -84,7 +84,11 @@ export function ItemList({ filter = "all" }: ItemListProps) {
   if (loading) {
     return (
       <div className="p-4">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between mb-4">
+          <div className="flex items-center text-muted-foreground">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+            <span>Cargando elementos...</span>
+          </div>
           <Skeleton className="h-10 w-36" />
         </div>
         {[1, 2, 3].map((i) => (
