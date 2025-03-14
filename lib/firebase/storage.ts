@@ -3,24 +3,56 @@ import {
   uploadBytes, 
   getDownloadURL, 
   deleteObject,
-  listAll
+  listAll,
+  uploadBytesResumable
 } from 'firebase/storage';
 import { storage } from './firebase';
 
 // Función para subir un archivo a Firebase Storage
-export const uploadFile = async (file: File, path: string) => {
+export const uploadFile = async (file: File, path: string, onProgress?: (progress: number, fileName: string) => void) => {
   try {
     const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
     
-    return {
-      path,
-      downloadURL,
-      name: file.name,
-      type: file.type,
-      size: file.size
-    };
+    // Si hay una función de progreso, usar uploadBytesResumable
+    if (onProgress) {
+      return new Promise((resolve, reject) => {
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            onProgress(progress, file.name);
+          },
+          (error) => {
+            console.error('Error al subir archivo:', error);
+            reject(error);
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve({
+              path,
+              downloadURL,
+              name: file.name,
+              type: file.type,
+              size: file.size
+            });
+          }
+        );
+      });
+    } else {
+      // Si no hay función de progreso, usar el método original
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      return {
+        path,
+        downloadURL,
+        name: file.name,
+        type: file.type,
+        size: file.size
+      };
+    }
   } catch (error) {
     console.error('Error al subir archivo:', error);
     throw error;

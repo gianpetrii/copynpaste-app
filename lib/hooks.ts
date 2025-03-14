@@ -78,7 +78,7 @@ export function useItems(userId: string) {
     };
   }, [userId]);
 
-  const addItem = async (itemData: Partial<Item>) => {
+  const addItem = async (itemData: Partial<Item>, onProgress?: (progress: number, fileName: string) => void) => {
     if (!userId) throw new Error("Usuario no autenticado")
 
     try {
@@ -90,7 +90,7 @@ export function useItems(userId: string) {
         
         // Subir el archivo a Firebase Storage
         const filePath = `users/${userId}/files/${Date.now()}_${file.name}`
-        const uploadedFile = await uploadFile(file, filePath)
+        const uploadedFile = await uploadFile(file, filePath, onProgress)
         
         fileData = {
           fileUrl: uploadedFile.downloadURL,
