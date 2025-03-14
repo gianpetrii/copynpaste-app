@@ -161,10 +161,8 @@ export function ItemCard({ item }: ItemCardProps) {
       case "text":
         return <FileText className="h-5 w-5 dark:text-white" />
       case "file":
-        if (item.fileType?.startsWith("image/")) {
-          return <ImageIcon className="h-5 w-5 dark:text-white" />
-        }
-        return <FileText className="h-5 w-5 dark:text-white" />
+        // No mostrar icono para archivos, ya que se muestra uno más grande en el contenido
+        return null;
       case "url":
         return <LinkIcon className="h-5 w-5 dark:text-white" />
       default:
@@ -462,7 +460,7 @@ export function ItemCard({ item }: ItemCardProps) {
         <div className="flex-1 overflow-hidden">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-2">
-              <div className="text-primary">{renderIcon()}</div>
+              {renderIcon() && <div className="text-primary">{renderIcon()}</div>}
               {isMobile && (
                 <Button
                   size="icon"
