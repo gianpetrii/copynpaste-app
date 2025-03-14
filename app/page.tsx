@@ -45,7 +45,7 @@ export default function Home() {
   }
 
   return (
-    <main className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
+    <main className={`${isDarkMode ? "dark" : ""}`}>
       <div className="container mx-auto px-2 sm:px-4">
         <header className="flex justify-between items-center mb-6 pt-4">
           <div className="flex items-center">
@@ -86,7 +86,7 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-[60vh]">
+          <div className="flex flex-col items-center justify-center py-16">
             <div className="flex items-center mb-4">
               <ClipboardCopy className="h-12 w-12 sm:h-16 sm:w-16 mr-3 text-foreground" />
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
