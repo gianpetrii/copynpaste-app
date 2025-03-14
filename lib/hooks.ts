@@ -5,6 +5,15 @@ import type { Item } from "@/types"
 import { addDocument, getDocuments, updateDocument, deleteDocument, subscribeToItems } from "@/lib/firebase/firestore"
 import { uploadFile, deleteFile } from "@/lib/firebase/storage"
 
+// Interfaz para el resultado de uploadFile
+interface UploadFileResult {
+  path: string;
+  downloadURL: string;
+  name: string;
+  type: string;
+  size: number;
+}
+
 // Hook para gestionar el almacenamiento local
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -90,7 +99,7 @@ export function useItems(userId: string) {
         
         // Subir el archivo a Firebase Storage
         const filePath = `users/${userId}/files/${Date.now()}_${file.name}`
-        const uploadedFile = await uploadFile(file, filePath, onProgress)
+        const uploadedFile = await uploadFile(file, filePath, onProgress) as UploadFileResult
         
         fileData = {
           fileUrl: uploadedFile.downloadURL,
