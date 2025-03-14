@@ -7,7 +7,23 @@ import { useToast } from "@/hooks/use-toast"
 import { formatDate } from "@/lib/utils"
 import { useItems } from "@/lib/hooks"
 import type { Item } from "@/types"
-import { FileText, Image, LinkIcon, Trash, Edit, Copy, Download, Star, MoreHorizontal } from "lucide-react"
+import { 
+  FileText, 
+  Image as ImageIcon, 
+  Link as LinkIcon, 
+  Trash, 
+  Edit, 
+  Copy, 
+  Download, 
+  Star, 
+  MoreHorizontal,
+  FileCode,
+  AudioLines as FileAudio,
+  Video as FileVideo,
+  FileText as FilePdf,
+  Archive as FileArchive,
+  File
+} from "lucide-react"
 
 interface ItemCardProps {
   item: Item
@@ -146,7 +162,7 @@ export function ItemCard({ item }: ItemCardProps) {
         return <FileText className="h-5 w-5 dark:text-white" />
       case "file":
         if (item.fileType?.startsWith("image/")) {
-          return <Image className="h-5 w-5 dark:text-white" />
+          return <ImageIcon className="h-5 w-5 dark:text-white" />
         }
         return <FileText className="h-5 w-5 dark:text-white" />
       case "url":
@@ -323,6 +339,78 @@ export function ItemCard({ item }: ItemCardProps) {
             onClick={(e) => e.stopPropagation()}
           />
           <p className="text-sm text-muted-foreground mt-1 break-words">{item.fileName}</p>
+        </div>
+      )
+    }
+
+    if (item.type === "file" && item.fileUrl) {
+      // Determinar el icono adecuado según el tipo de archivo
+      const getFileIcon = () => {
+        if (!item.fileType) return <File className="h-8 w-8 mr-2 text-primary" />;
+        
+        const fileType = item.fileType.toLowerCase();
+        
+        if (fileType.startsWith('image/')) {
+          return <ImageIcon className="h-8 w-8 mr-2 text-primary" />;
+        } else if (fileType.startsWith('audio/')) {
+          return <FileAudio className="h-8 w-8 mr-2 text-primary" />;
+        } else if (fileType.startsWith('video/')) {
+          return <FileVideo className="h-8 w-8 mr-2 text-primary" />;
+        } else if (fileType === 'application/pdf') {
+          return <FilePdf className="h-8 w-8 mr-2 text-primary" />;
+        } else if (fileType.includes('zip') || fileType.includes('compressed') || fileType.includes('archive')) {
+          return <FileArchive className="h-8 w-8 mr-2 text-primary" />;
+        } else if (fileType.includes('javascript') || fileType.includes('json') || fileType.includes('html') || 
+                  fileType.includes('css') || fileType.includes('xml') || fileType.includes('text/plain')) {
+          return <FileCode className="h-8 w-8 mr-2 text-primary" />;
+        } else {
+          return <File className="h-8 w-8 mr-2 text-primary" />;
+        }
+      };
+      
+      // Obtener una descripción amigable del tipo de archivo
+      const getFileTypeDescription = () => {
+        if (!item.fileType) return "";
+        
+        const fileType = item.fileType.toLowerCase();
+        
+        if (fileType.startsWith('image/')) {
+          return `Imagen ${fileType.split('/')[1]?.toUpperCase() || ''}`;
+        } else if (fileType.startsWith('audio/')) {
+          return `Audio ${fileType.split('/')[1]?.toUpperCase() || ''}`;
+        } else if (fileType.startsWith('video/')) {
+          return `Video ${fileType.split('/')[1]?.toUpperCase() || ''}`;
+        } else if (fileType === 'application/pdf') {
+          return 'Documento PDF';
+        } else if (fileType.includes('zip') || fileType.includes('compressed') || fileType.includes('archive')) {
+          return 'Archivo comprimido';
+        } else if (fileType.includes('javascript')) {
+          return 'Código JavaScript';
+        } else if (fileType.includes('json')) {
+          return 'Archivo JSON';
+        } else if (fileType.includes('html')) {
+          return 'Documento HTML';
+        } else if (fileType.includes('css')) {
+          return 'Hoja de estilos CSS';
+        } else if (fileType.includes('text/plain')) {
+          return 'Archivo de texto';
+        } else {
+          return fileType.split('/')[1]?.toUpperCase() || fileType;
+        }
+      };
+      
+      return (
+        <div className="mt-2">
+          <div className="flex items-center">
+            {getFileIcon()}
+            <div>
+              <p className="text-sm font-medium break-words">{item.fileName}</p>
+              <p className="text-xs text-muted-foreground">
+                {item.fileSize ? `${(item.fileSize / 1024 / 1024).toFixed(2)} MB` : ""}
+                {item.fileType ? ` • ${getFileTypeDescription()}` : ""}
+              </p>
+            </div>
+          </div>
         </div>
       )
     }
