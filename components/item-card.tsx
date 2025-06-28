@@ -159,14 +159,14 @@ export function ItemCard({ item }: ItemCardProps) {
   const renderIcon = () => {
     switch (item.type) {
       case "text":
-        return <FileText className="h-5 w-5 dark:text-white" />
+        return <FileText className="h-3 w-3 dark:text-white" />
       case "file":
         // No mostrar icono para archivos, ya que se muestra uno más grande en el contenido
         return null;
       case "url":
-        return <LinkIcon className="h-5 w-5 dark:text-white" />
+        return <LinkIcon className="h-3 w-3 dark:text-white" />
       default:
-        return <FileText className="h-5 w-5 dark:text-white" />
+        return <FileText className="h-3 w-3 dark:text-white" />
     }
   }
 
@@ -246,9 +246,15 @@ export function ItemCard({ item }: ItemCardProps) {
   const renderContent = () => {
     if (isEditing) {
       const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey && e.ctrlKey) {
-          e.preventDefault();
-          handleUpdate();
+        if (e.key === 'Enter') {
+          if (e.altKey) {
+            // Alt+Enter: nueva línea (comportamiento por defecto)
+            return;
+          } else {
+            // Enter solo: guardar cambios
+            e.preventDefault();
+            handleUpdate();
+          }
         }
       };
       
@@ -344,25 +350,25 @@ export function ItemCard({ item }: ItemCardProps) {
     if (item.type === "file" && item.fileUrl) {
       // Determinar el icono adecuado según el tipo de archivo
       const getFileIcon = () => {
-        if (!item.fileType) return <File className="h-8 w-8 mr-2 text-primary" />;
+        if (!item.fileType) return <File className="h-5 w-5 mr-2 text-primary" />;
         
         const fileType = item.fileType.toLowerCase();
         
         if (fileType.startsWith('image/')) {
-          return <ImageIcon className="h-8 w-8 mr-2 text-primary" />;
+          return <ImageIcon className="h-5 w-5 mr-2 text-primary" />;
         } else if (fileType.startsWith('audio/')) {
-          return <FileAudio className="h-8 w-8 mr-2 text-primary" />;
+          return <FileAudio className="h-5 w-5 mr-2 text-primary" />;
         } else if (fileType.startsWith('video/')) {
-          return <FileVideo className="h-8 w-8 mr-2 text-primary" />;
+          return <FileVideo className="h-5 w-5 mr-2 text-primary" />;
         } else if (fileType === 'application/pdf') {
-          return <FilePdf className="h-8 w-8 mr-2 text-primary" />;
+          return <FilePdf className="h-5 w-5 mr-2 text-primary" />;
         } else if (fileType.includes('zip') || fileType.includes('compressed') || fileType.includes('archive')) {
-          return <FileArchive className="h-8 w-8 mr-2 text-primary" />;
+          return <FileArchive className="h-5 w-5 mr-2 text-primary" />;
         } else if (fileType.includes('javascript') || fileType.includes('json') || fileType.includes('html') || 
                   fileType.includes('css') || fileType.includes('xml') || fileType.includes('text/plain')) {
-          return <FileCode className="h-8 w-8 mr-2 text-primary" />;
+          return <FileCode className="h-5 w-5 mr-2 text-primary" />;
         } else {
-          return <File className="h-8 w-8 mr-2 text-primary" />;
+          return <File className="h-5 w-5 mr-2 text-primary" />;
         }
       };
       
@@ -398,7 +404,7 @@ export function ItemCard({ item }: ItemCardProps) {
       };
       
       return (
-        <div className="mt-2">
+        <div className="mt-1">
           <div className="flex items-center">
             {getFileIcon()}
             <div>
@@ -453,36 +459,36 @@ export function ItemCard({ item }: ItemCardProps) {
 
   return (
     <div 
-      className="border border-border rounded-md p-3 sm:p-4 bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+      className="item-card border border-border rounded-md p-2 bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow"
       onClick={handleCopy}
     >
-      <div className="flex items-start gap-2 sm:gap-3">
+      <div className="flex items-start gap-2">
         <div className="flex-1 overflow-hidden">
           <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               {renderIcon() && <div className="text-primary">{renderIcon()}</div>}
               {isMobile && (
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={toggleMobileActions}
-                  className="text-muted-foreground hover:bg-secondary hover:text-foreground ml-auto"
+                  className="text-muted-foreground ml-auto h-6 w-6"
                 >
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="h-3 w-3" />
                 </Button>
               )}
             </div>
             
             {/* Desktop actions */}
             {!isMobile && (
-              <div className="flex gap-1">
+              <div className="flex gap-0.5">
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={handleToggleFavorite}
-                  className={`${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'} hover:bg-secondary`}
+                  className={`h-6 w-6 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
                 >
-                  <Star className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
+                  <Star className="h-3 w-3" fill={isFavorite ? "currentColor" : "none"} />
                   <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
                 </Button>
                 {!isEditing && item.type !== "file" && (
@@ -490,9 +496,9 @@ export function ItemCard({ item }: ItemCardProps) {
                     size="icon"
                     variant="ghost"
                     onClick={handleEdit}
-                    className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    className="text-muted-foreground h-6 w-6"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-3 w-3" />
                     <span className="sr-only">Editar</span>
                   </Button>
                 )}
@@ -500,9 +506,9 @@ export function ItemCard({ item }: ItemCardProps) {
                   size="icon"
                   variant="ghost"
                   onClick={handleCopy}
-                  className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  className="text-muted-foreground h-6 w-6"
                 >
-                  <Copy className="h-4 w-4" />
+                  <Copy className="h-3 w-3" />
                   <span className="sr-only">Copiar</span>
                 </Button>
                 {item.type === "file" && (
@@ -510,9 +516,9 @@ export function ItemCard({ item }: ItemCardProps) {
                     size="icon"
                     variant="ghost"
                     onClick={handleDownload}
-                    className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    className="text-muted-foreground h-6 w-6"
                   >
-                    <Download className="h-4 w-4" />
+                    <Download className="h-3 w-3" />
                     <span className="sr-only">Descargar</span>
                   </Button>
                 )}
@@ -521,26 +527,26 @@ export function ItemCard({ item }: ItemCardProps) {
                   variant="ghost"
                   onClick={handleDelete}
                   disabled={isLoading}
-                  className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+                  className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-6 w-6"
                 >
-                  <Trash className="h-4 w-4" />
+                  <Trash className="h-3 w-3" />
                   <span className="sr-only">Eliminar</span>
                 </Button>
               </div>
             )}
           </div>
           
-          <div className="mt-1">
+          <div className="mt-0.5">
             {renderContent()}
-            <div className="text-xs text-muted-foreground mt-2">
-              Creado: {formatDate(item.createdAt)}
+            <div className="text-xs text-muted-foreground mt-1">
+              {formatDate(item.createdAt)}
               {item.updatedAt && (
                 typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
                 typeof item.createdAt === 'object' && item.createdAt instanceof Date && 
                 item.updatedAt.getTime() !== item.createdAt.getTime() ? (
-                  <> • Modificado: {formatDate(item.updatedAt)}</>
+                  <> • {formatDate(item.updatedAt)}</>
                 ) : (
-                  item.updatedAt !== item.createdAt && <> • Modificado: {formatDate(item.updatedAt)}</>
+                  item.updatedAt !== item.createdAt && <> • {formatDate(item.updatedAt)}</>
                 )
               )}
             </div>
@@ -550,15 +556,15 @@ export function ItemCard({ item }: ItemCardProps) {
       
       {/* Mobile actions - horizontal row at the bottom */}
       {isMobile && showMobileActions && (
-        <div className="flex justify-between mt-3 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between mt-2 pt-1.5 border-t border-border" onClick={(e) => e.stopPropagation()}>
           <Button
             size="sm"
             variant="ghost"
             onClick={handleToggleFavorite}
-            className={`${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'} hover:bg-secondary`}
+            className={`h-7 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
           >
-            <Star className="h-4 w-4 mr-1" fill={isFavorite ? "currentColor" : "none"} />
-            <span className="text-xs">{isFavorite ? "Quitar" : "Favorito"}</span>
+            <Star className="h-3 w-3 mr-1" fill={isFavorite ? "currentColor" : "none"} />
+                                <span className="text-sm">{isFavorite ? "Quitar" : "Favorito"}</span>
           </Button>
           
           {!isEditing && item.type !== "file" && (
@@ -566,10 +572,10 @@ export function ItemCard({ item }: ItemCardProps) {
               size="sm"
               variant="ghost"
               onClick={handleEdit}
-              className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="text-muted-foreground h-7"
             >
-              <Edit className="h-4 w-4 mr-1" />
-              <span className="text-xs">Editar</span>
+              <Edit className="h-3 w-3 mr-1" />
+              <span className="text-sm">Editar</span>
             </Button>
           )}
           
@@ -577,10 +583,10 @@ export function ItemCard({ item }: ItemCardProps) {
             size="sm"
             variant="ghost"
             onClick={(e) => handleCopy(e)}
-            className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+            className="text-muted-foreground h-7"
           >
-            <Copy className="h-4 w-4 mr-1" />
-            <span className="text-xs">Copiar</span>
+            <Copy className="h-3 w-3 mr-1" />
+                          <span className="text-sm">Copiar</span>
           </Button>
           
           {item.type === "file" && (
@@ -588,10 +594,10 @@ export function ItemCard({ item }: ItemCardProps) {
               size="sm"
               variant="ghost"
               onClick={handleDownload}
-              className="text-muted-foreground hover:bg-secondary hover:text-foreground"
+              className="text-muted-foreground h-7"
             >
-              <Download className="h-4 w-4 mr-1" />
-              <span className="text-xs">Descargar</span>
+              <Download className="h-3 w-3 mr-1" />
+              <span className="text-sm">Descargar</span>
             </Button>
           )}
           
@@ -600,10 +606,10 @@ export function ItemCard({ item }: ItemCardProps) {
             variant="ghost"
             onClick={handleDelete}
             disabled={isLoading}
-            className="text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+            className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-7"
           >
-            <Trash className="h-4 w-4 mr-1" />
-            <span className="text-xs">Eliminar</span>
+            <Trash className="h-3 w-3 mr-1" />
+                          <span className="text-sm">Eliminar</span>
           </Button>
         </div>
       )}
