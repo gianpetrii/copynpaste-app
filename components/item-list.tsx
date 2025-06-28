@@ -276,7 +276,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
           <div className="text-center py-6 text-muted-foreground">
             {searchQuery ? (
               <div className="space-y-2">
-                <p className="text-sm">No hay resultados para "{searchQuery}"</p>
+                <p className="text-sm">No hay resultados para &ldquo;{searchQuery}&rdquo;</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -296,7 +296,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 p-1.5 bg-muted/50 rounded-md">
                 <span>
                   {filteredAndSortedItems.length} resultado{filteredAndSortedItems.length === 1 ? '' : 's'} 
-                  para "{searchQuery}"
+                  para &ldquo;{searchQuery}&rdquo;
                 </span>
                 <Button 
                   variant="ghost" 
