@@ -248,9 +248,6 @@ export function AddItemForm() {
           </TabsContent>
         </Tabs>
       </div>
-      <div className="text-xs text-muted-foreground text-center mt-1 mb-2">
-        Presiona Ctrl+Enter para guardar o usa el botón Agregar
-      </div>
     </div>
   )
 } 

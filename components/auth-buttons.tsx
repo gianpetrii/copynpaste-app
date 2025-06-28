@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/lib/context/auth-context"
-import { User } from "firebase/auth"
+import { LogOut, User, Chrome } from "lucide-react"
 
 export function AuthButtons() {
   const [isLoading, setIsLoading] = useState(false)
@@ -31,7 +31,7 @@ export function AuthButtons() {
       setIsLoading(true)
       await loginWithGoogle()
       toast({
-        title: "Sesión iniciada",
+        title: "🎉 ¡Bienvenido!",
         description: "Has iniciado sesión correctamente con Google",
       })
     } catch (error: any) {
@@ -52,7 +52,7 @@ export function AuthButtons() {
       await logout()
       toast({
         title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
+        description: "¡Hasta pronto! Has cerrado sesión correctamente",
       })
     } catch (error: any) {
       toast({
@@ -73,33 +73,58 @@ export function AuthButtons() {
         onClick={handleSignOut}
         disabled={isLoading}
         size={isMobile ? "sm" : "default"}
-        className="auth-button logout-button"
+        className="auth-button logout-button flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors"
       >
-        Cerrar sesión
+        <LogOut className="h-4 w-4" />
+        {isMobile ? "Salir" : "Cerrar sesión"}
       </Button>
     )
   }
 
+  // Para la página principal (hero), mostrar un botón más prominente
+  const isHeroPage = !user;
+
+  if (isHeroPage) {
+    return (
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <Button
+          onClick={handleGoogleSignIn}
+          disabled={isLoading}
+          size="lg"
+          className="auth-button hero-cta w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3 px-8 py-3"
+        >
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current" />
+              Iniciando...
+            </>
+          ) : (
+            <>
+              <Chrome className="h-5 w-5" />
+              Continuar con Google
+            </>
+          )}
+        </Button>
+        
+        <p className="text-xs text-muted-foreground text-center sm:text-left max-w-xs">
+          Gratis para siempre. No se requiere tarjeta de crédito.
+        </p>
+      </div>
+    )
+  }
+
+  // Para navbar cuando no hay usuario (caso edge)
   return (
-    <>
-      <Button
-        variant="outline"
-        onClick={handleGoogleSignIn}
-        disabled={isLoading}
-        size={isMobile ? "sm" : "default"}
-        className="auth-button"
-      >
-        {isMobile ? "Entrar" : "Iniciar sesión"}
-      </Button>
-      <Button 
-        onClick={handleGoogleSignIn} 
-        disabled={isLoading}
-        size={isMobile ? "sm" : "default"}
-        className="auth-button"
-      >
-        {isMobile ? "Registro" : "Registrarse"}
-      </Button>
-    </>
+    <Button
+      variant="outline"
+      onClick={handleGoogleSignIn}
+      disabled={isLoading}
+      size={isMobile ? "sm" : "default"}
+      className="auth-button flex items-center gap-2"
+    >
+      <User className="h-4 w-4" />
+      {isMobile ? "Entrar" : "Iniciar sesión"}
+    </Button>
   )
 }
 
