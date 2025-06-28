@@ -152,16 +152,227 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Transiciones suaves para todos los elementos interactivos */
-button, a, input, textarea, select {
+/* ===== SISTEMA DE INTERACTIVIDAD CONSISTENTE ===== */
+
+/* 
+ * REGLAS DE INTERACTIVIDAD:
+ * 1. Solo elementos clickeables tienen cursor pointer
+ * 2. Solo elementos clickeables tienen efectos hover
+ * 3. Elementos informativos NO tienen efectos hover
+ * 4. Botones tienen hover consistente
+ * 5. Cards clickeables se elevan ligeramente
+ */
+
+/* Regla base: elementos interactuables tienen cursor pointer */
+button, 
+a, 
+[role="button"], 
+[tabindex="0"],
+input[type="submit"],
+input[type="button"],
+select,
+.clickeable {
+  cursor: pointer;
+}
+
+/* Regla base: elementos informativos NO tienen cursor pointer */
+.stats-display,
+.info-text,
+.display-only {
+  cursor: default;
+}
+
+/* === BOTONES - SISTEMA CONSISTENTE === */
+
+/* Botones principales */
+button:not(:disabled) {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Botones ghost con hover sutil */
+button[variant="ghost"]:not(:disabled):hover,
+.btn-ghost:not(:disabled):hover {
+  background-color: hsl(var(--secondary));
+  transform: translateY(-1px);
+}
+
+/* Botones de icono */
+button[size="icon"]:not(:disabled):hover {
+  transform: scale(1.05);
+}
+
+/* Botón eliminar específico */
+.delete-button {
+  color: rgb(239 68 68); /* red-500 */
+  transition: all 0.2s ease-in-out;
+}
+
+.delete-button:hover {
+  background-color: rgb(239 68 68) !important; /* red-500 */
+  color: white !important;
+}
+
+/* === CARDS Y ELEMENTOS CLICKEABLES === */
+
+/* Cards clickeables */
+.item-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .item-card:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* === ELEMENTOS NO INTERACTUABLES === */
+
+/* Stats informativos - NO deben tener efectos hover */
+.stats-info {
+  cursor: default;
+  user-select: none;
+}
+
+/* Textos informativos */
+.info-display {
+  cursor: default;
+  transition: none;
+}
+
+/* === ANIMACIONES ESPECÍFICAS === */
+
+/* Hero section animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+.hero-icon {
+  animation: float 6s ease-in-out infinite;
+}
+
+.hero-glow {
+  animation: glow 4s ease-in-out infinite;
+}
+
+/* Botón CTA hero mejorado */
+.hero-cta {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
+  border: 1px solid hsl(var(--primary));
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.dark .hero-cta:hover {
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+}
+
+.hero-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.hero-cta:hover::before {
+  left: 100%;
+}
+
+/* Cards de features mejoradas */
+.feature-card {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  border: 1px solid hsl(var(--border));
+  cursor: default; /* Features no son clickeables */
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+.dark .feature-card:hover {
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+}
+
+/* Avatar en navbar mejorado */
+.user-avatar {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  cursor: default; /* Avatar no es clickeable, solo informativo */
+}
+
+/* Tabs mejoradas */
+.tabs-improved {
+  background: hsl(var(--secondary) / 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Navbar logo mejorado */
+.navbar-logo {
+  transition: all 0.3s ease;
+  cursor: pointer; /* Logo puede ser clickeable para volver a home */
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+}
+
+.navbar-logo:hover .logo-icon {
+  transform: rotate(10deg);
+}
+
+.logo-icon {
+  transition: transform 0.3s ease;
+}
+
+/* ===== FEEDBACK VISUAL CONSISTENTE ===== */
+
+/* Focus states mejorados para accesibilidad */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Transiciones solo para elementos interactuables */
+button:not(:disabled), 
+a, 
+input, 
+textarea, 
+select {
   transition: all 0.2s ease-in-out;
 }
 
 /* Estilos para mejorar la experiencia en dispositivos móviles */
 @media (max-width: 640px) {
   .container {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
   
   textarea, input {
@@ -171,6 +382,31 @@ button, a, input, textarea, select {
   /* Reducir tamaño de texto en placeholders para móvil */
   ::placeholder {
     font-size: 14px !important;
+  }
+  
+  /* Hero section responsive */
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Features grid responsive */
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  
+  /* Navbar responsive */
+  .navbar-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .navbar-subtitle {
+    display: none !important;
   }
   
   /* Estilos para los botones en móvil */
@@ -197,28 +433,36 @@ button, a, input, textarea, select {
     border-radius: 0.375rem;
   }
   
-  /* Limitar el número de líneas en móvil */
-  .line-clamp-mobile {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: calc(1.5em * 2); /* Altura aproximada para 2 líneas */
+  /* Hero CTA responsive */
+  .hero-cta {
+    width: 100% !important;
+    max-width: 300px;
+  }
+
+  /* Reducir efectos hover en móvil para mejor rendimiento */
+  .item-card:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 }
 
-/* Limitar el número de líneas en desktop */
-.line-clamp-desktop {
+/* === ELEMENTOS ESPECÍFICOS === */
+
+/* Limitar el número de líneas en móvil */
+.line-clamp-mobile {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: calc(1.5em * 3); /* Altura aproximada para 3 líneas */
 }
 
-/* Asegurar que los textos largos se muestren correctamente */
+.line-clamp-desktop {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .break-words {
   word-break: break-word;
   overflow-wrap: break-word;
@@ -228,136 +472,491 @@ button, a, input, textarea, select {
   white-space: pre-wrap;
 }
 
-/* Estilos para el botón "Ver más/menos" */
 button.text-primary.underline {
-  background: none;
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  background: transparent;
   border: none;
   padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: inline;
   font-size: inherit;
-  font-weight: normal;
-  text-decoration: underline;
+  cursor: pointer;
 }
 
 button.text-primary.underline.inline {
   display: inline;
-  vertical-align: baseline;
 }
 
-/* Estilos para el texto truncado */
 .inline {
   display: inline;
 }
 
-/* Estilos para los botones de autenticación */
 .auth-button {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  min-width: max-content !important;
-  width: auto !important;
+  min-height: 2.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
 }
 
-/* Ajustes específicos para dispositivos de escritorio */
 @media (min-width: 641px) {
   .auth-button {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    font-size: 0.875rem !important;
+    min-width: 120px;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
-/* Mejorar la apariencia de los botones de acción en móvil */
+/* Espaciado en header para evitar que los botones estén muy pegados */
 .flex.justify-between button {
-  flex: 1;
-  min-width: 0;
-  padding: 0.25rem;
+  margin-left: 0.5rem;
 }
 
-/* Hacer que el cursor sea pointer en toda la tarjeta */
-.cursor-pointer * {
-  cursor: pointer;
-}
-
-/* Estilos para el botón de cambio de tema */
 .theme-toggle-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s ease-in-out;
+  border-color: hsl(var(--border));
 }
 
 @media (max-width: 640px) {
   .theme-toggle-button {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 0 !important;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
   }
 }
 
-/* Estilos para el botón Agregar cuando está deshabilitado */
+/* Estilos para botón de agregar deshabilitado */
 .add-button:disabled {
-  opacity: 1 !important;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Estilos específicos para el tema oscuro - botón deshabilitado */
 .dark .add-button:disabled {
-  background-color: black !important;
-  color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
-/* Estilos específicos para el tema claro - botón deshabilitado */
+/* Tema claro - botón deshabilitado */
 :not(.dark) .add-button:disabled {
-  background-color: white !important;
-  color: black !important;
-  border: 1px solid rgba(0, 0, 0, 0.7) !important;
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
-/* Estilos para el botón Agregar cuando está habilitado en tema claro */
-:not(.dark) .add-button:not(:disabled) {
-  background-color: black !important;
-  color: white !important;
-}
-
-/* Estilos para el icono Plus cuando el botón está deshabilitado */
 .dark .add-button:disabled svg {
-  color: white !important;
+  opacity: 0.5;
 }
 
 :not(.dark) .add-button:disabled svg {
-  color: black !important;
+  opacity: 0.5;
 }
 
 :not(.dark) .add-button:not(:disabled) svg {
-  color: white !important;
+  color: hsl(var(--primary-foreground)) !important;
 }
 
-/* Efecto hover para el botón deshabilitado */
+/* Hover states for disabled buttons */
 .dark .add-button:disabled:hover {
-  background-color: rgba(0, 0, 0, 0.9) !important;
-  cursor: not-allowed;
+  background-color: hsl(var(--muted)) !important;
+  transform: none;
 }
 
 :not(.dark) .add-button:disabled:hover {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  cursor: not-allowed;
+  background-color: hsl(var(--muted)) !important;
+  transform: none;
 }
 
-/* Estilos para el botón de cerrar sesión */
+/* Estilos para botón de logout */
 .logout-button {
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  min-width: max-content !important;
-  width: auto !important;
+  transition: all 0.2s ease-in-out;
 }
 
 @media (max-width: 640px) {
   .logout-button {
-    font-size: 0.75rem !important;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* ===== ACCESIBILIDAD Y MOTION ===== */
+
+/* Reduce motion para usuarios que lo prefieren */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .hero-icon,
+  .hero-glow {
+    animation: none !important;
+  }
+}
+
+/* Mejora de contraste en modo oscuro */
+.dark {
+  --foreground: 0 0% 95%;
+  --muted-foreground: 0 0% 75%;
+}
+
+/* Esta regla está duplicada abajo, se eliminó para evitar conflictos */
+
+/* Compact scroll improvements */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Compact animations */
+.animate-slide-down {
+  animation: slideDown 1.5s ease-out;
+}
+
+.animate-push-down {
+  animation: pushDown 1.5s ease-out;
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 300px;
+  }
+}
+
+@keyframes pushDown {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Improve compact layout responsiveness */
+@media (max-width: 1023px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Compact item cards interaction states */
+.item-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.item-card:active {
+  transform: translateY(0);
+}
+
+/* Compact form interactions */
+.add-button {
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Compact navbar improvements */
+.navbar-logo {
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.02);
+}
+
+/* Compact tabs improvements */
+.tabs-improved .data-[state=active] {
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Better focus states for compact design */
+button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+}
+
+/* Compact mobile optimizations */
+@media (max-width: 640px) {
+  .hero-icon {
+    transform: scale(0.8);
+  }
+  
+  .feature-card {
+    padding: 1rem;
+  }
+  
+  .navbar-title {
+    font-size: 0.875rem !important;
+  }
+  
+  .navbar-subtitle {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* OPTIMIZACIONES PARA MEJOR USO DEL ANCHO DE PANTALLA */
+
+/* Container y layout mejorados */
+.max-w-7xl {
+  max-width: 85rem;
+}
+
+@media (min-width: 1536px) {
+  .max-w-7xl {
+    max-width: 90rem;
+  }
+}
+
+/* Layout grid optimizado para desktop */
+@media (min-width: 1024px) {
+  .max-w-7xl {
+    max-width: 85rem;
+  }
+  
+  /* Layout grid optimizado - columna izquierda más ancha */
+  .lg\:grid-cols-5 {
+    grid-template-columns: 2fr 3fr;
+  }
+  
+  /* Sticky optimizado */
+  .lg\:sticky {
+    position: sticky;
+    top: 0.75rem;
+    max-height: calc(100vh - 1.5rem);
+    overflow-y: auto;
+  }
+}
+
+/* Typography optimizations para mejor legibilidad */
+.text-xs {
+  font-size: 0.7rem !important;
+  line-height: 1rem !important;
+}
+
+.text-sm {
+  font-size: 0.8rem !important;
+  line-height: 1.1rem !important;
+}
+
+.text-base {
+  font-size: 0.9rem !important;
+  line-height: 1.3rem !important;
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .navbar-title {
+    font-size: 0.875rem !important;
+  }
+  
+  .navbar-subtitle {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Input y textarea con buen tamaño para tablet */
+  input, textarea {
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+  }
+  
+  /* Container optimizado para tablet */
+  .w-full.max-w-7xl {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
   }
 }
+
+/* Compact spacing utilities */
+.space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.375rem;
+}
+
+.space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.625rem;
+}
+
+/* Welcome section optimizations */
+.lg\:space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 0.5rem;
+}
+
+/* Mejoras específicas para inputs y formularios */
+input:focus, textarea:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+  border-color: hsl(var(--ring));
+}
+
+/* Placeholders más legibles */
+::placeholder {
+  opacity: 0.6;
+  font-size: inherit;
+}
+
+/* Botones más compactos en móvil */
+@media (max-width: 640px) {
+  button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Tabs más compactos */
+  .tabs-improved [role="tab"] {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Optimización para grid en pantallas medianas */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .lg\:grid-cols-5 {
+    grid-template-columns: 1fr; /* Mantiene una columna en tablet */
+  }
+}
+
+/* OPTIMIZACIONES ADICIONALES PARA MÁXIMO USO DEL ANCHO */
+
+/* Mobile ultra compacto */
+@media (max-width: 640px) {
+  /* Container con padding mínimo */
+  .w-full.max-w-7xl {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+  
+  /* Navbar ultra compacto */
+  .navbar-title {
+    font-size: 0.75rem !important;
+  }
+  
+  .navbar-subtitle {
+    font-size: 0.6rem !important;
+    line-height: 0.75rem !important;
+  }
+  
+  /* Input y textarea para móvil (16px evita zoom iOS, pero más pequeño que botones) */
+  input, textarea {
+    font-size: 16px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Placeholder discreto en móvil */
+  input::placeholder, textarea::placeholder {
+    font-size: 12px !important;
+    opacity: 0.6 !important;
+  }
+  
+  /* Espaciado mínimo */
+  .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.25rem !important;
+  }
+  
+  .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.375rem !important;
+  }
+  
+  /* Gaps mínimos */
+  .gap-2 {
+    gap: 0.25rem !important;
+  }
+  
+  /* Header ultra compacto */
+  header {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+/* Tablet - inputs tamaño medio */
+@media (min-width: 641px) and (max-width: 1023px) {
+  input, textarea {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+  }
+  
+  /* Placeholder discreto en tablet */
+  input::placeholder, textarea::placeholder {
+    font-size: 12px !important;
+    opacity: 0.65 !important;
+  }
+  
+  .w-full.max-w-7xl {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* Desktop - grid mejorado y ancho máximo */
+@media (min-width: 1024px) {
+  /* Usar todo el ancho disponible */
+  .max-w-7xl {
+    max-width: 95vw !important; /* Usar 95% del viewport */
+  }
+  
+  /* Grid con mejor proporción 2:3 */
+  .lg\:grid-cols-5 {
+    grid-template-columns: 2fr 3fr !important;
+  }
+  
+  /* Inputs tamaño apropiado para desktop (más pequeño que botones) */
+  input, textarea {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+  
+  /* Placeholder discreto en desktop */
+  input::placeholder, textarea::placeholder {
+    font-size: 13px !important;
+    opacity: 0.65 !important;
+  }
+}
+
+/* Mejoras generales para formularios */
+input:focus, textarea:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 1px;
+  border-color: hsl(var(--ring));
+}
+
+::placeholder {
+  opacity: 0.6;
+  font-size: inherit;
+}
+
 
