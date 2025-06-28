@@ -83,13 +83,19 @@ export function AddItemForm() {
 
   // Handle key press events for text and URL inputs
   const handleKeyDown = (e: React.KeyboardEvent, type: 'text' | 'url') => {
-    // Submit on Ctrl+Enter key press (instead of just Enter)
-    if (e.key === 'Enter' && e.ctrlKey) {
-      e.preventDefault(); // Prevent default behavior (new line in textarea)
-      if (type === 'text' && text.trim()) {
-        handleTextSubmit();
-      } else if (type === 'url' && url.trim()) {
-        handleUrlSubmit();
+    if (e.key === 'Enter') {
+      if (e.altKey) {
+        // Alt+Enter: nueva línea - no hacemos nada, permitimos comportamiento por defecto
+        // No llamamos e.preventDefault() para permitir la nueva línea
+        return;
+      } else {
+        // Enter solo: guardar elemento
+        e.preventDefault(); // Prevenir nueva línea
+        if (type === 'text' && text.trim()) {
+          handleTextSubmit();
+        } else if (type === 'url' && url.trim()) {
+          handleUrlSubmit();
+        }
       }
     }
   };
@@ -158,63 +164,61 @@ export function AddItemForm() {
 
   return (
     <div className="w-full">
-      <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-2 sm:p-3 mb-2">
+      <div className="bg-secondary/50 border border-border rounded-lg shadow-sm p-1.5 sm:p-2 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
-          <TabsList className="grid grid-cols-2 w-full bg-muted">
-            <TabsTrigger value="text" className="data-[state=active]:bg-background">
+          <TabsList className="grid grid-cols-2 w-full bg-muted h-6 sm:h-7">
+            <TabsTrigger value="text" className="data-[state=active]:bg-background text-sm py-0.5">
               Texto
             </TabsTrigger>
-            <TabsTrigger value="file" className="data-[state=active]:bg-background">
+            <TabsTrigger value="file" className="data-[state=active]:bg-background text-sm py-0.5">
               Archivo
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="text" className="p-2 sm:p-4">
+          <TabsContent value="text" className="p-1 sm:p-1.5 space-y-1 sm:space-y-1.5">
             <Textarea
-              placeholder="Ingresa tu texto aquí (Ctrl+Enter para guardar)"
+              placeholder="Texto (Enter: guardar, Alt+Enter: nueva línea)"
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'text')}
-              className="min-h-[100px] mb-2 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
+              className="min-h-[50px] sm:min-h-[55px] resize-none bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
             />
-            <div className="mt-2">
-              <Input
-                type="url"
-                placeholder="O ingresa un enlace (Ctrl+Enter)"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, 'url')}
-                className="mb-2 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
-              />
-            </div>
+            <Input
+              placeholder="Enlace (Enter: guardar)"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => handleKeyDown(e, 'url')}
+              className="h-8 sm:h-9 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
+            />
             <Button
-              className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 add-button"
+              className="w-full h-7 sm:h-8 bg-primary text-primary-foreground hover:bg-primary/90 add-button text-sm"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                  Guardando...
+                  <div className="animate-spin rounded-full h-3 w-3 sm:h-3.5 sm:w-3.5 border-b-2 border-current mr-1"></div>
+                  <span className="text-sm">Guardando...</span>
                 </>
               ) : (
                 <>
-                  <Plus className="mr-2 h-4 w-4" /> Agregar
+                  <Plus className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="text-sm">Agregar</span>
                 </>
               )}
             </Button>
           </TabsContent>
-          <TabsContent value="file" className="p-2 sm:p-4">
-            <div className="border-2 border-dashed rounded-md p-4 sm:p-6 text-center border-border hover:border-primary/50 transition-colors">
+          <TabsContent value="file" className="p-1 sm:p-1.5">
+            <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
               <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
               <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
-                    <span className="text-sm font-medium">Subiendo archivo: {currentFileName}</span>
-                    <span className="text-xs text-muted-foreground mt-1">{uploadProgress.toFixed(0)}% completado</span>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary mb-1"></div>
+                    <span className="text-xs font-medium">Subiendo: {currentFileName}</span>
+                    <span className="text-xs text-muted-foreground mt-0.5">{uploadProgress.toFixed(0)}%</span>
                     
                     {/* Progress bar */}
-                    <div className="w-full h-2 bg-secondary rounded-full mt-3 overflow-hidden">
+                    <div className="w-full h-1 bg-secondary rounded-full mt-1 overflow-hidden">
                       <div 
                         className="h-full bg-primary transition-all duration-300 ease-in-out" 
                         style={{ width: `${uploadProgress}%` }}
@@ -225,31 +229,28 @@ export function AddItemForm() {
                   <>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
+                      width="16"
+                      height="16"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="mb-2 text-primary"
+                      className="mb-1 text-primary"
                     >
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                       <polyline points="17 8 12 3 7 8" />
                       <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <span className="text-sm font-medium">Haz clic para seleccionar un archivo</span>
-                    <span className="text-xs text-muted-foreground mt-1">O arrastra y suelta aquí</span>
+                    <span className="text-xs font-medium">Seleccionar archivo</span>
+                    <span className="text-xs text-muted-foreground mt-0.5">O arrastra aquí</span>
                   </>
                 )}
               </label>
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-      <div className="text-xs text-muted-foreground text-center mt-1 mb-2">
-        Presiona Ctrl+Enter para guardar o usa el botón Agregar
       </div>
     </div>
   )
