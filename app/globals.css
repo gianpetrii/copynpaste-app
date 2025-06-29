@@ -187,13 +187,74 @@ select,
 /* Botones principales */
 button:not(:disabled) {
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
 
-/* Botones ghost con hover sutil */
-button[variant="ghost"]:not(:disabled):hover,
-.btn-ghost:not(:disabled):hover {
+/* TEMA CLARO: Eliminar movimientos en todos los botones */
+:not(.dark) button:not(:disabled):hover {
+  transform: none;
+}
+
+/* Botones outline - estilo mejorado */
+button[data-variant="outline"]:not(:disabled),
+.btn-outline:not(:disabled) {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* TEMA CLARO: Botones con letra negra → fondo gris al hover */
+:not(.dark) button[data-variant="outline"]:not(:disabled):hover,
+:not(.dark) .btn-outline:not(:disabled):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* TEMA OSCURO: Mantener efectos existentes */
+.dark button[data-variant="outline"]:not(:disabled):hover,
+.dark .btn-outline:not(:disabled):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+/* Botones default/primary - estilo mejorado */
+button[data-variant="default"]:not(:disabled),
+.btn-primary:not(:disabled) {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: 1px solid hsl(var(--primary));
+}
+
+/* TEMA CLARO: Botones de fondo negro → letra e icono negro y border negro al hover */
+:not(.dark) button[data-variant="default"]:not(:disabled):hover,
+:not(.dark) .btn-primary:not(:disabled):hover {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--foreground));
+}
+
+/* TEMA OSCURO: Mantener efectos existentes */
+.dark button[data-variant="default"]:not(:disabled):hover,
+.dark .btn-primary:not(:disabled):hover {
+  background: hsl(var(--primary)/.9);
+  border-color: hsl(var(--primary)/.8);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* TEMA CLARO: Botones ghost - letra negra → fondo gris */
+:not(.dark) button[data-variant="ghost"]:not(:disabled):hover,
+:not(.dark) .btn-ghost:not(:disabled):hover {
   background-color: hsl(var(--secondary));
-  transform: translateY(-1px);
+  color: hsl(var(--foreground));
+}
+
+/* TEMA OSCURO: Mantener efectos existentes */
+.dark button[data-variant="ghost"]:not(:disabled):hover,
+.dark .btn-ghost:not(:disabled):hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
 }
 
 /* Botones de icono */
@@ -256,47 +317,44 @@ button[size="icon"]:not(:disabled):hover {
   50% { opacity: 0.8; }
 }
 
+@keyframes subtleFloat {
+  0%, 100% { 
+    transform: translateY(0px) scale(1); 
+    filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.15));
+  }
+  50% { 
+    transform: translateY(-6px) scale(1.02); 
+    filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.25));
+  }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.9; 
+    transform: scale(1.01);
+  }
+}
+
 .hero-icon {
   animation: float 6s ease-in-out infinite;
+}
+
+.hero-icon-banner {
+  animation: subtleFloat 4s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform, filter;
 }
 
 .hero-glow {
   animation: glow 4s ease-in-out infinite;
 }
 
-/* Botón CTA hero mejorado */
-.hero-cta {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%);
-  border: 1px solid hsl(var(--primary));
-  transform: translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.dark .hero-cta:hover {
-  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
-}
-
-.hero-cta::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.hero-cta:hover::before {
-  left: 100%;
-}
+/* Botón CTA hero mejorado - sin movimiento */
+/* Eliminado - ahora usa button-primary */
 
 /* Cards de features mejoradas */
 .feature-card {
@@ -332,16 +390,7 @@ button[size="icon"]:not(:disabled):hover {
 
 /* Navbar logo mejorado */
 .navbar-logo {
-  transition: all 0.3s ease;
-  cursor: pointer; /* Logo puede ser clickeable para volver a home */
-}
-
-.navbar-logo:hover {
-  transform: scale(1.05);
-}
-
-.navbar-logo:hover .logo-icon {
-  transform: rotate(10deg);
+  /* Removed hover effects - logo is not clickable */
 }
 
 .logo-icon {
@@ -447,13 +496,13 @@ select {
 }
 
 /* === ELEMENTOS ESPECÍFICOS === */
-
-/* Limitar el número de líneas en móvil */
-.line-clamp-mobile {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  
+  /* Limitar el número de líneas en móvil */
+  .line-clamp-mobile {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .line-clamp-desktop {
@@ -494,7 +543,10 @@ button.text-primary.underline.inline {
   min-height: 2.5rem;
   font-weight: 500;
   transition: all 0.2s ease-in-out;
+  cursor: pointer;
 }
+
+/* Auth button base styles - ahora usando grupos */
 
 @media (min-width: 641px) {
   .auth-button {
@@ -512,6 +564,18 @@ button.text-primary.underline.inline {
 .theme-toggle-button {
   transition: all 0.2s ease-in-out;
   border-color: hsl(var(--border));
+}
+
+/* TEMA CLARO: Theme toggle - botón con icono negro → fondo gris */
+:not(.dark) .theme-toggle-button:hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+}
+
+/* TEMA OSCURO: Sin efectos de movimiento */
+.dark .theme-toggle-button:hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
 }
 
 @media (max-width: 640px) {
@@ -554,17 +618,81 @@ button.text-primary.underline.inline {
 /* Hover states for disabled buttons */
 .dark .add-button:disabled:hover {
   background-color: hsl(var(--muted)) !important;
-  transform: none;
 }
 
 :not(.dark) .add-button:disabled:hover {
   background-color: hsl(var(--muted)) !important;
-  transform: none;
 }
 
 /* Estilos para botón de logout */
 .logout-button {
   transition: all 0.2s ease-in-out;
+}
+
+.dark .logout-button:not(:disabled) {
+  border-color: hsl(var(--border));
+}
+
+/* TEMA CLARO: Logout button - botón con letra negra → fondo gris */
+:not(.dark) .logout-button:hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* TEMA OSCURO: Texto blanco en hover */
+.dark .logout-button:hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--foreground));
+}
+
+/* ===== GRUPOS DE BOTONES UNIFICADOS ===== */
+
+/* GRUPO 1: Botones Principales (fondo sólido) */
+.button-primary {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border: 1px solid hsl(var(--foreground));
+}
+
+/* TEMA CLARO: Grupo 1 */
+:not(.dark) .button-primary:not(:disabled):hover {
+  background: hsl(var(--foreground) / 0.9);
+}
+
+/* TEMA OSCURO: Grupo 1 */
+.dark .button-primary:not(:disabled) {
+  border-color: hsl(var(--border));
+}
+
+.dark .button-primary:not(:disabled):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--foreground));
+}
+
+/* GRUPO 2: Botones Secundarios (outline) */
+.button-secondary {
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* TEMA CLARO: Grupo 2 */
+:not(.dark) .button-secondary:not(:disabled):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+}
+
+/* TEMA OSCURO: Grupo 2 */
+.dark .button-secondary:not(:disabled) {
+  border-color: hsl(var(--border));
+}
+
+.dark .button-secondary:not(:disabled):hover {
+  background: hsl(var(--secondary));
+  border-color: hsl(var(--primary));
 }
 
 @media (max-width: 640px) {
@@ -587,6 +715,7 @@ button.text-primary.underline.inline {
   }
   
   .hero-icon,
+  .hero-icon-banner,
   .hero-glow {
     animation: none !important;
   }
@@ -671,7 +800,6 @@ button.text-primary.underline.inline {
 }
 
 .item-card:hover {
-  transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
@@ -684,18 +812,13 @@ button.text-primary.underline.inline {
   transition: all 0.2s ease;
 }
 
-.add-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+/* Add button ahora usa button-primary por defecto */
+
+/* Regla eliminada - ya está cubierta por las reglas específicas de tema */
 
 /* Compact navbar improvements */
 .navbar-logo {
-  transition: transform 0.2s ease;
-}
-
-.navbar-logo:hover {
-  transform: scale(1.02);
+  /* Removed hover effects - logo is not clickable */
 }
 
 /* Compact tabs improvements */

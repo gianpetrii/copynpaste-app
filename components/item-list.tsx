@@ -204,29 +204,29 @@ export function ItemList({ filter = "all" }: ItemListProps) {
         {/* Filtros compactos */}
         <div className="flex flex-col gap-2 mb-3">
           <div className="flex gap-2">
-            <Select value={filterType} onValueChange={(value) => setFilterType(value as "all" | "text" | "url" | "file")}>
+          <Select value={filterType} onValueChange={(value) => setFilterType(value as "all" | "text" | "url" | "file")}>
               <SelectTrigger className="flex-1 h-8 text-sm bg-background border-border text-foreground">
                 <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover text-popover-foreground border-border">
+            </SelectTrigger>
+            <SelectContent className="bg-popover text-popover-foreground border-border">
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="text">Texto</SelectItem>
-                <SelectItem value="url">Enlaces</SelectItem>
-                <SelectItem value="file">Archivos</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
+              <SelectItem value="text">Texto</SelectItem>
+              <SelectItem value="url">Enlaces</SelectItem>
+              <SelectItem value="file">Archivos</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
               <SelectTrigger className="flex-1 h-8 text-sm bg-background border-border text-foreground">
                 <SelectValue placeholder="Orden" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover text-popover-foreground border-border">
+            </SelectTrigger>
+            <SelectContent className="bg-popover text-popover-foreground border-border">
                 <SelectItem value="newest">Reciente</SelectItem>
                 <SelectItem value="oldest">Antiguo</SelectItem>
                 <SelectItem value="modified">Modificado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            </SelectContent>
+          </Select>
+        </div>
 
           {/* Botón eliminar todos compacto */}
           {filteredAndSortedItems.length > 0 && (

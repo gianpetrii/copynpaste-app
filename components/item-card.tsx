@@ -252,8 +252,8 @@ export function ItemCard({ item }: ItemCardProps) {
             return;
           } else {
             // Enter solo: guardar cambios
-            e.preventDefault();
-            handleUpdate();
+          e.preventDefault();
+          handleUpdate();
           }
         }
       };

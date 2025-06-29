@@ -18,6 +18,7 @@ import {
   Upload,
   Star
 } from "lucide-react"
+import { ClipboardIcon } from "@/components/ui/clipboard-icon"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
@@ -63,27 +64,25 @@ export default function Home() {
   const urlItems = items.filter(item => item.type === 'url').length
 
   return (
-    <main className={`${isDarkMode ? "dark" : ""} min-h-screen`}>
+    <main className="min-h-screen">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
         {/* Navbar mejorado - más compacto en móvil */}
         <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
-          <div className="flex items-center space-x-1.5 sm:space-x-2 navbar-logo">
-            <div className="p-0.5 sm:p-1 rounded-lg bg-primary/10">
-              <ClipboardCopy className="h-3 w-3 sm:h-4 sm:w-4 text-primary logo-icon" />
-            </div>
+          <div className="flex items-center space-x-2 sm:space-x-3 navbar-logo">
+            <ClipboardIcon className="text-primary" size={24} />
             <div>
               <h1 className="text-xs sm:text-sm lg:text-base font-bold text-foreground navbar-title">
                 Copy & Paste
-              </h1>
+            </h1>
               <p className="text-xs text-muted-foreground navbar-subtitle">
                 Tu portapapeles universal
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-1.5 sm:space-x-2">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <ThemeToggle onToggle={handleThemeToggle} isDark={isDarkMode} />
-            <AuthButtons />
+            <AuthButtons compact={true} />
           </div>
         </header>
 
@@ -164,36 +163,36 @@ export default function Home() {
                   </div>
 
                   {/* Formulario */}
-                  <AddItemForm />
+            <AddItemForm />
                 </div>
               </div>
 
               {/* Columna derecha - Lista de items (proporcionalmente más estrecha) */}
               <div className="lg:col-span-3">
                 <div className="space-y-2">
-                  <Tabs defaultValue="all" className="w-full">
+              <Tabs defaultValue="all" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 tabs-improved">
-                      <TabsTrigger
-                        value="all"
-                        onClick={() => setActiveTab("all")}
+                  <TabsTrigger
+                    value="all"
+                    onClick={() => setActiveTab("all")}
                         className="flex items-center gap-1 text-sm"
-                      >
+                  >
                         <FileText className="h-3.5 w-3.5" />
                         Todos ({totalItems})
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="favorites"
-                        onClick={() => setActiveTab("favorites")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="favorites"
+                    onClick={() => setActiveTab("favorites")}
                         className="flex items-center gap-1 text-sm"
-                      >
+                  >
                         <Star className="h-3.5 w-3.5" />
                         Favoritos ({favoriteItems})
-                      </TabsTrigger>
-                    </TabsList>
+                  </TabsTrigger>
+                </TabsList>
                     <div className="mt-2">
-                      <ItemList filter={activeTab} />
+                <ItemList filter={activeTab} />
                     </div>
-                  </Tabs>
+              </Tabs>
                 </div>
               </div>
             </div>
@@ -202,29 +201,28 @@ export default function Home() {
           /* Hero section para usuarios sin login */
           <div className="flex flex-col items-center justify-center py-12 sm:py-20 space-y-12">
             {/* Hero principal */}
-            <div className="text-center space-y-6 max-w-3xl">
-              <div className="flex justify-center mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full hero-glow"></div>
-                  <div className="relative p-4 bg-primary/10 rounded-full hero-icon">
-                    <ClipboardCopy className="h-16 w-16 sm:h-20 sm:w-20 text-primary" />
-                  </div>
+            <div className="text-center space-y-6 max-w-4xl">
+              <div className="flex items-center justify-center gap-6 sm:gap-8 mb-6">
+                <ClipboardIcon className="text-primary flex-shrink-0 hero-icon-banner" size={120} />
+                <div className="text-left">
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight whitespace-nowrap">
+                    Tu portapapeles
+                  </h1>
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-primary leading-tight whitespace-nowrap">
+                    universal
+                  </h1>
                 </div>
               </div>
               
               <div className="space-y-4">
-                <h1 className="text-4xl sm:text-6xl font-bold text-foreground leading-tight hero-title">
-                  Tu portapapeles
-                  <span className="block text-primary">universal</span>
-                </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed hero-subtitle">
                   Guarda, organiza y accede a tu información importante desde cualquier dispositivo. 
                   <span className="block mt-2 text-primary font-medium">Simple. Seguro. Sincronizado.</span>
                 </p>
               </div>
 
-              <div className="pt-4">
-                <AuthButtons />
+              <div className="pt-4" id="auth-section">
+                <AuthButtons compact={false} />
               </div>
             </div>
 
@@ -247,7 +245,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-foreground">Totalmente Seguro</h3>
                 <p className="text-sm text-muted-foreground">
                   Tus datos están protegidos y solo tú puedes acceder a ellos
-                </p>
+            </p>
               </div>
               
               <div className="text-center space-y-4 p-6 rounded-2xl bg-secondary/20 border border-border/50 feature-card">

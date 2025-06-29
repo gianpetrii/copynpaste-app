@@ -83,8 +83,8 @@ export function AddItemForm() {
 
   // Handle key press events for text and URL inputs
   const handleKeyDown = (e: React.KeyboardEvent, type: 'text' | 'url') => {
-    // Submit on Ctrl+Enter key press (instead of just Enter)
-    if (e.key === 'Enter' && e.ctrlKey) {
+    // Submit on Enter key press, Alt+Enter for new line
+    if (e.key === 'Enter' && !e.altKey) {
       e.preventDefault(); // Prevent default behavior (new line in textarea)
       if (type === 'text' && text.trim()) {
         handleTextSubmit();
@@ -170,7 +170,7 @@ export function AddItemForm() {
           </TabsList>
           <TabsContent value="text" className="p-2 sm:p-4">
             <Textarea
-              placeholder="Ingresa tu texto aquí (Ctrl+Enter para guardar)"
+              placeholder="Ingresa tu texto aquí (Enter para guardar, Alt+Enter para nueva línea)"
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, 'text')}
@@ -179,7 +179,7 @@ export function AddItemForm() {
             <div className="mt-2">
               <Input
                 type="url"
-                placeholder="O ingresa un enlace (Ctrl+Enter)"
+                placeholder="O ingresa un enlace (Enter para guardar)"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, 'url')}
@@ -187,7 +187,7 @@ export function AddItemForm() {
               />
             </div>
             <Button
-              className="w-full mt-2 bg-primary text-primary-foreground hover:bg-primary/90 add-button"
+              className="w-full mt-2 add-button button-primary"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >

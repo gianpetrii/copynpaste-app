@@ -91,10 +91,10 @@ export function AddItemForm() {
       } else {
         // Enter solo: guardar elemento
         e.preventDefault(); // Prevenir nueva línea
-        if (type === 'text' && text.trim()) {
-          handleTextSubmit();
-        } else if (type === 'url' && url.trim()) {
-          handleUrlSubmit();
+      if (type === 'text' && text.trim()) {
+        handleTextSubmit();
+      } else if (type === 'url' && url.trim()) {
+        handleUrlSubmit();
         }
       }
     }
@@ -182,15 +182,15 @@ export function AddItemForm() {
               onKeyDown={(e) => handleKeyDown(e, 'text')}
               className="min-h-[50px] sm:min-h-[55px] resize-none bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
             />
-            <Input
+              <Input
               placeholder="Enlace (Enter: guardar)"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, 'url')}
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => handleKeyDown(e, 'url')}
               className="h-8 sm:h-9 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
-            />
+              />
             <Button
-              className="w-full h-7 sm:h-8 bg-primary text-primary-foreground hover:bg-primary/90 add-button text-sm"
+              className="w-full h-7 sm:h-8 add-button button-primary text-sm"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
