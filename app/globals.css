@@ -703,7 +703,7 @@ button.text-primary.underline.inline {
     transform-origin: 70% 70%;
   }
   25% { 
-    transform: rotate(8deg);
+    transform: rotate(10deg);
     transform-origin: 70% 70%;
   }
   50% { 
@@ -718,7 +718,29 @@ button.text-primary.underline.inline {
 
 .wave-greeting {
   display: inline-block;
-  animation: slowWave 4s ease-in-out infinite;
+  animation: slowWave 3s ease-in-out infinite;
+}
+
+/* ===== MEJORAS DE TAMAÑOS PARA TABLET/DESKTOP ===== */
+
+/* Inputs y textareas más legibles en tablet/desktop */
+@media (min-width: 1024px) {
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"], 
+  textarea {
+    font-size: 1rem; /* 16px instead of 14px */
+  }
+  
+  /* Labels más legibles */
+  label {
+    font-size: 0.95rem; /* Slightly larger labels */
+  }
+  
+  /* Placeholders más legibles */
+  ::placeholder {
+    font-size: 1rem;
+  }
 }
 
 @media (max-width: 640px) {

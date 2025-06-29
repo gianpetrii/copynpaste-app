@@ -151,10 +151,10 @@ export function AddItemForm() {
     return (
       <div className="p-4">
         <div className="bg-secondary rounded-xl shadow-sm p-6 text-center">
-          <p className="text-secondary-foreground mb-4">
+          <p className="text-secondary-foreground mb-4 text-base lg:text-lg">
             Debes iniciar sesión para guardar elementos.
           </p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm lg:text-base">
             Tus datos se guardarán de forma segura y solo tú podrás acceder a ellos.
           </p>
         </div>
@@ -167,10 +167,10 @@ export function AddItemForm() {
       <div className="bg-secondary/50 border border-border rounded-lg shadow-sm p-1.5 sm:p-2 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
           <TabsList className="grid grid-cols-2 w-full bg-muted h-6 sm:h-7">
-            <TabsTrigger value="text" className="data-[state=active]:bg-background text-sm py-0.5">
+            <TabsTrigger value="text" className="data-[state=active]:bg-background text-sm lg:text-base py-0.5">
               Texto
             </TabsTrigger>
-            <TabsTrigger value="file" className="data-[state=active]:bg-background text-sm py-0.5">
+            <TabsTrigger value="file" className="data-[state=active]:bg-background text-sm lg:text-base py-0.5">
               Archivo
             </TabsTrigger>
           </TabsList>
@@ -190,14 +190,14 @@ export function AddItemForm() {
               className="h-8 sm:h-9 bg-background border-border focus:ring-1 focus:ring-ring text-foreground"
               />
             <Button
-              className="w-full h-7 sm:h-8 add-button button-primary text-sm"
+              className="w-full h-7 sm:h-8 add-button button-primary text-sm lg:text-base"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
               disabled={isSubmitting || (!text && !url)}
             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-3 w-3 sm:h-3.5 sm:w-3.5 border-b-2 border-current mr-1"></div>
-                  <span className="text-sm">Guardando...</span>
+                  <span className="text-sm lg:text-base">Guardando...</span>
                 </>
               ) : (
                 <>

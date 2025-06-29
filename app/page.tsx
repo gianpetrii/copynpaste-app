@@ -71,10 +71,10 @@ export default function Home() {
           <div className="flex items-center space-x-2 sm:space-x-3 navbar-logo">
             <ClipboardIcon className="text-primary" size={24} />
             <div>
-              <h1 className="text-xs sm:text-sm lg:text-base font-bold text-foreground navbar-title">
+              <h1 className="text-xs sm:text-sm lg:text-lg font-bold text-foreground navbar-title">
                 Copy & Paste
             </h1>
-              <p className="text-xs text-muted-foreground navbar-subtitle">
+              <p className="text-xs lg:text-sm text-muted-foreground navbar-subtitle">
                 Tu portapapeles universal
               </p>
             </div>
@@ -98,15 +98,15 @@ export default function Home() {
                   <div className="lg:text-center lg:space-y-2">
                     {/* Desktop: Saludo grande con líneas separadas */}
                     <div className="hidden lg:block">
-                      <h2 className="text-lg xl:text-xl font-bold text-foreground">
+                      <h2 className="text-lg xl:text-2xl font-bold text-foreground">
                         ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! <span className="wave-greeting">👋</span>
                       </h2>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm lg:text-base text-muted-foreground">
                         Tienes <span className="font-semibold text-foreground">{totalItems}</span> elementos guardados
                       </p>
                       {/* Stats horizontales para desktop */}
                       {totalItems > 0 && (
-                        <div className="flex flex-wrap items-center justify-center gap-3 text-xs mt-2">
+                        <div className="flex flex-wrap items-center justify-center gap-3 text-xs lg:text-sm mt-2">
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <FileText className="h-3 w-3" />
                             <span>{textItems} textos</span>
@@ -132,12 +132,12 @@ export default function Home() {
                     {/* Mobile/Tablet: Saludo horizontal con iconos */}
                     <div className="lg:hidden">
                       <div className="flex items-center justify-between gap-1 text-left">
-                        <h2 className="text-sm sm:text-base font-bold text-foreground">
+                        <h2 className="text-sm sm:text-lg font-bold text-foreground">
                           ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! <span className="wave-greeting">👋</span>
                         </h2>
                         {/* Stats horizontales con iconos */}
                         {totalItems > 0 && (
-                          <div className="flex gap-1.5 sm:gap-2 text-xs">
+                          <div className="flex gap-1.5 sm:gap-2 text-xs sm:text-sm">
                             <div className="flex items-center gap-0.5 text-muted-foreground">
                               <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               <span>{textItems}</span>
@@ -175,7 +175,7 @@ export default function Home() {
                   <TabsTrigger
                     value="all"
                     onClick={() => setActiveTab("all")}
-                        className="flex items-center gap-1 text-sm"
+                        className="flex items-center gap-1 text-sm lg:text-base"
                   >
                         <FileText className="h-3.5 w-3.5" />
                         Todos ({totalItems})
@@ -183,7 +183,7 @@ export default function Home() {
                   <TabsTrigger
                     value="favorites"
                     onClick={() => setActiveTab("favorites")}
-                        className="flex items-center gap-1 text-sm"
+                        className="flex items-center gap-1 text-sm lg:text-base"
                   >
                         <Star className="h-3.5 w-3.5" />
                         Favoritos ({favoriteItems})
@@ -205,17 +205,17 @@ export default function Home() {
               <div className="flex items-center justify-center gap-6 sm:gap-8 mb-6">
                 <ClipboardIcon className="text-primary flex-shrink-0 hero-icon-banner" size={120} />
                 <div className="text-left">
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight whitespace-nowrap">
+                  <h1 className="text-3xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-tight whitespace-nowrap">
                     Tu portapapeles
                   </h1>
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-primary leading-tight whitespace-nowrap">
+                  <h1 className="text-3xl sm:text-6xl lg:text-7xl font-bold text-primary leading-tight whitespace-nowrap">
                     universal
                   </h1>
                 </div>
               </div>
               
               <div className="space-y-4">
-                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed hero-subtitle">
+                <p className="text-lg sm:text-2xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed hero-subtitle">
                   Guarda, organiza y accede a tu información importante desde cualquier dispositivo. 
                   <span className="block mt-2 text-primary font-medium">Simple. Seguro. Sincronizado.</span>
                 </p>
@@ -232,8 +232,8 @@ export default function Home() {
                 <div className="mx-auto w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
                   <Zap className="h-6 w-6 text-blue-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Acceso Rápido</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Acceso Rápido</h3>
+                <p className="text-sm lg:text-base text-muted-foreground">
                   Copia cualquier contenido con un solo clic y accede desde cualquier dispositivo
                 </p>
               </div>
@@ -242,8 +242,8 @@ export default function Home() {
                 <div className="mx-auto w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
                   <Shield className="h-6 w-6 text-green-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Totalmente Seguro</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Totalmente Seguro</h3>
+                <p className="text-sm lg:text-base text-muted-foreground">
                   Tus datos están protegidos y solo tú puedes acceder a ellos
             </p>
               </div>
@@ -252,8 +252,8 @@ export default function Home() {
                 <div className="mx-auto w-12 h-12 bg-purple-500/10 rounded-full flex items-center justify-center">
                   <Sparkles className="h-6 w-6 text-purple-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Multi-formato</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Multi-formato</h3>
+                <p className="text-sm lg:text-base text-muted-foreground">
                   Textos, enlaces, archivos y más. Todo en un solo lugar organizado
                 </p>
               </div>
@@ -261,10 +261,10 @@ export default function Home() {
 
             {/* CTA secondary */}
             <div className="text-center space-y-4 p-8 rounded-2xl bg-primary/5 border border-primary/20 max-w-2xl">
-              <h3 className="text-xl font-semibold text-foreground">
+              <h3 className="text-xl lg:text-2xl font-semibold text-foreground">
                 ¿Listo para comenzar?
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-base lg:text-lg text-muted-foreground">
                 Inicia sesión con Google y comienza a organizar tu información en segundos
               </p>
             </div>

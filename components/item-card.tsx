@@ -408,8 +408,8 @@ export function ItemCard({ item }: ItemCardProps) {
           <div className="flex items-center">
             {getFileIcon()}
             <div>
-              <p className="text-sm font-medium break-words">{item.fileName}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm lg:text-base font-medium break-words">{item.fileName}</p>
+              <p className="text-xs lg:text-sm text-muted-foreground">
                 {item.fileSize ? `${(item.fileSize / 1024 / 1024).toFixed(2)} MB` : ""}
                 {item.fileType ? ` • ${getFileTypeDescription()}` : ""}
               </p>
@@ -424,10 +424,10 @@ export function ItemCard({ item }: ItemCardProps) {
     
     return (
       <div>
-        <p className={`text-foreground break-words whitespace-pre-wrap ${!showFullText ? 'inline' : ''}`}>
+        <p className={`text-sm lg:text-base text-foreground break-words whitespace-pre-wrap ${!showFullText ? 'inline' : ''}`}>
           {showFullText ? item.content : truncatedContent}
           {showButton && !showFullText && (
-            <span className="text-xs text-primary ml-1 inline-flex items-center">
+            <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
               (<button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -441,7 +441,7 @@ export function ItemCard({ item }: ItemCardProps) {
           )}
         </p>
         {showButton && showFullText && (
-          <span className="text-xs text-primary ml-1 inline-flex items-center">
+          <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
             (<button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -538,7 +538,7 @@ export function ItemCard({ item }: ItemCardProps) {
           
           <div className="mt-0.5">
             {renderContent()}
-            <div className="text-xs text-muted-foreground mt-1">
+            <div className="text-xs lg:text-sm text-muted-foreground mt-1">
               {formatDate(item.createdAt)}
               {item.updatedAt && (
                 typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
@@ -564,7 +564,7 @@ export function ItemCard({ item }: ItemCardProps) {
             className={`h-7 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
           >
             <Star className="h-3 w-3 mr-1" fill={isFavorite ? "currentColor" : "none"} />
-                                <span className="text-sm">{isFavorite ? "Quitar" : "Favorito"}</span>
+                                <span className="text-sm lg:text-base">{isFavorite ? "Quitar" : "Favorito"}</span>
           </Button>
           
           {!isEditing && item.type !== "file" && (
@@ -575,7 +575,7 @@ export function ItemCard({ item }: ItemCardProps) {
               className="text-muted-foreground h-7"
             >
               <Edit className="h-3 w-3 mr-1" />
-              <span className="text-sm">Editar</span>
+              <span className="text-sm lg:text-base">Editar</span>
             </Button>
           )}
           
@@ -586,7 +586,7 @@ export function ItemCard({ item }: ItemCardProps) {
             className="text-muted-foreground h-7"
           >
             <Copy className="h-3 w-3 mr-1" />
-                          <span className="text-sm">Copiar</span>
+                          <span className="text-sm lg:text-base">Copiar</span>
           </Button>
           
           {item.type === "file" && (
@@ -597,7 +597,7 @@ export function ItemCard({ item }: ItemCardProps) {
               className="text-muted-foreground h-7"
             >
               <Download className="h-3 w-3 mr-1" />
-              <span className="text-sm">Descargar</span>
+              <span className="text-sm lg:text-base">Descargar</span>
             </Button>
           )}
           
@@ -609,7 +609,7 @@ export function ItemCard({ item }: ItemCardProps) {
             className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-7"
           >
             <Trash className="h-3 w-3 mr-1" />
-                          <span className="text-sm">Eliminar</span>
+                          <span className="text-sm lg:text-base">Eliminar</span>
           </Button>
         </div>
       )}

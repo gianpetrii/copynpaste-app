@@ -261,7 +261,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               authSection.scrollIntoView({ behavior: 'smooth' })
             }
           }}
-          className="auth-button button-secondary text-xs sm:text-sm"
+          className="auth-button button-secondary text-xs sm:text-base"
         >
           Iniciar sesión
         </Button>
@@ -276,7 +276,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               authSection.scrollIntoView({ behavior: 'smooth' })
             }
           }}
-          className="auth-button button-primary text-xs sm:text-sm"
+          className="auth-button button-primary text-xs sm:text-base"
         >
           Registrarse
         </Button>
@@ -314,7 +314,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
           {/* Divider */}
           <div className="flex items-center w-full">
             <div className="flex-1 h-px bg-border"></div>
-            <span className="px-4 text-sm text-muted-foreground">o</span>
+            <span className="px-4 text-sm lg:text-base text-muted-foreground">o</span>
             <div className="flex-1 h-px bg-border"></div>
           </div>
           
@@ -344,7 +344,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             </Button>
           </div>
           
-          <p className="text-xs text-muted-foreground text-center max-w-xs">
+          <p className="text-xs lg:text-sm text-muted-foreground text-center max-w-xs">
             Gratis para siempre. No se requiere tarjeta de crédito.
           </p>
         </div>
@@ -367,7 +367,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             <ArrowLeft className="h-4 w-4" />
             Volver
           </Button>
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl lg:text-2xl font-semibold">
             {authMode === "login" && "Iniciar sesión"}
             {authMode === "register" && "Crear cuenta"}
             {authMode === "reset" && "Recuperar contraseña"}

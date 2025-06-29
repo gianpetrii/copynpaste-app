@@ -196,7 +196,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
               placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-7 h-8 text-sm bg-background border-border text-foreground"
+              className="pl-7 h-8 text-sm lg:text-base bg-background border-border text-foreground"
             />
           </div>
         </div>
@@ -205,7 +205,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
         <div className="flex flex-col gap-2 mb-3">
           <div className="flex gap-2">
           <Select value={filterType} onValueChange={(value) => setFilterType(value as "all" | "text" | "url" | "file")}>
-              <SelectTrigger className="flex-1 h-8 text-sm bg-background border-border text-foreground">
+              <SelectTrigger className="flex-1 h-8 text-sm lg:text-base bg-background border-border text-foreground">
                 <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
@@ -217,7 +217,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
           </Select>
           
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
-              <SelectTrigger className="flex-1 h-8 text-sm bg-background border-border text-foreground">
+              <SelectTrigger className="flex-1 h-8 text-sm lg:text-base bg-background border-border text-foreground">
                 <SelectValue placeholder="Orden" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
@@ -235,7 +235,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="h-8 text-sm text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950"
+                  className="h-8 text-sm lg:text-base text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950"
                   disabled={isDeleting}
                 >
                   <Trash2 className="h-3 w-3 mr-1" />
@@ -276,18 +276,18 @@ export function ItemList({ filter = "all" }: ItemListProps) {
           <div className="text-center py-6 text-muted-foreground">
             {searchQuery ? (
               <div className="space-y-2">
-                <p className="text-sm">No hay resultados para &ldquo;{searchQuery}&rdquo;</p>
+                <p className="text-sm lg:text-base">No hay resultados para &ldquo;{searchQuery}&rdquo;</p>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setSearchQuery("")}
-                  className="text-primary h-8 text-sm"
+                  className="text-primary h-8 text-sm lg:text-base"
                 >
                   Limpiar búsqueda
                 </Button>
               </div>
             ) : (
-              <p className="text-sm">No hay elementos guardados</p>
+              <p className="text-sm lg:text-base">No hay elementos guardados</p>
             )}
           </div>
         ) : (
