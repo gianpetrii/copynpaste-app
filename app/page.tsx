@@ -99,7 +99,7 @@ export default function Home() {
                     {/* Desktop: Saludo grande con líneas separadas */}
                     <div className="hidden lg:block">
                       <h2 className="text-lg xl:text-xl font-bold text-foreground">
-                        ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! 👋
+                        ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! <span className="wave-greeting">👋</span>
                       </h2>
                       <p className="text-sm text-muted-foreground">
                         Tienes <span className="font-semibold text-foreground">{totalItems}</span> elementos guardados
@@ -133,7 +133,7 @@ export default function Home() {
                     <div className="lg:hidden">
                       <div className="flex items-center justify-between gap-1 text-left">
                         <h2 className="text-sm sm:text-base font-bold text-foreground">
-                          ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! 👋
+                          ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! <span className="wave-greeting">👋</span>
                         </h2>
                         {/* Stats horizontales con iconos */}
                         {totalItems > 0 && (
