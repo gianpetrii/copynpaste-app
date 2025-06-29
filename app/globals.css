@@ -697,20 +697,24 @@ button.text-primary.underline.inline {
 
 /* ===== ANIMACIÓN DE SALUDO ===== */
 
-@keyframes slowWave {
-  0%, 100% { 
-    transform: rotate(0deg);
+@keyframes smoothWave {
+  0% { 
+    transform: rotate(-5deg);
     transform-origin: 70% 70%;
   }
   25% { 
-    transform: rotate(10deg);
+    transform: rotate(8deg);
     transform-origin: 70% 70%;
   }
   50% { 
-    transform: rotate(0deg);
+    transform: rotate(10deg);
     transform-origin: 70% 70%;
   }
   75% { 
+    transform: rotate(8deg);
+    transform-origin: 70% 70%;
+  }
+  100% { 
     transform: rotate(-5deg);
     transform-origin: 70% 70%;
   }
@@ -718,7 +722,7 @@ button.text-primary.underline.inline {
 
 .wave-greeting {
   display: inline-block;
-  animation: slowWave 3s ease-in-out infinite;
+  animation: smoothWave 3s ease-in-out infinite;
 }
 
 /* ===== MEJORAS DE TAMAÑOS PARA TABLET/DESKTOP ===== */
