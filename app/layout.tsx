@@ -11,10 +11,7 @@ export const metadata: Metadata = {
   title: "Copy&Paste - Portapapeles Universal",
   description: "Comparte texto, archivos y enlaces entre dispositivos fácilmente",
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' }
-    ],
+    icon: { url: '/favicon.svg', type: 'image/svg+xml' },
     apple: '/favicon.svg',
   },
 }
