@@ -699,23 +699,15 @@ button.text-primary.underline.inline {
 
 @keyframes smoothWave {
   0% { 
-    transform: rotate(-5deg);
-    transform-origin: 70% 70%;
-  }
-  25% { 
-    transform: rotate(8deg);
+    transform: rotate(-10deg);
     transform-origin: 70% 70%;
   }
   50% { 
     transform: rotate(10deg);
     transform-origin: 70% 70%;
   }
-  75% { 
-    transform: rotate(8deg);
-    transform-origin: 70% 70%;
-  }
   100% { 
-    transform: rotate(-5deg);
+    transform: rotate(-10deg);
     transform-origin: 70% 70%;
   }
 }
