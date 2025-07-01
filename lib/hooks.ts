@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import type { Item } from "@/types"
 import { addDocument, getDocuments, updateDocument, deleteDocument, subscribeToItems } from "@/lib/firebase/firestore"
 import { uploadFile, deleteFile } from "@/lib/firebase/storage"
+import { sanitizeText } from "@/lib/utils/validation"
+import { logger } from "@/lib/utils/logger"
 
 // Interfaz para el resultado de uploadFile
 interface UploadFileResult {
@@ -107,10 +109,10 @@ export function useItems(userId: string) {
         }
       }
 
-      // Crear el nuevo item en Firestore
+      // Crear el nuevo item en Firestore con contenido sanitizado
       const newItem = {
         type: itemData.type || "text",
-        content: itemData.content || "",
+        content: sanitizeText(itemData.content || ""), // Sanitizar contenido
         userId, // Always use the authenticated user's ID
         fileName: itemData.fileName || "",
         fileType: itemData.fileType || "",
@@ -123,7 +125,7 @@ export function useItems(userId: string) {
       // La suscripción se encargará de actualizar la lista automáticamente
       return await addDocument("items", newItem)
     } catch (error) {
-      console.error("Error al añadir item:", error)
+      logger.databaseError("Error al añadir item", error, undefined, userId)
       throw error
     }
   }
@@ -138,11 +140,17 @@ export function useItems(userId: string) {
         throw new Error("No tienes permiso para actualizar este elemento")
       }
       
+      // Sanitizar contenido si se está actualizando
+      const sanitizedData = { ...data }
+      if (data.content) {
+        sanitizedData.content = sanitizeText(data.content)
+      }
+      
       // Actualizar el documento en Firestore
       // La suscripción se encargará de actualizar la lista automáticamente
-      await updateDocument("items", id, data)
+      await updateDocument("items", id, sanitizedData)
     } catch (error) {
-      console.error("Error al actualizar item:", error)
+      logger.databaseError("Error al actualizar item", error, id, userId)
       throw error
     }
   }
@@ -166,7 +174,7 @@ export function useItems(userId: string) {
       // La suscripción se encargará de actualizar la lista automáticamente
       await deleteDocument("items", id)
     } catch (error) {
-      console.error("Error al eliminar item:", error)
+      logger.databaseError("Error al eliminar item", error, id, userId)
       throw error
     }
   }

@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
+import { Plus, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useItems } from "@/lib/hooks"
 import { useAuth } from "@/lib/context/auth-context"
+import { validateFile, validateUrl, validateInput, generateSafeFileName } from "@/lib/utils/validation"
+import { logger } from "@/lib/utils/logger"
 
 export function AddItemForm() {
   const { toast } = useToast()
@@ -28,13 +30,24 @@ export function AddItemForm() {
   const isAuthenticated = !!userId
 
   const handleTextSubmit = async () => {
-    if (!text.trim() || !isAuthenticated) return
+    if (!isAuthenticated) return
+
+    // Validar y sanitizar contenido
+    const validation = validateInput(text, 5000) // 5000 caracteres máximo para texto
+    if (!validation.isValid) {
+      toast({
+        title: "Error de validación",
+        description: validation.error,
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       setIsSubmitting(true)
       await addItem({
         type: "text",
-        content: text,
+        content: validation.sanitized!,
         userId: userId, // Explicitly set userId for security
       })
       setText("")
@@ -43,25 +56,37 @@ export function AddItemForm() {
         description: "El texto ha sido guardado correctamente",
       })
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
-        description: "Ha ocurrido un error al guardar el texto",
+        description: `Ha ocurrido un error al guardar el texto: ${errorMessage}`,
         variant: "destructive",
       })
-      console.error(error)
+      logger.databaseError("Error al guardar texto", error, undefined, userId)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleUrlSubmit = async () => {
-    if (!url.trim() || !isAuthenticated) return
+    if (!isAuthenticated) return
+
+    // Validar URL
+    const urlValidation = validateUrl(url)
+    if (!urlValidation.isValid) {
+      toast({
+        title: "URL inválida",
+        description: urlValidation.error,
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       setIsSubmitting(true)
       await addItem({
         type: "url",
-        content: url,
+        content: urlValidation.normalizedUrl!, // Usar URL normalizada
         userId: userId, // Explicitly set userId for security
       })
       setUrl("")
@@ -70,12 +95,13 @@ export function AddItemForm() {
         description: "El enlace ha sido guardado correctamente",
       })
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
-        description: "Ha ocurrido un error al guardar el enlace",
+        description: `Ha ocurrido un error al guardar el enlace: ${errorMessage}`,
         variant: "destructive",
       })
-      console.error(error)
+      logger.databaseError("Error al guardar URL", error, undefined, userId)
     } finally {
       setIsSubmitting(false)
     }
@@ -103,9 +129,35 @@ export function AddItemForm() {
   const handleFileSubmit = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !isAuthenticated) return
 
+    const file = e.target.files[0]
+
+    // Validar archivo antes de procesar
+    const fileValidation = validateFile(file)
+    if (!fileValidation.isValid) {
+      toast({
+        title: "Archivo inválido",
+        description: fileValidation.error,
+        variant: "destructive",
+      })
+      // Limpiar input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+      return
+    }
+
+    // Mostrar advertencias si las hay
+    if (fileValidation.warnings && fileValidation.warnings.length > 0) {
+      toast({
+        title: "Advertencia",
+        description: fileValidation.warnings.join('. '),
+        variant: "default",
+      })
+    }
+
     try {
       setIsSubmitting(true)
-      const file = e.target.files[0]
+      const safeFileName = generateSafeFileName(file.name)
       setCurrentFileName(file.name)
       setUploadProgress(0)
 
@@ -113,7 +165,7 @@ export function AddItemForm() {
         {
           type: "file",
           file: file,
-          fileName: file.name,
+          fileName: safeFileName, // Usar nombre de archivo seguro
           fileType: file.type,
           fileSize: file.size,
           userId: userId, // Explicitly set userId for security
@@ -130,19 +182,24 @@ export function AddItemForm() {
 
       toast({
         title: "Archivo guardado",
-        description: "El archivo ha sido guardado correctamente",
+        description: `El archivo "${file.name}" ha sido guardado correctamente`,
       })
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
-        description: "Ha ocurrido un error al guardar el archivo",
+        description: `Ha ocurrido un error al guardar el archivo: ${errorMessage}`,
         variant: "destructive",
       })
-      console.error(error)
+      logger.fileError("Error al guardar archivo", error, file.name, userId)
     } finally {
       setIsSubmitting(false)
       setUploadProgress(0)
       setCurrentFileName("")
+      // Limpiar input en caso de error
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
     }
   }
 
@@ -192,7 +249,7 @@ export function AddItemForm() {
             <Button
               className="w-full h-7 sm:h-8 add-button button-primary text-sm lg:text-base"
               onClick={url ? handleUrlSubmit : handleTextSubmit}
-              disabled={isSubmitting || (!text && !url)}
+              disabled={isSubmitting || (!text.trim() && !url.trim())}
             >
               {isSubmitting ? (
                 <>
@@ -208,8 +265,25 @@ export function AddItemForm() {
             </Button>
           </TabsContent>
           <TabsContent value="file" className="p-1 sm:p-1.5">
+            {/* Información sobre límites de archivo */}
+            <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
+              <div className="flex items-center gap-1 mb-1">
+                <AlertTriangle className="h-3 w-3" />
+                <span className="font-medium">Límites:</span>
+              </div>
+              <div>• Tamaño máximo: 10MB</div>
+              <div>• Tipos: Imágenes, documentos, audio, video, archivos comprimidos</div>
+            </div>
+            
             <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
-              <Input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSubmit} id="file-upload" />
+              <Input 
+                ref={fileInputRef} 
+                type="file" 
+                className="hidden" 
+                onChange={handleFileSubmit} 
+                id="file-upload"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.mp4,.webm,.json,.html,.css"
+              />
               <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
                 {isSubmitting ? (
                   <>

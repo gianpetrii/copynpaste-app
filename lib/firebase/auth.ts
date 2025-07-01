@@ -9,6 +9,7 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from './firebase';
+import { logger } from '@/lib/utils/logger';
 
 // Proveedor de autenticación de Google
 const googleProvider = new GoogleAuthProvider();
@@ -19,7 +20,7 @@ export const registerUser = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error('Error al registrar usuario:', error);
+    logger.authError('Error al registrar usuario', error);
     throw error;
   }
 };
@@ -30,7 +31,7 @@ export const signIn = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   } catch (error) {
-    console.error('Error al iniciar sesión:', error);
+    logger.authError('Error al iniciar sesión', error);
     throw error;
   }
 };
@@ -41,7 +42,7 @@ export const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
-    console.error('Error al iniciar sesión con Google:', error);
+    logger.authError('Error al iniciar sesión con Google', error);
     throw error;
   }
 };
@@ -52,7 +53,7 @@ export const signOut = async () => {
     await firebaseSignOut(auth);
     return true;
   } catch (error) {
-    console.error('Error al cerrar sesión:', error);
+    logger.authError('Error al cerrar sesión', error);
     throw error;
   }
 };
@@ -68,7 +69,7 @@ export const resetPassword = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
     return true;
   } catch (error) {
-    console.error('Error al enviar email de recuperación:', error);
+    logger.authError('Error al enviar email de recuperación', error);
     throw error;
   }
 }; 
