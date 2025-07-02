@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración para Firebase Hosting
-  output: 'export', // Genera archivos estáticos para hosting
-  images: {
-    unoptimized: true, // Necesario para exportación estática
+  // Configuración para Firebase Hosting con Next.js support
+  experimental: {
+    serverComponentsExternalPackages: ["firebase-admin"],
   },
-  // Deshabilitar la generación de archivos estáticos para rutas dinámicas
-  // si tu aplicación usa rutas dinámicas
-  trailingSlash: true,
+  images: {
+    unoptimized: true, // Requerido para Firebase Hosting
+  },
+  // Configuración optimizada para Firebase
+  trailingSlash: false,
+  poweredByHeader: false,
 };
 
 export default nextConfig;
