@@ -39,4 +39,5 @@ next-env.d.ts
 # firebase
 /.firebase/
 .firebase/*.cache
+.firebase/*/hosting/
 firebase-debug.log
