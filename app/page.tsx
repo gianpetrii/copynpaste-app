@@ -14,20 +14,23 @@ import {
   Shield, 
   Zap,
   FileText,
-  Link,
+  Link as LinkIcon,
   Upload,
   Star
 } from "lucide-react"
 import { ClipboardIcon } from "@/components/ui/clipboard-icon"
+import UserPlanBanner from "@/app/components/user-plan-banner"
+import Link from "next/link"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { user } = useAuth()
   const { items, loading } = useItems(user?.uid || "")
 
   useEffect(() => {
-    // Check if user has a theme preference stored
+    // Solo ejecutar en el cliente después del montaje
     const savedTheme = localStorage.getItem('theme');
     
     if (savedTheme === 'dark') {
@@ -41,6 +44,9 @@ export default function Home() {
         localStorage.setItem('theme', 'light');
       }
     }
+    
+    // Marcar como montado
+    setMounted(true);
   }, []);
 
   const handleThemeToggle = () => {
@@ -63,6 +69,36 @@ export default function Home() {
   const fileItems = items.filter(item => item.type === 'file').length
   const urlItems = items.filter(item => item.type === 'url').length
 
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <main className="min-h-screen">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
+          <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
+            <div className="flex items-center space-x-2 sm:space-x-3 navbar-logo">
+              <ClipboardIcon className="text-primary" size={24} />
+              <div>
+                <h1 className="text-xs sm:text-sm lg:text-lg font-bold text-foreground navbar-title">
+                  Copy & Paste
+                </h1>
+                <p className="text-xs lg:text-sm text-muted-foreground navbar-subtitle">
+                  Tu portapapeles universal
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </header>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen">
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
@@ -81,6 +117,20 @@ export default function Home() {
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-3">
+            {user && (
+              <>
+                <Link href="/pricing" className="hidden sm:block">
+                  <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors">
+                    Planes
+                  </button>
+                </Link>
+                <Link href="/account" className="hidden sm:block">
+                  <button className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                    Cuenta
+                  </button>
+                </Link>
+              </>
+            )}
             <ThemeToggle onToggle={handleThemeToggle} isDark={isDarkMode} />
             <AuthButtons compact={true} />
           </div>
@@ -89,6 +139,8 @@ export default function Home() {
         {user ? (
           /* Dashboard para usuarios logueados - Layout responsive */
           <div className="space-y-2 sm:space-y-3">
+            {/* Plan Banner */}
+            <UserPlanBanner />
             {/* Layout mejorado - columna izquierda más ancha en desktop */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
               {/* Columna izquierda - Welcome section y form (más ancha) */}
@@ -112,7 +164,7 @@ export default function Home() {
                             <span>{textItems} textos</span>
                           </div>
                           <div className="flex items-center gap-1 text-muted-foreground">
-                            <Link className="h-3 w-3" />
+                            <LinkIcon className="h-3 w-3" />
                             <span>{urlItems} enlaces</span>
                           </div>
                           <div className="flex items-center gap-1 text-muted-foreground">
@@ -143,7 +195,7 @@ export default function Home() {
                               <span>{textItems}</span>
                             </div>
                             <div className="flex items-center gap-0.5 text-muted-foreground">
-                              <Link className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                              <LinkIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                               <span>{urlItems}</span>
                             </div>
                             <div className="flex items-center gap-0.5 text-muted-foreground">
@@ -267,6 +319,13 @@ export default function Home() {
               <p className="text-base lg:text-lg text-muted-foreground">
                 Inicia sesión con Google y comienza a organizar tu información en segundos
               </p>
+              <div className="mt-4">
+                <Link href="/pricing">
+                  <button className="px-6 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg border border-blue-200 transition-colors">
+                    Ver Planes Premium
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         )}

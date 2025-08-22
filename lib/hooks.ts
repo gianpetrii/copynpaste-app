@@ -6,6 +6,7 @@ import { addDocument, getDocuments, updateDocument, deleteDocument, subscribeToI
 import { uploadFile, deleteFile } from "@/lib/firebase/storage"
 import { sanitizeText } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
+import { PLAN_LIMITS, getUserPlan } from "@/lib/firebase/device-manager"
 
 // Interfaz para el resultado de uploadFile
 interface UploadFileResult {
@@ -91,6 +92,14 @@ export function useItems(userId: string) {
 
   const addItem = async (itemData: Partial<Item>, onProgress?: (progress: number, fileName: string) => void) => {
     if (!userId) throw new Error("Usuario no autenticado")
+
+    // Verificar límites del plan antes de crear el item
+    const userPlan = await getUserPlan(userId);
+    const planLimits = PLAN_LIMITS[userPlan];
+    
+    if (planLimits.maxItems > 0 && items.length >= planLimits.maxItems) {
+      throw new Error(`LIMIT_REACHED:${items.length}:${planLimits.maxItems}`);
+    }
 
     try {
       let fileData = {}

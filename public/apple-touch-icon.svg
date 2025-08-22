@@ -1,0 +1,9 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="30" fill="#000000"/>
+  <g transform="translate(45, 45)">
+    <path d="M22.5 15H18.75C16.875 15 15 16.875 15 18.75V63.75C15 65.625 16.875 67.5 18.75 67.5H71.25C73.125 67.5 75 65.625 75 63.75V18.75C75 16.875 73.125 15 71.25 15H67.5" stroke="#ffffff" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22.5 15C22.5 11.25 26.25 7.5 30 7.5H60C63.75 7.5 67.5 11.25 67.5 15C67.5 18.75 63.75 22.5 60 22.5H30C26.25 22.5 22.5 18.75 22.5 15Z" stroke="#ffffff" stroke-width="5.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22.5 37.5H67.5" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round"/>
+    <path d="M22.5 48.75H67.5" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round"/>
+  </g>
+</svg> 

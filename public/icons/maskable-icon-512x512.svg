@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Safe zone background -->
+  <circle cx="256" cy="256" r="256" fill="#000000"/>
+  <!-- Icon centered in safe zone (20% padding from edges) -->
+  <g transform="translate(154, 154)">
+    <path d="M51.2 34.133H42.667C38.4 34.133 34.133 38.4 34.133 42.667V145.067C34.133 149.333 38.4 153.6 42.667 153.6H162.133C166.4 153.6 170.667 149.333 170.667 145.067V42.667C170.667 38.4 166.4 34.133 162.133 34.133H153.6" stroke="#ffffff" stroke-width="12.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M51.2 34.133C51.2 25.6 59.733 17.067 68.267 17.067H136.533C145.067 17.067 153.6 25.6 153.6 34.133C153.6 42.667 145.067 51.2 136.533 51.2H68.267C59.733 51.2 51.2 42.667 51.2 34.133Z" stroke="#ffffff" stroke-width="12.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M51.2 85.333H153.6" stroke="#ffffff" stroke-width="10.4" stroke-linecap="round"/>
+    <path d="M51.2 111.0667H153.6" stroke="#ffffff" stroke-width="10.4" stroke-linecap="round"/>
+  </g>
+</svg> 

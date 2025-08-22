@@ -358,7 +358,6 @@ button[size="icon"]:not(:disabled):hover {
 
 /* Cards de features mejoradas */
 .feature-card {
-  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   border: 1px solid hsl(var(--border));
   cursor: default; /* Features no son clickeables */
@@ -383,9 +382,8 @@ button[size="icon"]:not(:disabled):hover {
 
 /* Tabs mejoradas */
 .tabs-improved {
-  background: hsl(var(--secondary) / 0.3);
-  backdrop-filter: blur(10px);
-  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--secondary) / 0.7);
+  border: 1px solid hsl(var(--border) / 0.7);
 }
 
 /* Navbar logo mejorado */

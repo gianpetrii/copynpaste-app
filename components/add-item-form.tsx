@@ -7,23 +7,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Plus, AlertTriangle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/use-toast"
 import { useItems } from "@/lib/hooks"
 import { useAuth } from "@/lib/context/auth-context"
 import { validateFile, validateUrl, validateInput, generateSafeFileName } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
+import ItemLimitModal from "@/app/components/item-limit-modal"
 
 export function AddItemForm() {
   const { toast } = useToast()
   const { user } = useAuth()
   const userId = user?.uid || ""
-  const { addItem } = useItems(userId)
+  const { addItem, items } = useItems(userId)
   const [activeTab, setActiveTab] = useState<"text" | "file">("text")
   const [text, setText] = useState("")
   const [url, setUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [currentFileName, setCurrentFileName] = useState("")
+  const [showLimitModal, setShowLimitModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Ensure user is authenticated before allowing submissions
@@ -56,6 +58,13 @@ export function AddItemForm() {
         description: "El texto ha sido guardado correctamente",
       })
     } catch (error) {
+      // Manejar error de límite alcanzado
+      if (error instanceof Error && error.message.startsWith('LIMIT_REACHED:')) {
+        setShowLimitModal(true);
+        setIsSubmitting(false);
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
@@ -95,6 +104,13 @@ export function AddItemForm() {
         description: "El enlace ha sido guardado correctamente",
       })
     } catch (error) {
+      // Manejar error de límite alcanzado
+      if (error instanceof Error && error.message.startsWith('LIMIT_REACHED:')) {
+        setShowLimitModal(true);
+        setIsSubmitting(false);
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
@@ -185,6 +201,18 @@ export function AddItemForm() {
         description: `El archivo "${file.name}" ha sido guardado correctamente`,
       })
     } catch (error) {
+      // Manejar error de límite alcanzado
+      if (error instanceof Error && error.message.startsWith('LIMIT_REACHED:')) {
+        setShowLimitModal(true);
+        setIsSubmitting(false);
+        setUploadProgress(0);
+        setCurrentFileName("");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : "Error desconocido"
       toast({
         title: "Error al guardar",
@@ -326,6 +354,13 @@ export function AddItemForm() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modal de límite de items */}
+      <ItemLimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        currentItemCount={items.length}
+      />
     </div>
   )
 } 

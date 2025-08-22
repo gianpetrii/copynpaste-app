@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/use-toast"
 import { useAuth } from "@/lib/context/auth-context"
 import { LogOut, User, Chrome, Mail, Lock, ArrowLeft, KeyRound } from "lucide-react"
 import {
@@ -28,6 +28,7 @@ interface AuthButtonsProps {
 export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [authMode, setAuthMode] = useState<AuthMode>("google")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -36,27 +37,33 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const { toast } = useToast()
   const { user, loginWithGoogle, loginWithEmail, registerWithEmail, resetPassword, logout } = useAuth()
 
-  // Detectar si estamos en móvil
+  // Solo renderizar después de montaje para evitar hidratación
   useEffect(() => {
+    // Detectar si estamos en móvil
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);
     };
     
+    // Cargar modo de autenticación guardado
+    const loadSavedAuthMode = () => {
+      const savedAuthMode = localStorage.getItem('authMode');
+      if (savedAuthMode && !compact) {
+        setAuthMode(savedAuthMode as AuthMode);
+        localStorage.removeItem('authMode'); // Limpiar después de usar
+      }
+    };
+    
+    // Ejecutar todo después del montaje
     checkMobile();
+    loadSavedAuthMode();
+    setMounted(true);
+    
+    // Configurar event listeners
     window.addEventListener('resize', checkMobile);
     
     return () => {
       window.removeEventListener('resize', checkMobile);
     };
-  }, []);
-
-  // Escuchar cambios en localStorage para cambiar el modo de autenticación
-  useEffect(() => {
-    const savedAuthMode = localStorage.getItem('authMode');
-    if (savedAuthMode && !compact) {
-      setAuthMode(savedAuthMode as AuthMode);
-      localStorage.removeItem('authMode'); // Limpiar después de usar
-    }
   }, [compact]);
 
   const handleGoogleSignIn = async () => {
@@ -209,6 +216,21 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
     setEmail("")
     setPassword("")
     setConfirmPassword("")
+  }
+
+  // Renderizar un placeholder durante SSR
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        disabled
+        size="default"
+        className="auth-button button-secondary flex items-center gap-2"
+      >
+        <User className="h-4 w-4" />
+        {compact ? "..." : "Cargando..."}
+      </Button>
+    );
   }
 
   if (user) {
