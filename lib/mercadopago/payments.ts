@@ -8,7 +8,7 @@ export interface CreateSubscriptionData {
   userId: string;
   userEmail: string;
   plan: 'premium' | 'enterprise';
-  subscriptionId: string;
+  subscriptionId: string | null;
 }
 
 export interface MPPaymentResult {
@@ -41,11 +41,11 @@ export const createSinglePayment = async (data: CreateSubscriptionData): Promise
         first_name: 'Usuario',
         last_name: 'CopyNPaste'
       },
-      external_reference: data.subscriptionId,
+      external_reference: data.subscriptionId || `temp_${data.userId}_${Date.now()}`,
       notification_url: `${MP_CONFIG.baseUrl}/api/mercadopago/webhook`,
       metadata: {
         user_id: data.userId,
-        subscription_id: data.subscriptionId,
+        subscription_id: data.subscriptionId || 'pending',
         plan: data.plan
       }
     };
@@ -85,11 +85,12 @@ export const createRecurringSubscription = async (data: CreateSubscriptionData):
   try {
     const preApproval = new PreApproval(mercadoPagoClient);
     const amount = PLAN_PRICES[data.plan];
-    const callbacks = getCallbackUrls(data.subscriptionId);
+    const tempReference = data.subscriptionId || `temp_${data.userId}_${Date.now()}`;
+    const callbacks = getCallbackUrls(tempReference);
     
     const body = {
       reason: `Suscripción ${data.plan.charAt(0).toUpperCase() + data.plan.slice(1)} - CopyNPaste`,
-      external_reference: data.subscriptionId,
+      external_reference: tempReference,
       payer_email: data.userEmail,
       auto_recurring: {
         frequency: 1,

@@ -33,32 +33,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear suscripción en Firestore primero
-    const subscriptionId = await createSubscription(userId, plan);
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: 'Error creando suscripción en base de datos' },
-        { status: 500 }
-      );
-    }
-
-    // Crear suscripción en MercadoPago
+    // Crear suscripción en MercadoPago primero
     const mpResult = await createRecurringSubscription({
       userId,
       userEmail,
       plan,
-      subscriptionId
+      subscriptionId: null // Temporal, se generará en MercadoPago
     });
 
     if (!mpResult.success) {
       logger.error('Error creando suscripción en MercadoPago', { 
         error: mpResult.error,
-        userId,
-        subscriptionId 
+        userId
       });
       
       return NextResponse.json(
         { error: mpResult.error || 'Error creando suscripción en MercadoPago' },
+        { status: 500 }
+      );
+    }
+
+    // Crear suscripción en Firestore con el ID de MercadoPago
+    const subscriptionId = await createSubscription(userId, plan, mpResult.subscriptionId);
+    if (!subscriptionId) {
+      return NextResponse.json(
+        { error: 'Error creando suscripción en base de datos' },
         { status: 500 }
       );
     }
