@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/lib/context/auth-context';
 import { PLAN_LIMITS, PLAN_PRICES } from '@/lib/firebase/device-manager';
 import { Card } from '@/components/ui/card';
@@ -20,8 +21,6 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
   const [showPricing, setShowPricing] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'premium' | 'enterprise' | null>(null);
 
-  if (!isOpen) return null;
-
   const currentPlan = userProfile?.plan || 'free';
   const planLimits = PLAN_LIMITS[currentPlan];
 
@@ -36,10 +35,24 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
     onClose();
   };
 
+  // Evitar scroll del body y asegurar layering correcto
+  useEffect(() => {
+    const shouldLock = isOpen || showPricing || !!selectedPlan;
+    if (shouldLock) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isOpen, showPricing, selectedPlan]);
+
+  if (!isOpen) return null;
+
   // Modal de pricing plans (exclusivo)
   if (showPricing) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4" style={{ backdropFilter: 'none' }}>
+    return createPortal(
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] p-4" style={{ backdropFilter: 'none' }}>
         <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Elige tu Plan</h2>
@@ -52,25 +65,27 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
           </div>
           <PricingPlans onSelectPlan={handleSelectPlan} />
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // Modal de suscripción (exclusivo)
   if (selectedPlan) {
-    return (
+    return createPortal(
       <SubscriptionModal
         isOpen={!!selectedPlan}
         onClose={handleCloseModal}
         selectedPlan={selectedPlan}
-      />
+      />,
+      document.body
     );
   }
 
   // Modal de límite alcanzado (por defecto)
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4" style={{ backdropFilter: 'none' }}>
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] p-4" style={{ backdropFilter: 'none' }}>
         <Card className="max-w-md w-full p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -151,7 +166,8 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
           </div>
         </Card>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
