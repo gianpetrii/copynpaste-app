@@ -36,7 +36,7 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
     onClose();
   };
 
-  // Modal de pricing plans
+  // Modal de pricing plans (exclusivo)
   if (showPricing) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4" style={{ backdropFilter: 'none' }}>
@@ -56,18 +56,20 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
     );
   }
 
+  // Modal de suscripción (exclusivo)
+  if (selectedPlan) {
+    return (
+      <SubscriptionModal
+        isOpen={!!selectedPlan}
+        onClose={handleCloseModal}
+        selectedPlan={selectedPlan}
+      />
+    );
+  }
+
+  // Modal de límite alcanzado (por defecto)
   return (
     <>
-      {/* Modal de suscripción */}
-      {selectedPlan && (
-        <SubscriptionModal
-          isOpen={!!selectedPlan}
-          onClose={handleCloseModal}
-          selectedPlan={selectedPlan}
-        />
-      )}
-
-      {/* Modal de límite alcanzado */}
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4" style={{ backdropFilter: 'none' }}>
         <Card className="max-w-md w-full p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
