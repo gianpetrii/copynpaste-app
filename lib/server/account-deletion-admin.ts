@@ -13,6 +13,7 @@ export interface AccountDeletionResult {
 }
 
 async function deleteCollectionDocsByUser(collectionName: string, userId: string): Promise<number> {
+  if (!adminDb) throw new Error('Firebase Admin not initialized')
   const snapshot = await adminDb.collection(collectionName).where('userId', '==', userId).get()
   if (snapshot.empty) return 0
   const batch = adminDb.batch()
@@ -40,14 +41,17 @@ async function deleteUserPayments(userId: string) {
 }
 
 async function deleteUserProfile(userId: string) {
+  if (!adminDb) throw new Error('Firebase Admin not initialized')
   await adminDb.doc(`users/${userId}`).delete().catch(() => {})
 }
 
 async function deleteUserFiles(userId: string): Promise<number> {
+  if (!adminStorage) throw new Error('Firebase Admin not initialized')
   // Cubrir ambos esquemas de path usados históricamente
   const prefixes = [`users/${userId}/`, `files/${userId}/`]
+  const bucket = adminStorage.bucket()
   await Promise.all(
-    prefixes.map((p) => adminStorage.bucket().deleteFiles({ prefix: p, force: true }).catch(() => {}))
+    prefixes.map((p) => bucket.deleteFiles({ prefix: p, force: true }).catch(() => {}))
   )
   return 0
 }
@@ -66,7 +70,10 @@ export async function deleteUserAccountAdmin(userId: string): Promise<AccountDel
     try { result.deletedItems.devices = await deleteUserDevices(userId) } catch { result.errors.push('Error eliminando dispositivos') }
     try { result.deletedItems.files = await deleteUserFiles(userId) } catch { result.errors.push('Error eliminando archivos') }
     try { await deleteUserProfile(userId) } catch { result.errors.push('Error eliminando perfil') }
-    try { await adminAuth.deleteUser(userId) } catch { result.errors.push('Error eliminando cuenta de autenticación') }
+    try { 
+      if (!adminAuth) throw new Error('Firebase Admin not initialized')
+      await adminAuth.deleteUser(userId) 
+    } catch { result.errors.push('Error eliminando cuenta de autenticación') }
 
     result.success = result.errors.length === 0
   } catch (e) {

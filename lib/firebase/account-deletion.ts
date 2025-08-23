@@ -66,7 +66,7 @@ async function deleteUserFiles(userId: string): Promise<number> {
         await deleteObject(fileRef);
         deletedCount++;
       } catch (error) {
-        logger.warn(`Error eliminando archivo: ${fileRef.fullPath}`, error);
+        logger.warn(`Error eliminando archivo: ${fileRef.fullPath}`, { error });
       }
     });
     
@@ -78,7 +78,7 @@ async function deleteUserFiles(userId: string): Promise<number> {
         await Promise.all(subDeletePromises);
         deletedCount += subFilesList.items.length;
       } catch (error) {
-        logger.warn(`Error eliminando carpeta: ${folderRef.fullPath}`, error);
+        logger.warn(`Error eliminando carpeta: ${folderRef.fullPath}`, { error });
       }
     });
     

@@ -128,7 +128,7 @@ export const createRecurringSubscription = async (data: CreateSubscriptionData):
 export const getSubscriptionStatus = async (mpSubscriptionId: string) => {
   try {
     const preApproval = new PreApproval(mercadoPagoClient);
-    const result = await preApproval.get({ preapprovalId: mpSubscriptionId });
+    const result = await preApproval.get({ id: mpSubscriptionId });
     
     return {
       success: true,
