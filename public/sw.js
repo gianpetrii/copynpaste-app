@@ -1,4 +1,4 @@
-const CACHE_NAME = 'copynpaste-v1.0.0';
+const CACHE_NAME = 'copynpaste-v1.0.1';
 const STATIC_CACHE_NAME = `${CACHE_NAME}-static`;
 const DYNAMIC_CACHE_NAME = `${CACHE_NAME}-dynamic`;
 
@@ -11,11 +11,7 @@ const STATIC_FILES = [
   '/icons/icon-512x512.svg',
   '/icons/maskable-icon-512x512.svg',
   '/apple-touch-icon.svg',
-  // Next.js genera estos archivos automáticamente
-  '/_next/static/css/app/layout.css',
-  '/_next/static/chunks/webpack.js',
-  '/_next/static/chunks/main.js',
-  '/_next/static/chunks/pages/_app.js',
+  // No cachear assets dinámicos de Next.js en SW (evita chunks obsoletos en dev)
   // Fuentes de Google Fonts si las usas
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
 ];
@@ -89,13 +85,18 @@ self.addEventListener('fetch', (event) => {
   // Solo manejar requests GET
   if (method !== 'GET') return;
 
+  // Ignorar assets de Next.js para evitar servir chunks obsoletos
+  if (url.includes('/_next/')) {
+    return;
+  }
+
   // No cachear URLs excluidas
   if (EXCLUDED_URLS.some(excludedUrl => url.includes(excludedUrl))) {
     return;
   }
 
   // Estrategia de cache
-  if (url.includes('/_next/static/') || url.includes('/icons/') || url.includes('/manifest.json')) {
+  if (url.includes('/icons/') || url.includes('/manifest.json')) {
     // Cache First para archivos estáticos
     event.respondWith(cacheFirst(request));
   } else if (url.includes('firebasestorage.googleapis.com')) {

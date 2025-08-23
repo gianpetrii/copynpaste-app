@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/context/auth-context';
-import PricingPlans from '@/app/components/subscription/pricing-plans';
-import SubscriptionModal from '@/app/components/subscription/subscription-modal';
-import SubscriptionManager from '@/app/components/subscription/subscription-manager';
+import PricingPlans from '@/components/features/subscription/pricing-plans';
+import SubscriptionModal from '@/components/features/subscription/subscription-modal';
+import SubscriptionManager from '@/components/features/subscription/subscription-manager';
 
 export default function PricingPage() {
   const { user, userProfile } = useAuth();

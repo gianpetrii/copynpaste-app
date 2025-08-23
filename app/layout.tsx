@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/context/auth-context"
 import { PWAInstaller } from "@/components/pwa-installer"
 import { PWAStatus } from "@/components/pwa-status"
 import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
+import DevSwCleanup from "@/components/dev-sw-cleanup"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -119,22 +120,24 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
-        {/* Service Worker Registration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('✅ SW registered: ', registration);
-                  }, function(registrationError) {
-                    console.log('❌ SW registration failed: ', registrationError);
+        {/* Service Worker Registration - only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                      console.log('✅ SW registered: ', registration);
+                    }, function(registrationError) {
+                      console.log('❌ SW registration failed: ', registrationError);
+                    });
                   });
-                });
-              }
-            `,
-          }}
-        />
+                }
+              `,
+            }}
+          />
+        )}
       </head>
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
@@ -142,6 +145,7 @@ export default function RootLayout({
             {children}
           </div>
           <Toaster />
+          {process.env.NODE_ENV !== 'production' && <DevSwCleanup />}
           <PWAInstaller />
           <PWAStatus />
           <DeviceLimitWarning />
