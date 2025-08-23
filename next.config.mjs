@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración para Firebase Hosting con Next.js support
+  // Configuración optimizada para Vercel con Firebase Admin
   experimental: {
     serverComponentsExternalPackages: ["firebase-admin"],
   },
   images: {
-    unoptimized: true, // Requerido para Firebase Hosting
+    unoptimized: false, // Vercel soporta optimización de imágenes
   },
   // Configuración optimizada para Firebase y PWA
   trailingSlash: false,

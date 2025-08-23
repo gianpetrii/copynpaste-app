@@ -1,0 +1,8 @@
+# Vercel ignore file
+.firebase/
+firebase.json
+.firebaserc
+firestore.rules
+storage.rules
+FIREBASE_HOSTING_SETUP.md
+FIREBASE_STORAGE_SETUP.md

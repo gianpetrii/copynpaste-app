@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/context/auth-context';
+import { getUserDataSummary } from '@/lib/firebase/account-deletion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,31 +41,24 @@ export default function DeleteAccountModal({ isOpen, onClose }: DeleteAccountMod
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const loadDataSummary = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const summary = await getUserDataSummary(user.uid);
+      setDataSummary(summary as any);
+    } catch (e: any) {
+      setError('Error cargando datos de usuario');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (isOpen && user && step === 'summary') {
       loadDataSummary();
     }
-  }, [isOpen, user, step]);
-
-  const loadDataSummary = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/account/delete?userId=${user.uid}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setDataSummary(data);
-      } else {
-        setError(data.error || 'Error cargando datos');
-      }
-    } catch (error) {
-      setError('Error de conexión');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isOpen, user, step, loadDataSummary]);
 
   const handleDeleteAccount = async () => {
     if (!user || confirmationText !== 'ELIMINAR MI CUENTA') {
@@ -76,6 +70,7 @@ export default function DeleteAccountModal({ isOpen, onClose }: DeleteAccountMod
     setError('');
 
     try {
+      const idToken = await user.getIdToken();
       const response = await fetch('/api/account/delete', {
         method: 'POST',
         headers: {
@@ -87,20 +82,22 @@ export default function DeleteAccountModal({ isOpen, onClose }: DeleteAccountMod
             email: user.email,
             displayName: user.displayName
           },
-          confirmationText
+          confirmationText,
+          idToken
         })
       });
 
       const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok && result.success) {
         setDeletionResult(result);
         setStep('completed');
         setTimeout(() => {
           window.location.href = '/';
         }, 5000);
       } else {
-        setError(result.error || 'Error eliminando cuenta');
+        const msg = result.error || (result.errors?.[0]) || 'Error eliminando cuenta';
+        setError(msg);
         setStep('confirm');
       }
     } catch (error) {

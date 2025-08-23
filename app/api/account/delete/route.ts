@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteUserAccount, getUserDataSummary } from '@/lib/firebase/account-deletion';
+import { deleteUserAccountAdmin } from '@/lib/server/account-deletion-admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { user, confirmationText } = body;
+    const { user, confirmationText, idToken } = body;
 
     // Validar datos requeridos
     if (!user || !user.uid) {
@@ -28,17 +30,22 @@ export async function POST(request: NextRequest) {
       email: user.email 
     });
 
-    // Obtener resumen antes de eliminar
-    let dataSummary;
+    // Validar token del usuario para operar como Admin de forma segura
     try {
-      dataSummary = await getUserDataSummary(user.uid);
-    } catch (error) {
-      logger.warn('No se pudo obtener resumen de datos', error);
-      dataSummary = null;
+      if (!idToken || !adminAuth) throw new Error('ID token requerido');
+      const decoded = await adminAuth.verifyIdToken(idToken);
+      if (decoded.uid !== user.uid) throw new Error('Token inválido para este usuario');
+    } catch (e) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
+    // Opcional: obtener resumen (via cliente ya se muestra). Aquí lo omitimos o lo capturamos best-effort
+    let dataSummary = null;
+    try { dataSummary = await getUserDataSummary(user.uid); } catch {}
+
     // Proceder con la eliminación
-    const deletionResult = await deleteUserAccount(user);
+    // Ejecutar eliminación con privilegios de servidor
+    const deletionResult = await deleteUserAccountAdmin(user.uid);
 
     // Log del resultado
     logger.info('Resultado de eliminación de cuenta', {

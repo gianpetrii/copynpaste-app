@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+# Environment Setup for Account Deletion (Firebase Admin)
+
+To enable server-side account deletion, set these environment variables:
+
+- FIREBASE_PROJECT_ID
+- FIREBASE_CLIENT_EMAIL
+- FIREBASE_PRIVATE_KEY (escape newlines as \n)
+- FIREBASE_STORAGE_BUCKET (e.g., copynpaste-app-d4159.firebasestorage.app)
+
+On Vercel: add them in Project Settings → Environment Variables. Locally, put them in .env.local.
