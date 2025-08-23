@@ -6,8 +6,8 @@ import { PLAN_LIMITS, PLAN_PRICES } from '@/lib/firebase/device-manager';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { XIcon, AlertTriangleIcon, TrendingUpIcon } from 'lucide-react';
-import PricingPlans from './subscription/pricing-plans';
-import SubscriptionModal from './subscription/subscription-modal';
+import PricingPlans from '@/components/features/subscription/pricing-plans';
+import SubscriptionModal from '@/components/features/subscription/subscription-modal';
 
 interface ItemLimitModalProps {
   isOpen: boolean;
@@ -72,7 +72,7 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
         <Card className="max-w-md w-full p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon className="h-6 w-6 text-orange-600" />
+              <AlertTriangleIcon className="h-6 w-6 text-blue-600" />
               <h2 className="text-xl font-bold text-gray-900">
                 Límite Alcanzado
               </h2>
@@ -87,11 +87,11 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
           </div>
 
           <div className="text-center space-y-4">
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-orange-800 font-medium">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800 font-medium">
                 Has alcanzado el límite de tu plan gratuito
               </p>
-              <p className="text-sm text-orange-600 mt-1">
+              <p className="text-sm text-blue-600 mt-1">
                 {currentItemCount}/{planLimits.maxItems} elementos guardados
               </p>
             </div>
@@ -152,3 +152,5 @@ export default function ItemLimitModal({ isOpen, onClose, currentItemCount }: It
     </>
   );
 }
+
+

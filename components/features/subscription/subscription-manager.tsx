@@ -42,7 +42,6 @@ export default function SubscriptionManager() {
       const success = await cancelSubscription(subscription.id, 'Cancelación solicitada por usuario');
       
       if (success) {
-        // Refrescar datos del usuario
         await refreshUserProfile();
         setSubscription(null);
         alert('Suscripción cancelada exitosamente');
@@ -118,12 +117,8 @@ export default function SubscriptionManager() {
       <Card className="p-6">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">Plan Gratuito</h3>
-          <p className="text-gray-600 mb-4">
-            Estás usando el plan gratuito de CopyNPaste.
-          </p>
-          <p className="text-sm text-gray-500">
-            Mejora a Premium para acceder a más funciones.
-          </p>
+          <p className="text-gray-600 mb-4">Estás usando el plan gratuito de CopyNPaste.</p>
+          <p className="text-sm text-gray-500">Mejora a Premium para acceder a más funciones.</p>
         </div>
       </Card>
     );
@@ -142,23 +137,17 @@ export default function SubscriptionManager() {
 
       {subscription ? (
         <div className="space-y-4">
-          {/* Plan Details */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-500">Plan</label>
-              <p className="text-lg font-semibold capitalize">
-                {subscription.plan}
-              </p>
+              <p className="text-lg font-semibold capitalize">{subscription.plan}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-500">Precio</label>
-              <p className="text-lg font-semibold">
-                {formatPrice(subscription.amount)}/mes
-              </p>
+              <p className="text-lg font-semibold">{formatPrice(subscription.amount)}/mes</p>
             </div>
           </div>
 
-          {/* Dates */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="flex items-center">
               <CalendarIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -176,7 +165,6 @@ export default function SubscriptionManager() {
             </div>
           </div>
 
-          {/* Payment Method */}
           <div className="flex items-center p-4 bg-gray-50 rounded-lg">
             <CreditCardIcon className="h-5 w-5 text-gray-400 mr-3" />
             <div>
@@ -185,20 +173,13 @@ export default function SubscriptionManager() {
             </div>
           </div>
 
-          {/* Actions */}
           {subscription.status === 'active' && (
             <div className="pt-4 border-t">
-              <Button
-                onClick={handleCancelSubscription}
-                disabled={cancelling}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
+              <Button onClick={handleCancelSubscription} disabled={cancelling} className="bg-red-600 hover:bg-red-700 text-white">
                 <XCircleIcon className="h-4 w-4 mr-2" />
                 {cancelling ? 'Cancelando...' : 'Cancelar Suscripción'}
               </Button>
-              <p className="text-xs text-gray-500 mt-2">
-                Tu suscripción seguirá activa hasta el final del período actual.
-              </p>
+              <p className="text-xs text-gray-500 mt-2">Tu suscripción seguirá activa hasta el final del período actual.</p>
             </div>
           )}
 
@@ -207,12 +188,8 @@ export default function SubscriptionManager() {
               <div className="flex items-center">
                 <XCircleIcon className="h-5 w-5 text-yellow-600 mr-2" />
                 <div>
-                  <p className="text-sm font-medium text-yellow-800">
-                    Suscripción cancelada
-                  </p>
-                  <p className="text-xs text-yellow-600">
-                    Tendrás acceso hasta: {formatDate(subscription.endDate)}
-                  </p>
+                  <p className="text-sm font-medium text-yellow-800">Suscripción cancelada</p>
+                  <p className="text-xs text-yellow-600">Tendrás acceso hasta: {formatDate(subscription.endDate)}</p>
                 </div>
               </div>
             </div>
@@ -220,11 +197,11 @@ export default function SubscriptionManager() {
         </div>
       ) : (
         <div className="text-center">
-          <p className="text-gray-600">
-            No se encontró información de suscripción.
-          </p>
+          <p className="text-gray-600">No se encontró información de suscripción.</p>
         </div>
       )}
     </Card>
   );
 }
+
+

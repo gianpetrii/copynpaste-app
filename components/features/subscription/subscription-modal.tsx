@@ -185,3 +185,5 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
     </div>
   );
 }
+
+

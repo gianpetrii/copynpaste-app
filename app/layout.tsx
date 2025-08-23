@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/lib/context/auth-context"
 import { PWAInstaller } from "@/components/pwa-installer"
 import { PWAStatus } from "@/components/pwa-status"
-import DeviceLimitWarning from "@/app/components/device-limit-warning"
+import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
 
 const inter = Inter({ subsets: ["latin"] })
 

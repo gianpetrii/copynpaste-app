@@ -19,7 +19,7 @@ import {
   Star
 } from "lucide-react"
 import { ClipboardIcon } from "@/components/ui/clipboard-icon"
-import UserPlanBanner from "@/app/components/user-plan-banner"
+import UserPlanBanner from "@/components/features/banners/user-plan-banner"
 import Link from "next/link"
 
 export default function Home() {
@@ -75,13 +75,13 @@ export default function Home() {
       <main className="min-h-screen">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
           <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
-            <div className="flex items-center space-x-2 sm:space-x-3 navbar-logo">
-              <ClipboardIcon className="text-primary" size={24} />
+            <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
+              <ClipboardIcon className="text-primary" size={28} />
               <div>
-                <h1 className="text-xs sm:text-sm lg:text-lg font-bold text-foreground navbar-title">
+                <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
                   Copy & Paste
                 </h1>
-                <p className="text-xs lg:text-sm text-muted-foreground navbar-subtitle">
+                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
                   Tu portapapeles universal
                 </p>
               </div>
@@ -104,13 +104,13 @@ export default function Home() {
       <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
         {/* Navbar mejorado - más compacto en móvil */}
         <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
-          <div className="flex items-center space-x-2 sm:space-x-3 navbar-logo">
-            <ClipboardIcon className="text-primary" size={24} />
+          <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
+            <ClipboardIcon className="text-primary" size={28} />
             <div>
-              <h1 className="text-xs sm:text-sm lg:text-lg font-bold text-foreground navbar-title">
+              <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
                 Copy & Paste
-            </h1>
-              <p className="text-xs lg:text-sm text-muted-foreground navbar-subtitle">
+              </h1>
+              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
                 Tu portapapeles universal
               </p>
             </div>

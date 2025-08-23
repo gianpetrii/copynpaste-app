@@ -12,7 +12,7 @@ import { useItems } from "@/lib/hooks"
 import { useAuth } from "@/lib/context/auth-context"
 import { validateFile, validateUrl, validateInput, generateSafeFileName } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
-import ItemLimitModal from "@/app/components/item-limit-modal"
+import ItemLimitModal from "@/components/features/limits/item-limit-modal"
 
 export function AddItemForm() {
   const { toast } = useToast()

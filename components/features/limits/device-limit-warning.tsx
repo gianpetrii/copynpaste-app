@@ -6,8 +6,8 @@ import { getUserDevices, removeDevice, getDeviceName } from '@/lib/firebase/devi
 import type { DeviceInfo } from '@/lib/firebase/device-manager';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import PricingPlans from './subscription/pricing-plans';
-import SubscriptionModal from './subscription/subscription-modal';
+import PricingPlans from '@/components/features/subscription/pricing-plans';
+import SubscriptionModal from '@/components/features/subscription/subscription-modal';
 
 export default function DeviceLimitWarning() {
   const { user, deviceAllowed, currentDeviceId } = useAuth();
@@ -179,7 +179,7 @@ export default function DeviceLimitWarning() {
             <p className="text-sm text-yellow-700 mb-3">
               Con <strong>Premium</strong> puedes conectar hasta 5 dispositivos por solo el precio de un café al mes.
             </p>
-                        <button 
+            <button 
               className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors font-medium"
               onClick={() => setShowPricing(true)}
             >
@@ -191,4 +191,6 @@ export default function DeviceLimitWarning() {
       </div>
     </>
   );
-} 
+}
+
+

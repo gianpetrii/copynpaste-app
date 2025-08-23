@@ -174,16 +174,10 @@ export default function PricingPlans({ onSelectPlan, loading = false }: PricingP
               </Button>
             )}
           </div>
-
-          {plan.id === 'premium' && currentPlan === 'free' && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700 text-center">
-                🎯 <strong>Recomendado:</strong> Ideal para la mayoría de usuarios
-              </p>
-            </div>
-          )}
         </Card>
       ))}
     </div>
   );
 }
+
+

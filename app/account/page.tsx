@@ -15,8 +15,8 @@ import {
   MailIcon
 } from 'lucide-react';
 import Link from 'next/link';
-import DeleteAccountModal from '@/app/components/account/delete-account-modal';
-import SubscriptionManager from '@/app/components/subscription/subscription-manager';
+import DeleteAccountModal from '@/components/features/account/delete-account-modal';
+import SubscriptionManager from '@/components/features/subscription/subscription-manager';
 
 export default function AccountPage() {
   const { user, userProfile } = useAuth();
