@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Plus, AlertTriangle } from "lucide-react"
+import { Plus, AlertTriangle, Image, Clipboard } from "lucide-react"
 import { useToast } from "@/components/use-toast"
 import { useItems } from "@/lib/hooks"
 import { useAuth } from "@/lib/context/auth-context"
 import { validateFile, validateUrl, validateInput, generateSafeFileName } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
 import ItemLimitModal from "@/components/features/limits/item-limit-modal"
+import { useClipboardImagePaste, type ClipboardImageData } from "@/lib/hooks/use-clipboard-paste"
+import { ImagePreview } from "@/components/ui/image-preview"
 
 export function AddItemForm() {
   const { toast } = useToast()
@@ -27,6 +29,10 @@ export function AddItemForm() {
   const [currentFileName, setCurrentFileName] = useState("")
   const [showLimitModal, setShowLimitModal] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Estado para imágenes del clipboard
+  const [clipboardImage, setClipboardImage] = useState<ClipboardImageData | null>(null)
+  const [isUploadingClipboard, setIsUploadingClipboard] = useState(false)
 
   // Ensure user is authenticated before allowing submissions
   const isAuthenticated = !!userId
@@ -231,6 +237,99 @@ export function AddItemForm() {
     }
   }
 
+  // Funciones para manejo del clipboard
+  const handleClipboardImagePaste = (imageData: ClipboardImageData) => {
+    setClipboardImage(imageData)
+    
+    // Cambiar automáticamente a la pestaña de archivo
+    setActiveTab("file")
+    
+    toast({
+      title: "Imagen detectada",
+      description: `Imagen pegada desde el portapapeles (${imageData.name})`,
+    })
+    
+    logger.info('Imagen pegada desde clipboard', {
+      fileName: imageData.name,
+      size: imageData.size,
+      type: imageData.type,
+      userId
+    })
+  }
+
+  const handleClipboardImageUpload = async () => {
+    if (!clipboardImage || !isAuthenticated) return
+
+    try {
+      setIsUploadingClipboard(true)
+      setUploadProgress(0)
+      setCurrentFileName(clipboardImage.name)
+
+      await addItem(
+        {
+          type: "file",
+          file: clipboardImage.file,
+          fileName: clipboardImage.name,
+          fileType: clipboardImage.type,
+          fileSize: clipboardImage.size,
+          userId: userId,
+        },
+        (progress, fileName) => {
+          setUploadProgress(progress)
+          if (fileName) setCurrentFileName(fileName)
+        }
+      )
+
+      toast({
+        title: "Imagen guardada",
+        description: "La imagen del portapapeles ha sido guardada correctamente",
+      })
+
+      // Limpiar estado
+      setClipboardImage(null)
+      setUploadProgress(0)
+      setCurrentFileName("")
+
+      logger.info('Imagen del clipboard guardada exitosamente', {
+        fileName: clipboardImage.name,
+        userId
+      })
+
+    } catch (error) {
+      // Manejar error de límite alcanzado
+      if (error instanceof Error && error.message.startsWith('LIMIT_REACHED:')) {
+        setShowLimitModal(true);
+        setIsUploadingClipboard(false);
+        return;
+      }
+      
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido"
+      toast({
+        title: "Error al guardar",
+        description: `Ha ocurrido un error al guardar la imagen: ${errorMessage}`,
+        variant: "destructive",
+      })
+      logger.databaseError("Error al guardar imagen del clipboard", error, undefined, userId)
+    } finally {
+      setIsUploadingClipboard(false)
+    }
+  }
+
+  const handleRemoveClipboardImage = () => {
+    setClipboardImage(null)
+    toast({
+      title: "Imagen removida",
+      description: "La imagen del portapapeles ha sido removida",
+    })
+  }
+
+  // Hook para detectar paste de imágenes
+  useClipboardImagePaste(handleClipboardImagePaste, {
+    enabled: isAuthenticated,
+    maxSize: 10 * 1024 * 1024, // 10MB
+    acceptedImageTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
+  })
+
   // Disable form if not authenticated
   if (!isAuthenticated) {
     return (
@@ -293,67 +392,102 @@ export function AddItemForm() {
             </Button>
           </TabsContent>
           <TabsContent value="file" className="p-1 sm:p-1.5">
-            {/* Información sobre límites de archivo */}
-            <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
-              <div className="flex items-center gap-1 mb-1">
-                <AlertTriangle className="h-3 w-3" />
-                <span className="font-medium">Límites:</span>
+            {/* Vista previa de imagen del clipboard - DENTRO de la pestaña archivo */}
+            {clipboardImage ? (
+              <div className="space-y-2">
+                <ImagePreview
+                  src={clipboardImage.dataUrl}
+                  alt={clipboardImage.name}
+                  size={clipboardImage.size}
+                  type={clipboardImage.type}
+                  fileName={clipboardImage.name}
+                  onRemove={handleRemoveClipboardImage}
+                  onUpload={handleClipboardImageUpload}
+                  uploading={isUploadingClipboard}
+                  className="w-full"
+                />
               </div>
-              <div>• Tamaño máximo: 10MB</div>
-              <div>• Tipos: Imágenes, documentos, audio, video, archivos comprimidos</div>
-            </div>
-            
-            <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
-              <Input 
-                ref={fileInputRef} 
-                type="file" 
-                className="hidden" 
-                onChange={handleFileSubmit} 
-                id="file-upload"
-                accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.mp4,.webm,.json,.html,.css"
-              />
-              <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary mb-1"></div>
-                    <span className="text-xs font-medium">Subiendo: {currentFileName}</span>
-                    <span className="text-xs text-muted-foreground mt-0.5">{uploadProgress.toFixed(0)}%</span>
-                    
-                    {/* Progress bar */}
-                    <div className="w-full h-1 bg-secondary rounded-full mt-1 overflow-hidden">
-                      <div 
-                        className="h-full bg-primary transition-all duration-300 ease-in-out" 
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
+            ) : (
+              <>
+                {/* Información sobre límites de archivo */}
+                <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 mb-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    <span className="font-medium">Límites:</span>
+                  </div>
+                  <div>• Tamaño máximo: 10MB</div>
+                  <div>• Tipos: Imágenes, documentos, audio, video, archivos comprimidos</div>
+                </div>
+                
+                <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
+                  <Input 
+                    ref={fileInputRef} 
+                    type="file" 
+                    className="hidden" 
+                    onChange={handleFileSubmit} 
+                    id="file-upload"
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.mp4,.webm,.json,.html,.css"
+                  />
+                  <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary mb-1"></div>
+                        <span className="text-xs font-medium">Subiendo: {currentFileName}</span>
+                        <span className="text-xs text-muted-foreground mt-0.5">{uploadProgress.toFixed(0)}%</span>
+                        
+                        {/* Progress bar */}
+                        <div className="w-full h-1 bg-secondary rounded-full mt-1 overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all duration-300 ease-in-out" 
+                            style={{ width: `${uploadProgress}%` }}
+                          ></div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="mb-1 text-primary"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span className="text-xs font-medium">Seleccionar archivo</span>
+                        <span className="text-xs text-muted-foreground mt-0.5">O arrastra aquí</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+
+                {/* Tip de pegado de imágenes - solo cuando no hay imagen pegada */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 bg-emerald-500 rounded flex-shrink-0">
+                      <Clipboard className="h-3 w-3 text-white" />
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mb-1 text-primary"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="17 8 12 3 7 8" />
-                      <line x1="12" y1="3" x2="12" y2="15" />
-                    </svg>
-                    <span className="text-xs font-medium">Seleccionar archivo</span>
-                    <span className="text-xs text-muted-foreground mt-0.5">O arrastra aquí</span>
-                  </>
-                )}
-              </label>
-            </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                        💡 <kbd className="px-1 py-0.5 bg-emerald-200 dark:bg-emerald-800 rounded text-xs font-mono">Ctrl+V</kbd> para pegar imágenes
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>
+
+
 
       {/* Modal de límite de items */}
       <ItemLimitModal

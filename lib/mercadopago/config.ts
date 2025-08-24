@@ -14,7 +14,7 @@ export const MP_CONFIG = {
   publicKey: process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '',
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN || '',
   isProduction: process.env.NEXT_PUBLIC_ENV === 'production',
-  baseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'https://example.com'
 };
 
 // URLs de callback

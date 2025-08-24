@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRecurringSubscription } from '@/lib/mercadopago/payments';
-import { createSubscription, activateSubscription } from '@/lib/firebase/subscription-manager';
+import { activateSubscription } from '@/lib/firebase/subscription-manager';
+import { createSubscriptionAdmin } from '@/lib/server/subscription-admin';
 import { validateMPConfig } from '@/lib/mercadopago/config';
 import { logger } from '@/lib/utils/logger';
 
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear suscripción en Firestore con el ID de MercadoPago
-    const subscriptionId = await createSubscription(userId, plan, mpResult.subscriptionId);
+    const subscriptionId = await createSubscriptionAdmin(userId, plan, mpResult.subscriptionId);
     if (!subscriptionId) {
       return NextResponse.json(
         { error: 'Error creando suscripción en base de datos' },

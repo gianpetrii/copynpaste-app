@@ -61,15 +61,54 @@ export function ItemCard({ item }: ItemCardProps) {
     }
     
     try {
-      await navigator.clipboard.writeText(item.content || item.fileUrl || "")
-      toast({
-        title: "Copiado al portapapeles",
-        description: "El contenido ha sido copiado al portapapeles",
-      })
+      // Importar dinámicamente para evitar problemas de SSR
+      const { copyItemContent } = await import('@/lib/utils/clipboard');
+      
+      const result = await copyItemContent(
+        item.content || "",
+        item.fileUrl,
+        item.fileType
+      );
+      
+      if (result.success) {
+        const description = result.copiedAs === 'image' 
+          ? "🖼️ La imagen ha sido copiada. Puedes pegarla en otras aplicaciones (Discord, WhatsApp, Paint, etc.)"
+          : "El contenido ha sido copiado al portapapeles";
+          
+        toast({
+          title: "✅ Copiado al portapapeles",
+          description,
+        })
+      } else {
+        // Para imágenes, mostrar opciones alternativas
+        if (item.type === 'file' && item.fileUrl) {
+          toast({
+            title: "⚠️ Copiar imagen (limitación técnica)",
+            description: "Por limitaciones de CORS, abre la imagen en nueva ventana y haz clic derecho → 'Copiar imagen'",
+            variant: "default",
+            action: (
+              <button
+                onClick={() => window.open(item.fileUrl, '_blank')}
+                className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-primary text-primary-foreground px-3 text-sm font-medium transition-colors hover:bg-primary/90"
+              >
+                Abrir imagen
+              </button>
+            ),
+          })
+        } else {
+          // Error genérico para otros tipos
+          const errorMessage = result.error || "No se pudo copiar al portapapeles";
+          toast({
+            title: "❌ Error al copiar",
+            description: errorMessage,
+            variant: "destructive",
+          })
+        }
+      }
     } catch (error) {
       toast({
-        title: "Error al copiar",
-        description: "No se pudo copiar al portapapeles",
+        title: "❌ Error inesperado",
+        description: "Hubo un problema al intentar copiar. Intenta nuevamente.",
         variant: "destructive",
       })
     }
