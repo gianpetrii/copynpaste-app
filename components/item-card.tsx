@@ -22,7 +22,8 @@ import {
   Video as FileVideo,
   FileText as FilePdf,
   Archive as FileArchive,
-  File
+  File,
+  Link2
 } from "lucide-react"
 
 interface ItemCardProps {
@@ -182,6 +183,31 @@ export function ItemCard({ item }: ItemCardProps) {
     e.stopPropagation(); // Prevent copying when clicking download
     if (item.fileUrl) {
       window.open(item.fileUrl, "_blank")
+    }
+  }
+
+  const handleCopyLink = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent copying when clicking copy link
+    try {
+      if (item.fileUrl) {
+        await navigator.clipboard.writeText(item.fileUrl);
+        toast({
+          title: "🔗 Enlace copiado",
+          description: "El enlace del archivo ha sido copiado al portapapeles",
+        });
+      } else if (item.content) {
+        await navigator.clipboard.writeText(item.content);
+        toast({
+          title: "✅ Copiado al portapapeles",
+          description: "El contenido ha sido copiado",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error al copiar",
+        description: "No se pudo copiar el enlace al portapapeles",
+        variant: "destructive",
+      });
     }
   }
 
@@ -573,36 +599,74 @@ export function ItemCard({ item }: ItemCardProps) {
                   <Star className="h-3 w-3" fill={isFavorite ? "currentColor" : "none"} />
                   <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
                 </Button>
-                {!isEditing && item.type !== "file" && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleEdit}
-                    className="text-muted-foreground h-6 w-6"
-                  >
-                    <Edit className="h-3 w-3" />
-                    <span className="sr-only">Editar</span>
-                  </Button>
-                )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleCopy}
-                  className="text-muted-foreground h-6 w-6"
-                >
-                  <Copy className="h-3 w-3" />
-                  <span className="sr-only">Copiar</span>
-                </Button>
-                {item.type === "file" && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleDownload}
-                    className="text-muted-foreground h-6 w-6"
-                  >
-                    <Download className="h-3 w-3" />
-                    <span className="sr-only">Descargar</span>
-                  </Button>
+                {/* Para imágenes: orden = estrella, link, descarga, copiar, tacho */}
+                {isImageFile() ? (
+                  <>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleCopyLink}
+                      className="text-muted-foreground h-6 w-6"
+                      title="Copiar enlace"
+                    >
+                      <Link2 className="h-3 w-3" />
+                      <span className="sr-only">Copiar enlace</span>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleDownload}
+                      className="text-muted-foreground h-6 w-6"
+                      title="Descargar"
+                    >
+                      <Download className="h-3 w-3" />
+                      <span className="sr-only">Descargar</span>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleCopy}
+                      className="text-muted-foreground h-6 w-6"
+                      title="Copiar imagen"
+                    >
+                      <Copy className="h-3 w-3" />
+                      <span className="sr-only">Copiar imagen</span>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {!isEditing && item.type !== "file" && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleEdit}
+                        className="text-muted-foreground h-6 w-6"
+                      >
+                        <Edit className="h-3 w-3" />
+                        <span className="sr-only">Editar</span>
+                      </Button>
+                    )}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleCopy}
+                      className="text-muted-foreground h-6 w-6"
+                    >
+                      <Copy className="h-3 w-3" />
+                      <span className="sr-only">Copiar</span>
+                    </Button>
+                    {item.type === "file" && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleDownload}
+                        className="text-muted-foreground h-6 w-6"
+                      >
+                        <Download className="h-3 w-3" />
+                        <span className="sr-only">Descargar</span>
+                      </Button>
+                    )}
+                  </>
                 )}
                 <Button
                   size="icon"
@@ -646,41 +710,74 @@ export function ItemCard({ item }: ItemCardProps) {
             className={`h-7 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
           >
             <Star className="h-3 w-3 mr-1" fill={isFavorite ? "currentColor" : "none"} />
-                                <span className="text-sm lg:text-base">{isFavorite ? "Quitar" : "Favorito"}</span>
+            <span className="text-sm lg:text-base">{isFavorite ? "Quitar" : "Favorito"}</span>
           </Button>
           
-          {!isEditing && item.type !== "file" && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleEdit}
-              className="text-muted-foreground h-7"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              <span className="text-sm lg:text-base">Editar</span>
-            </Button>
-          )}
-          
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => handleCopy(e)}
-            className="text-muted-foreground h-7"
-          >
-            <Copy className="h-3 w-3 mr-1" />
-                          <span className="text-sm lg:text-base">Copiar</span>
-          </Button>
-          
-          {item.type === "file" && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleDownload}
-              className="text-muted-foreground h-7"
-            >
-              <Download className="h-3 w-3 mr-1" />
-              <span className="text-sm lg:text-base">Descargar</span>
-            </Button>
+          {/* Para imágenes en móvil: orden = favorito, enlace, descarga, copiar, eliminar */}
+          {isImageFile() ? (
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleCopyLink}
+                className="text-muted-foreground h-7"
+              >
+                <Link2 className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Enlace</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleDownload}
+                className="text-muted-foreground h-7"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Descargar</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => handleCopy(e)}
+                className="text-muted-foreground h-7"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Copiar</span>
+              </Button>
+            </>
+          ) : (
+            <>
+              {!isEditing && item.type !== "file" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleEdit}
+                  className="text-muted-foreground h-7"
+                >
+                  <Edit className="h-3 w-3 mr-1" />
+                  <span className="text-sm lg:text-base">Editar</span>
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(e) => handleCopy(e)}
+                className="text-muted-foreground h-7"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Copiar</span>
+              </Button>
+              {item.type === "file" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleDownload}
+                  className="text-muted-foreground h-7"
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  <span className="text-sm lg:text-base">Descargar</span>
+                </Button>
+              )}
+            </>
           )}
           
           <Button
@@ -691,7 +788,7 @@ export function ItemCard({ item }: ItemCardProps) {
             className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-7"
           >
             <Trash className="h-3 w-3 mr-1" />
-                          <span className="text-sm lg:text-base">Eliminar</span>
+            <span className="text-sm lg:text-base">Eliminar</span>
           </Button>
         </div>
       )}
