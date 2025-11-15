@@ -77,7 +77,7 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    logger.error('Error copiando imagen al portapapeles', error);
+    logger.error('Error copiando imagen al portapapeles', { error });
     return false;
   }
 }
@@ -152,7 +152,7 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
     // Fallback: método legacy
     return copyTextLegacy(text);
   } catch (error) {
-    logger.warn('Error con API moderna, intentando método legacy', error);
+    logger.warn('Error con API moderna, intentando método legacy', { error });
     // Intentar método legacy como fallback
     return copyTextLegacy(text);
   }
@@ -183,7 +183,7 @@ function copyTextLegacy(text: string): boolean {
       throw new Error('execCommand failed');
     }
   } catch (error) {
-    logger.error('Error copiando texto con método legacy', error);
+    logger.error('Error copiando texto con método legacy', { error });
     return false;
   }
 }
