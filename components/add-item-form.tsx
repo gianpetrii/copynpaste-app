@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/context/auth-context"
 import { validateFile, validateUrl, validateInput, generateSafeFileName } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
 import ItemLimitModal from "@/components/features/limits/item-limit-modal"
-import { useClipboardImagePaste, type ClipboardImageData } from "@/lib/hooks/use-clipboard-paste"
+import { useClipboardPaste, type ClipboardImageData } from "@/lib/hooks/use-clipboard-paste"
 import { ImagePreview } from "@/components/ui/image-preview"
 
 export function AddItemForm() {
@@ -245,7 +245,7 @@ export function AddItemForm() {
     setActiveTab("file")
     
     toast({
-      title: "Imagen detectada",
+      title: "🖼️ Imagen detectada",
       description: `Imagen pegada desde el portapapeles (${imageData.name})`,
     })
     
@@ -255,6 +255,27 @@ export function AddItemForm() {
       type: imageData.type,
       userId
     })
+  }
+
+  const handleClipboardTextPaste = (pastedText: string) => {
+    // Solo actuar si estamos en la pestaña de archivo y no hay imagen pegada
+    if (activeTab === "file" && !clipboardImage) {
+      // Cambiar automáticamente a la pestaña de texto
+      setActiveTab("text")
+      
+      // Agregar el texto al textarea
+      setText(pastedText)
+      
+      toast({
+        title: "📝 Texto detectado",
+        description: "Texto pegado desde el portapapeles. Cambiado a pestaña 'Texto'",
+      })
+      
+      logger.info('Texto pegado desde clipboard', {
+        textLength: pastedText.length,
+        userId
+      })
+    }
   }
 
   const handleClipboardImageUpload = async () => {
@@ -323,8 +344,10 @@ export function AddItemForm() {
     })
   }
 
-  // Hook para detectar paste de imágenes
-  useClipboardImagePaste(handleClipboardImagePaste, {
+  // Hook para detectar paste de imágenes Y texto
+  useClipboardPaste({
+    onImagePaste: handleClipboardImagePaste,
+    onTextPaste: handleClipboardTextPaste,
     enabled: isAuthenticated,
     maxSize: 10 * 1024 * 1024, // 10MB
     acceptedImageTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp']
