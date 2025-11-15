@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { XCircle } from 'lucide-react';
+import { XCircle, Loader } from 'lucide-react';
 
-export default function SubscriptionFailure() {
+function SubscriptionFailureContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -46,5 +47,24 @@ export default function SubscriptionFailure() {
         )}
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">Cargando...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SubscriptionFailure() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SubscriptionFailureContent />
+    </Suspense>
   );
 }

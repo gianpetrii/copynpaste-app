@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/context/auth-context';
 import { activateSubscription } from '@/lib/firebase/subscription-manager';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader } from 'lucide-react';
 
-export default function SubscriptionSuccess() {
+function SubscriptionSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -82,5 +82,24 @@ export default function SubscriptionSuccess() {
         </Button>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">Cargando...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SubscriptionSuccess() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SubscriptionSuccessContent />
+    </Suspense>
   );
 }
