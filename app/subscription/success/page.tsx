@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/lib/hooks';
+import { useAuth } from '@/lib/context/auth-context';
 import { activateSubscription } from '@/lib/firebase/subscription-manager';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader } from 'lucide-react';

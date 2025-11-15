@@ -1,0 +1,5 @@
+[33m75a088e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m ✨ Implementar funcionalidad completa de copiar/pegar imágenes
+[33m0d550f0[m fix: subscription creation flow with mercadoPagoSubscriptionId
+[33m22ed46c[m fix: wrap subscription pages with Suspense boundaries
+[33mbc3040d[m fix: firebase-admin version and compilation errors
+[33m0b03f97[m fix: compilation errors for Vercel deployment

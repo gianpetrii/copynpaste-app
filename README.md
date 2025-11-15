@@ -1,47 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📋 CopyNPaste - Tu Portapapeles Universal
 
-## Getting Started
+CopyNPaste es una aplicación web completa que funciona como tu portapapeles universal, permitiéndote guardar, organizar y acceder a tu información importante desde cualquier dispositivo. Sincroniza textos, enlaces y archivos de forma segura con funcionalidades avanzadas de organización.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 📝 Gestión Completa de Contenido
+- Guardar textos, enlaces y archivos de cualquier tipo
+- Organización con favoritos y categorías
+- Búsqueda rápida por contenido y tipo
+- Sincronización automática entre dispositivos
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 📱 Experiencia PWA Optimizada
+- Aplicación web progresiva (PWA) instalable
+- Funciona offline con sincronización automática
+- Interfaz responsive optimizada para móvil y desktop
+- Acceso rápido desde cualquier dispositivo
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🔐 Seguridad y Privacidad
+- Autenticación segura con Firebase Auth
+- Datos encriptados y privados por usuario
+- Control total sobre tu información personal
+- Eliminación completa de cuenta disponible
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 📋 Funcionalidades de Portapapeles
+- Detección automática de contenido pegado
+- Soporte para imágenes desde portapapeles
+- Organización automática por tipo de contenido
+- Acceso rápido a elementos frecuentemente usados
 
-## Learn More
+### 💰 Sistema de Suscripciones
+- Plan gratuito con funcionalidades básicas
+- Planes premium con características avanzadas
+- Integración con MercadoPago para pagos seguros
+- Gestión flexible de suscripciones
 
-To learn more about Next.js, take a look at the following resources:
+### 🌐 Compartir y Exportar
+- Compartir elementos específicos con otros usuarios
+- Exportar datos en múltiples formatos
+- Sincronización en tiempo real
+- Acceso desde múltiples dispositivos simultáneamente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Radix UI components
+- **Backend**: Firebase (Authentication, Firestore, Storage)
+- **Payments**: MercadoPago integration
+- **PWA**: Service Worker, offline functionality
 
-## Deploy on Vercel
+## 🚀 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Prerequisites
+- Node.js 18+ and npm
+- Firebase project with Authentication, Firestore, and Storage enabled
+- MercadoPago account for payment processing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Installation
 
-# Environment Setup for Account Deletion (Firebase Admin)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/copynpaste-app.git
+   cd copynpaste-app
+   ```
 
-To enable server-side account deletion, set these environment variables:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- FIREBASE_PROJECT_ID
-- FIREBASE_CLIENT_EMAIL
-- FIREBASE_PRIVATE_KEY (escape newlines as \n)
-- FIREBASE_STORAGE_BUCKET (e.g., copynpaste-app-d4159.firebasestorage.app)
+3. **Set up environment variables**
+   Create a `.env.local` file with your configuration:
+   ```env
+   # Firebase Configuration
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   
+   # Firebase Admin (for account deletion)
+   FIREBASE_PROJECT_ID=your_project_id
+   FIREBASE_CLIENT_EMAIL=your_service_account_email
+   FIREBASE_PRIVATE_KEY=your_private_key
+   FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   
+   # MercadoPago
+   MERCADOPAGO_ACCESS_TOKEN=your_mercadopago_token
+   ```
 
-On Vercel: add them in Project Settings → Environment Variables. Locally, put them in .env.local.
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🗺️ Current Status & Future Enhancements
+
+### ✅ **Completed Features**
+- Core clipboard functionality with text, links, and files
+- User authentication and secure data storage
+- PWA implementation with offline capabilities
+- Subscription system with MercadoPago integration
+- Responsive design optimized for all devices
+- Advanced search and organization features
+- Image paste from clipboard functionality
+
+### 🔧 **Technical Improvements in Progress**
+- Performance optimizations
+- Enhanced offline synchronization
+- Bug fixes and stability improvements
+- Security enhancements
+- Code refactoring and optimization
+
+### 💡 **Potential Future Enhancements**
+- Advanced collaboration features
+- API integrations with popular tools
+- Enhanced mobile app experience
+- Advanced analytics and insights
+- Team workspace functionality
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Built with ❤️ for productivity enthusiasts**

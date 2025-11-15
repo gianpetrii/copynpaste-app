@@ -282,7 +282,40 @@ export function ItemCard({ item }: ItemCardProps) {
     }
   };
 
+  // Helper function to detect if a file is an image
+  const isImageFile = () => {
+    // Method 1: Check fileType
+    if (item.fileType?.startsWith("image/")) {
+      return true;
+    }
+    
+    // Method 2: Check file extension if fileType is missing
+    if (item.fileName) {
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico'];
+      const lowerFileName = item.fileName.toLowerCase();
+      return imageExtensions.some(ext => lowerFileName.endsWith(ext));
+    }
+    
+    // Method 3: Check if URL contains image indicators
+    if (item.fileUrl) {
+      const lowerUrl = item.fileUrl.toLowerCase();
+      return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico)(\?|$)/i.test(lowerUrl);
+    }
+    
+    return false;
+  };
+
   const renderContent = () => {
+    // Debug: Log file type for images to help troubleshoot
+    if (item.type === "file" && isImageFile()) {
+      console.log("🖼️ Image item:", {
+        fileName: item.fileName,
+        fileType: item.fileType,
+        hasUrl: !!item.fileUrl,
+        detectionMethod: item.fileType ? 'fileType' : 'extension/url'
+      });
+    }
+
     if (isEditing) {
       const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter') {
@@ -372,16 +405,26 @@ export function ItemCard({ item }: ItemCardProps) {
       )
     }
 
-    if (item.type === "file" && item.fileType?.startsWith("image/") && item.fileUrl) {
+    if (item.type === "file" && isImageFile() && item.fileUrl) {
       return (
         <div className="mt-2">
           <img
             src={item.fileUrl || "/placeholder.svg"}
             alt={item.fileName || "Imagen"}
-            className="max-h-40 rounded-md"
+            className="max-h-40 rounded-md object-contain bg-secondary/30"
             onClick={(e) => e.stopPropagation()}
+            onError={(e) => {
+              // Fallback si la imagen no carga
+              console.error("Error loading image:", item.fileName);
+              e.currentTarget.style.display = 'none';
+            }}
           />
-          <p className="text-sm text-muted-foreground mt-1 break-words">{item.fileName}</p>
+          <p className="text-sm text-muted-foreground mt-1 break-words">
+            {item.fileName}
+            <span className="text-xs ml-2 text-muted-foreground/70">
+              ({item.fileType || 'imagen'})
+            </span>
+          </p>
         </div>
       )
     }
