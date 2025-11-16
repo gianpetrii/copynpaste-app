@@ -142,9 +142,9 @@ export default function Home() {
             {/* Plan Banner */}
             <UserPlanBanner />
             {/* Layout mejorado - columna izquierda más ancha en desktop */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
-              {/* Columna izquierda - Welcome section y form (más ancha) */}
-              <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 gap-2 sm:gap-3">
+              {/* Welcome section y form */}
+              <div className="w-full">
                 <div className="lg:sticky lg:top-4 space-y-2 sm:space-y-3">
                   {/* Welcome section - Desktop: grande, Mobile/Tablet: horizontal */}
                   <div className="lg:text-center lg:space-y-2">
@@ -219,8 +219,8 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Columna derecha - Lista de items (proporcionalmente más estrecha) */}
-              <div className="lg:col-span-3">
+              {/* Lista de items */}
+              <div className="w-full">
                 <div className="space-y-2">
               <Tabs defaultValue="all" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 tabs-improved">

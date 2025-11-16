@@ -371,7 +371,7 @@ export function AddItemForm() {
 
   return (
     <div className="w-full">
-      <div className="bg-secondary/50 border border-border rounded-lg shadow-sm p-1.5 sm:p-2 mb-2">
+      <div className="bg-secondary/50 border border-border rounded-lg shadow-sm p-1.5 sm:p-2 lg:p-2 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
           <TabsList className="grid grid-cols-2 w-full bg-muted h-6 sm:h-7">
             <TabsTrigger value="text" className="data-[state=active]:bg-background text-sm lg:text-base py-0.5">
@@ -432,64 +432,64 @@ export function AddItemForm() {
               </div>
             ) : (
               <>
-                {/* Información sobre límites de archivo */}
-                <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1 mb-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    <span className="font-medium">Límites:</span>
-                  </div>
-                  <div>• Tamaño máximo: 10MB</div>
-                  <div>• Tipos: Imágenes, documentos, audio, video, archivos comprimidos</div>
-                </div>
-                
-                <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
-                  <Input 
-                    ref={fileInputRef} 
-                    type="file" 
-                    className="hidden" 
-                    onChange={handleFileSubmit} 
-                    id="file-upload"
-                    accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.mp4,.webm,.json,.html,.css"
-                  />
-                  <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary mb-1"></div>
-                        <span className="text-xs font-medium">Subiendo: {currentFileName}</span>
-                        <span className="text-xs text-muted-foreground mt-0.5">{uploadProgress.toFixed(0)}%</span>
-                        
-                        {/* Progress bar */}
-                        <div className="w-full h-1 bg-secondary rounded-full mt-1 overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-300 ease-in-out" 
-                            style={{ width: `${uploadProgress}%` }}
-                          ></div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mb-1 text-primary"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="17 8 12 3 7 8" />
-                          <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        <span className="text-xs font-medium">Seleccionar archivo</span>
-                        <span className="text-xs text-muted-foreground mt-0.5">O arrastra aquí</span>
-                      </>
-                    )}
-                  </label>
-                </div>
+            {/* Información sobre límites de archivo */}
+            <div className="mb-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
+              <div className="flex items-center gap-1 mb-1">
+                <AlertTriangle className="h-3 w-3" />
+                <span className="font-medium">Límites:</span>
+              </div>
+              <div>• Tamaño máximo: 10MB</div>
+              <div>• Tipos: Imágenes, documentos, audio, video, archivos comprimidos</div>
+            </div>
+            
+            <div className="border-2 border-dashed rounded-md p-2 sm:p-2.5 text-center border-border hover:border-primary/50 transition-colors">
+              <Input 
+                ref={fileInputRef} 
+                type="file" 
+                className="hidden" 
+                onChange={handleFileSubmit} 
+                id="file-upload"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.svg,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.mp4,.webm,.json,.html,.css"
+              />
+              <label htmlFor="file-upload" className={`cursor-pointer flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 pointer-events-none' : ''}`}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary mb-1"></div>
+                    <span className="text-xs font-medium">Subiendo: {currentFileName}</span>
+                    <span className="text-xs text-muted-foreground mt-0.5">{uploadProgress.toFixed(0)}%</span>
+                    
+                    {/* Progress bar */}
+                    <div className="w-full h-1 bg-secondary rounded-full mt-1 overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300 ease-in-out" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mb-1 text-primary"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span className="text-xs font-medium">Seleccionar archivo</span>
+                    <span className="text-xs text-muted-foreground mt-0.5">O arrastra aquí</span>
+                  </>
+                )}
+              </label>
+            </div>
 
                 {/* Tip de pegado de imágenes - solo cuando no hay imagen pegada */}
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border border-emerald-200 dark:border-emerald-800 rounded-lg p-2">

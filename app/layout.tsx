@@ -122,21 +122,21 @@ export default function RootLayout({
         
         {/* Service Worker Registration - only in production */}
         {process.env.NODE_ENV === 'production' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                if ('serviceWorker' in navigator) {
-                  window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                      console.log('✅ SW registered: ', registration);
-                    }, function(registrationError) {
-                      console.log('❌ SW registration failed: ', registrationError);
-                    });
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('✅ SW registered: ', registration);
+                  }, function(registrationError) {
+                    console.log('❌ SW registration failed: ', registrationError);
                   });
-                }
-              `,
-            }}
-          />
+                });
+              }
+            `,
+          }}
+        />
         )}
       </head>
       <body className={`${inter.className} bg-background text-foreground`}>

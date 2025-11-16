@@ -914,9 +914,10 @@ button:focus-visible {
   }
   
   /* Layout grid optimizado - columna izquierda más ancha */
-  .lg\:grid-cols-5 {
+  /* COMENTADO: Esto forzaba 2 columnas lado a lado pero visualmente se ve como 1 columna */
+  /* .lg\:grid-cols-5 {
     grid-template-columns: 2fr 3fr;
-  }
+  } */
   
   /* Sticky optimizado */
   .lg\:sticky {
@@ -1095,9 +1096,10 @@ input:focus, textarea:focus {
   }
   
   /* Grid con mejor proporción 2:3 */
-  .lg\:grid-cols-5 {
+  /* COMENTADO: Esto forzaba 2 columnas lado a lado pero visualmente se ve como 1 columna */
+  /* .lg\:grid-cols-5 {
     grid-template-columns: 2fr 3fr !important;
-  }
+  } */
   
   /* Inputs tamaño apropiado para desktop (más pequeño que botones) */
   input, textarea {

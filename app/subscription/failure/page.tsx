@@ -8,7 +8,7 @@ import { XCircle, Loader } from 'lucide-react';
 function SubscriptionFailureContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const subscriptionId = searchParams.get('subscription_id');
   const reason = searchParams.get('reason') || 'Error de pago';
 
@@ -17,23 +17,23 @@ function SubscriptionFailureContent() {
       <div className="text-center max-w-md">
         <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-red-600 mb-2">
-          Error en el Pago
-        </h1>
+            Error en el Pago
+          </h1>
         <p className="text-muted-foreground mb-4">
           No pudimos procesar tu suscripción. Esto puede deberse a:
-        </p>
+          </p>
         <ul className="text-left text-sm text-muted-foreground mb-6 space-y-1">
-          <li>• Fondos insuficientes</li>
+            <li>• Fondos insuficientes</li>
           <li>• Problema con la tarjeta</li>
           <li>• Pago cancelado</li>
           <li>• Error temporal del sistema</li>
-        </ul>
+          </ul>
         <div className="space-y-2">
           <Button onClick={() => router.push('/')} className="w-full">
             Intentar nuevamente
           </Button>
           <Button 
-            variant="outline" 
+            variant="outline"
             onClick={() => router.push('/contact')} 
             className="w-full"
           >
@@ -45,8 +45,8 @@ function SubscriptionFailureContent() {
             ID de referencia: {subscriptionId}
           </p>
         )}
-      </div>
-    </div>
+          </div>
+        </div>
   );
 }
 
