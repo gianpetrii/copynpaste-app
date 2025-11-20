@@ -17,6 +17,7 @@ interface SwipeHandlers {
   onTouchEnd: () => void;
   swipeDirection: SwipeDirection;
   swipeDistance: number;
+  swipeOffset: number; // Desplazamiento actual en px (puede ser negativo)
   isSwipping: boolean;
 }
 
@@ -31,6 +32,7 @@ export function useSwipe({
   const touchStartTime = useRef<number>(0);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
   const [swipeDistance, setSwipeDistance] = useState(0);
+  const [swipeOffset, setSwipeOffset] = useState(0); // Desplazamiento actual
   const [isSwipping, setIsSwipping] = useState(false);
 
   const onTouchStart = useCallback((e: TouchEvent) => {
@@ -39,6 +41,7 @@ export function useSwipe({
     touchStartTime.current = Date.now();
     setSwipeDirection(null);
     setSwipeDistance(0);
+    setSwipeOffset(0);
     setIsSwipping(false);
   }, []);
 
@@ -54,6 +57,7 @@ export function useSwipe({
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
       setIsSwipping(true);
       setSwipeDistance(Math.abs(diffX));
+      setSwipeOffset(diffX); // Guardar el desplazamiento real (con signo)
       
       if (diffX > 0) {
         setSwipeDirection('right');
@@ -84,6 +88,7 @@ export function useSwipe({
     touchStartTime.current = 0;
     setSwipeDirection(null);
     setSwipeDistance(0);
+    setSwipeOffset(0);
     setIsSwipping(false);
   }, [swipeDirection, swipeDistance, minSwipeDistance, maxSwipeTime, onSwipeLeft, onSwipeRight]);
 
@@ -93,6 +98,7 @@ export function useSwipe({
     onTouchEnd,
     swipeDirection,
     swipeDistance,
+    swipeOffset,
     isSwipping,
   };
 }

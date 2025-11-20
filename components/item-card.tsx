@@ -650,7 +650,7 @@ export function ItemCard({ item }: ItemCardProps) {
               swipeHandlers.swipeDirection === 'right' ? 'opacity-100 bg-yellow-500' : 'opacity-0'
             }`}
           >
-            <Star className="h-7 w-7 text-white" fill="currentColor" />
+            <Star className="h-7 w-7 text-white" fill="none" strokeWidth={2} />
           </div>
           
           {/* Indicador derecho - Eliminar */}
@@ -670,9 +670,9 @@ export function ItemCard({ item }: ItemCardProps) {
         }`}
         style={{
           transform: swipeHandlers.isSwipping 
-            ? `translateX(${swipeHandlers.swipeDirection === 'right' ? '50px' : swipeHandlers.swipeDirection === 'left' ? '-50px' : '0'})` 
+            ? `translateX(${swipeHandlers.swipeOffset}px)` 
             : 'translateX(0)',
-          transition: swipeHandlers.isSwipping ? 'none' : 'transform 0.2s ease-out',
+          transition: swipeHandlers.isSwipping ? 'none' : 'transform 0.3s ease-out',
         }}
         onClick={handleCardClick}
         {...(isMobile ? {
