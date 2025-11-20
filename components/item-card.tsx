@@ -630,7 +630,7 @@ export function ItemCard({ item }: ItemCardProps) {
     }
 
     // Móvil: comportamiento inteligente
-    if (item.type === 'text' || item.type === 'link') {
+    if (item.type === 'text' || item.type === 'url') {
       // Texto y Links: copia directamente
       handleCopy(e);
     } else {
@@ -646,20 +646,20 @@ export function ItemCard({ item }: ItemCardProps) {
         <>
           {/* Indicador izquierdo - Favorito */}
           <div 
-            className={`absolute left-0 top-0 bottom-0 w-16 flex items-center justify-center rounded-l-md transition-opacity ${
+            className={`absolute left-0 top-0 bottom-0 w-20 flex items-center justify-start pl-4 rounded-l-md transition-all ${
               swipeHandlers.swipeDirection === 'right' ? 'opacity-100 bg-yellow-500' : 'opacity-0'
             }`}
           >
-            <Star className="h-6 w-6 text-white" fill="currentColor" />
+            <Star className="h-7 w-7 text-white" fill="currentColor" />
           </div>
           
           {/* Indicador derecho - Eliminar */}
           <div 
-            className={`absolute right-0 top-0 bottom-0 w-16 flex items-center justify-center rounded-r-md transition-opacity ${
+            className={`absolute right-0 top-0 bottom-0 w-20 flex items-center justify-end pr-4 rounded-r-md transition-all ${
               swipeHandlers.swipeDirection === 'left' ? 'opacity-100 bg-red-500' : 'opacity-0'
             }`}
           >
-            <Trash className="h-6 w-6 text-white" />
+            <Trash className="h-7 w-7 text-white" />
           </div>
         </>
       )}
@@ -670,7 +670,7 @@ export function ItemCard({ item }: ItemCardProps) {
         }`}
         style={{
           transform: swipeHandlers.isSwipping 
-            ? `translateX(${swipeHandlers.swipeDirection === 'right' ? '8px' : swipeHandlers.swipeDirection === 'left' ? '-8px' : '0'})` 
+            ? `translateX(${swipeHandlers.swipeDirection === 'right' ? '50px' : swipeHandlers.swipeDirection === 'left' ? '-50px' : '0'})` 
             : 'translateX(0)',
           transition: swipeHandlers.isSwipping ? 'none' : 'transform 0.2s ease-out',
         }}

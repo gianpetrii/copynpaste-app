@@ -223,11 +223,11 @@ export default function Home() {
               <div className="w-full">
                 <div className="space-y-2">
               <Tabs defaultValue="all" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-muted h-6 sm:h-7">
+                    <TabsList className="grid w-full grid-cols-2 bg-muted h-8 sm:h-9">
                   <TabsTrigger
                     value="all"
                     onClick={() => setActiveTab("all")}
-                        className="flex items-center gap-1 text-sm lg:text-base data-[state=active]:bg-background py-0.5"
+                        className="flex items-center gap-1 text-sm lg:text-base data-[state=active]:bg-background py-1.5"
                   >
                         <FileText className="h-3.5 w-3.5" />
                         Todos ({totalItems})
@@ -235,7 +235,7 @@ export default function Home() {
                   <TabsTrigger
                     value="favorites"
                     onClick={() => setActiveTab("favorites")}
-                        className="flex items-center gap-1 text-sm lg:text-base data-[state=active]:bg-background py-0.5"
+                        className="flex items-center gap-1 text-sm lg:text-base data-[state=active]:bg-background py-1.5"
                   >
                         <Star className="h-3.5 w-3.5" />
                         Favoritos ({favoriteItems})
