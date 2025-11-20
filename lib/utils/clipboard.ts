@@ -15,42 +15,51 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
     let blob: Blob;
 
     try {
-      // Método 1: Fetch directo (Firebase Storage ya tiene CORS configurado)
-      logger.info('Descargando imagen directamente', { imageUrl });
+      // Método 1: Usar proxy (funciona tanto en desarrollo como producción)
+      logger.info('Descargando imagen via proxy', { imageUrl });
       
-      const response = await fetch(imageUrl, {
-        mode: 'cors',
-        credentials: 'omit',
-        cache: 'force-cache'
-      });
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const proxyResponse = await fetch(proxyUrl);
       
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      if (!proxyResponse.ok) {
+        const errorText = await proxyResponse.text();
+        logger.warn('Proxy falló', { 
+          status: proxyResponse.status, 
+          statusText: proxyResponse.statusText,
+          errorText 
+        });
+        throw new Error(`Proxy error: ${proxyResponse.status}`);
       }
       
-      blob = await response.blob();
-      logger.info('Imagen descargada exitosamente', { 
+      blob = await proxyResponse.blob();
+      logger.info('Imagen descargada via proxy exitosamente', { 
         size: blob.size, 
         type: blob.type 
       });
       
-    } catch (directError) {
-      logger.warn('Fetch directo falló, intentando proxy local', { error: directError });
+    } catch (proxyError) {
+      logger.warn('Proxy falló, intentando fetch directo', { 
+        error: proxyError,
+        errorMessage: proxyError instanceof Error ? proxyError.message : 'Unknown error'
+      });
       
       try {
-        // Método 2: Proxy local como fallback (solo funciona en desarrollo)
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
-        const proxyResponse = await fetch(proxyUrl);
+        // Método 2: Fetch directo como fallback
+        const response = await fetch(imageUrl, {
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'force-cache'
+        });
         
-        if (!proxyResponse.ok) {
-          throw new Error(`Proxy error: ${proxyResponse.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
         
-        blob = await proxyResponse.blob();
-        logger.info('Imagen descargada via proxy');
+        blob = await response.blob();
+        logger.info('Imagen descargada via fetch directo');
         
-      } catch (proxyError) {
-        logger.warn('Proxy falló, intentando canvas', { error: proxyError });
+      } catch (directError) {
+        logger.warn('Fetch directo falló, intentando canvas', { error: directError });
         // Método 3: Canvas como último recurso
         blob = await downloadImageViaCanvas(imageUrl);
         logger.info('Imagen descargada via canvas');
