@@ -31,7 +31,7 @@ function SubscriptionSuccessContent() {
       } catch (error) {
         console.error('Error activando suscripción:', error);
         setError('Error al activar la suscripción');
-        setLoading(false);
+      setLoading(false);
       }
     };
 
@@ -73,7 +73,7 @@ function SubscriptionSuccessContent() {
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
         <h1 className="text-2xl font-bold text-green-600 mb-2">
           ¡Suscripción Exitosa!
-        </h1>
+          </h1>
         <p className="text-muted-foreground mb-6">
           Tu suscripción ha sido activada correctamente. Ahora puedes disfrutar de todas las funcionalidades premium.
         </p>

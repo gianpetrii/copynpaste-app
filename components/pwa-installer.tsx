@@ -107,8 +107,13 @@ export function PWAInstaller() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleDismiss}
-                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDismiss();
+                }}
+                className="h-6 w-6 p-0 flex-shrink-0"
+                aria-label="Cerrar"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -155,8 +160,13 @@ export function PWAInstaller() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleDismiss}
-                className="h-6 w-6 p-0"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDismiss();
+                }}
+                className="h-6 w-6 p-0 flex-shrink-0"
+                aria-label="Cerrar"
               >
                 <X className="h-4 w-4" />
               </Button>

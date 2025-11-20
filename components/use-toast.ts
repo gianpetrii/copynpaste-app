@@ -5,7 +5,8 @@ import * as React from "react"
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 5
+// Límite de toasts más bajo en móvil para evitar ocupar toda la pantalla
+const TOAST_LIMIT = typeof window !== 'undefined' && window.innerWidth < 640 ? 2 : 5
 const TOAST_REMOVE_DELAY = 1000
 
 type ToasterToast = ToastProps & {
