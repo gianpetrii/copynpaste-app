@@ -32,6 +32,22 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
       }
       
       blob = await proxyResponse.blob();
+      
+      // Si el blob no tiene tipo, inferirlo de la URL
+      if (!blob.type || blob.type === 'application/octet-stream') {
+        const urlLower = imageUrl.toLowerCase();
+        let inferredType = 'image/png'; // Default
+        
+        if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) inferredType = 'image/jpeg';
+        else if (urlLower.includes('.gif')) inferredType = 'image/gif';
+        else if (urlLower.includes('.webp')) inferredType = 'image/webp';
+        else if (urlLower.includes('.svg')) inferredType = 'image/svg+xml';
+        
+        // Crear nuevo blob con el tipo correcto
+        blob = new Blob([blob], { type: inferredType });
+        logger.info('Tipo de imagen inferido de URL', { inferredType });
+      }
+      
       logger.info('Imagen descargada via proxy exitosamente', { 
         size: blob.size, 
         type: blob.type 
@@ -56,6 +72,21 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
         }
         
         blob = await response.blob();
+        
+        // Si el blob no tiene tipo, inferirlo de la URL
+        if (!blob.type || blob.type === 'application/octet-stream') {
+          const urlLower = imageUrl.toLowerCase();
+          let inferredType = 'image/png'; // Default
+          
+          if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) inferredType = 'image/jpeg';
+          else if (urlLower.includes('.gif')) inferredType = 'image/gif';
+          else if (urlLower.includes('.webp')) inferredType = 'image/webp';
+          else if (urlLower.includes('.svg')) inferredType = 'image/svg+xml';
+          
+          blob = new Blob([blob], { type: inferredType });
+          logger.info('Tipo de imagen inferido de URL (fetch directo)', { inferredType });
+        }
+        
         logger.info('Imagen descargada via fetch directo');
         
       } catch (directError) {
@@ -66,9 +97,17 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
       }
     }
     
-    // Verificar que sea una imagen
+    // Verificar que tengamos un blob válido
+    if (!blob || blob.size === 0) {
+      throw new Error('No se pudo descargar la imagen');
+    }
+    
+    // Asegurar que el blob tenga un tipo de imagen válido
     if (!blob.type.startsWith('image/')) {
-      throw new Error('El archivo no es una imagen válida');
+      logger.warn('Blob sin tipo de imagen, usando image/png por defecto', { 
+        currentType: blob.type 
+      });
+      blob = new Blob([blob], { type: 'image/png' });
     }
 
     // Crear ClipboardItem con la imagen

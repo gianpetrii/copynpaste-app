@@ -48,19 +48,27 @@ export async function GET(request: NextRequest) {
     
     console.log(`Successfully fetched image: ${blob.size} bytes, type: ${blob.type}`);
     
-    // Verificar que sea una imagen
-    if (!blob.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: 'URL does not point to an image' },
-        { status: 400 }
-      );
+    // Determinar el tipo de contenido
+    // Si Firebase no devuelve el tipo, inferirlo de la URL
+    let contentType = blob.type;
+    if (!contentType || contentType === 'application/octet-stream') {
+      // Inferir del nombre del archivo en la URL
+      const urlLower = imageUrl.toLowerCase();
+      if (urlLower.includes('.png')) contentType = 'image/png';
+      else if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) contentType = 'image/jpeg';
+      else if (urlLower.includes('.gif')) contentType = 'image/gif';
+      else if (urlLower.includes('.webp')) contentType = 'image/webp';
+      else if (urlLower.includes('.svg')) contentType = 'image/svg+xml';
+      else contentType = 'image/png'; // Default
+      
+      console.log(`Content-Type inferido de URL: ${contentType}`);
     }
 
     // Retornar la imagen con headers CORS apropiados
     return new NextResponse(blob, {
       status: 200,
       headers: {
-        'Content-Type': blob.type,
+        'Content-Type': contentType,
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
         'Access-Control-Allow-Headers': 'Content-Type',
