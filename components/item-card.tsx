@@ -599,18 +599,18 @@ export function ItemCard({ item }: ItemCardProps) {
                   <Star className="h-3 w-3" fill={isFavorite ? "currentColor" : "none"} />
                   <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
                 </Button>
-                {/* Para imágenes: orden = estrella, link, descarga, copiar, tacho */}
+                {/* Para imágenes: orden = estrella, copiar, descarga, link, tacho */}
                 {isImageFile() ? (
                   <>
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={handleCopyLink}
+                      onClick={handleCopy}
                       className="text-muted-foreground h-6 w-6"
-                      title="Copiar enlace"
+                      title="Copiar imagen"
                     >
-                      <Link2 className="h-3 w-3" />
-                      <span className="sr-only">Copiar enlace</span>
+                      <Copy className="h-3 w-3" />
+                      <span className="sr-only">Copiar imagen</span>
                     </Button>
                     <Button
                       size="icon"
@@ -625,12 +625,12 @@ export function ItemCard({ item }: ItemCardProps) {
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={handleCopy}
+                      onClick={handleCopyLink}
                       className="text-muted-foreground h-6 w-6"
-                      title="Copiar imagen"
+                      title="Copiar enlace"
                     >
-                      <Copy className="h-3 w-3" />
-                      <span className="sr-only">Copiar imagen</span>
+                      <Link2 className="h-3 w-3" />
+                      <span className="sr-only">Copiar enlace</span>
                     </Button>
                   </>
                 ) : (
@@ -713,17 +713,17 @@ export function ItemCard({ item }: ItemCardProps) {
             <span className="text-sm lg:text-base">{isFavorite ? "Quitar" : "Favorito"}</span>
           </Button>
           
-          {/* Para imágenes en móvil: orden = favorito, enlace, descarga, copiar, eliminar */}
+          {/* Para imágenes en móvil: orden = favorito, copiar, descarga, enlace, eliminar */}
           {isImageFile() ? (
             <>
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={handleCopyLink}
+                onClick={(e) => handleCopy(e)}
                 className="text-muted-foreground h-7"
               >
-                <Link2 className="h-3 w-3 mr-1" />
-                <span className="text-sm lg:text-base">Enlace</span>
+                <Copy className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Copiar</span>
               </Button>
               <Button
                 size="sm"
@@ -737,11 +737,11 @@ export function ItemCard({ item }: ItemCardProps) {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={(e) => handleCopy(e)}
+                onClick={handleCopyLink}
                 className="text-muted-foreground h-7"
               >
-                <Copy className="h-3 w-3 mr-1" />
-                <span className="text-sm lg:text-base">Copiar</span>
+                <Link2 className="h-3 w-3 mr-1" />
+                <span className="text-sm lg:text-base">Enlace</span>
               </Button>
             </>
           ) : (
