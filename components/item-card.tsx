@@ -70,16 +70,21 @@ export function ItemCard({ item }: ItemCardProps) {
       const result = await copyItemContent(
         item.content || "",
         item.fileUrl,
-        item.fileType
+        item.fileType,
+        item.fileName
       );
       
       if (result.success) {
-        const description = result.copiedAs === 'image' 
-          ? "🖼️ La imagen ha sido copiada. Puedes pegarla en otras aplicaciones (Discord, WhatsApp, Paint, etc.)"
-          : "El contenido ha sido copiado al portapapeles";
+        let description = "El contenido ha sido copiado al portapapeles";
+        
+        if (result.copiedAs === 'image') {
+          description = "🖼️ La imagen ha sido copiada. Puedes pegarla en otras aplicaciones (Discord, WhatsApp, Paint, etc.)";
+        } else if (result.copiedAs === 'shared') {
+          description = "📤 Menú de compartir abierto. Selecciona 'Copiar' para copiar al portapapeles";
+        }
           
         toast({
-          title: "✅ Copiado al portapapeles",
+          title: result.copiedAs === 'shared' ? "📤 Compartir imagen" : "✅ Copiado al portapapeles",
           description,
         })
       } else {

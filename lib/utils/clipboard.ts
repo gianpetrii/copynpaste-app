@@ -3,6 +3,87 @@
 import { logger } from './logger';
 
 /**
+ * Detecta si estamos en un dispositivo móvil
+ */
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+/**
+ * Comparte una imagen usando la Share API (móvil)
+ */
+export async function shareImage(imageUrl: string, fileName: string = 'image.png'): Promise<boolean> {
+  try {
+    // Verificar si el navegador soporta Share API
+    if (!navigator.share) {
+      logger.warn('Share API no soportada');
+      return false;
+    }
+
+    logger.info('Compartiendo imagen via Share API', { imageUrl, fileName });
+
+    // Descargar la imagen primero
+    let blob: Blob;
+    
+    try {
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error(`Proxy error: ${response.status}`);
+      }
+      
+      blob = await response.blob();
+      
+      // Inferir tipo si falta
+      if (!blob.type || blob.type === 'application/octet-stream') {
+        const urlLower = imageUrl.toLowerCase();
+        let inferredType = 'image/png';
+        
+        if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) inferredType = 'image/jpeg';
+        else if (urlLower.includes('.gif')) inferredType = 'image/gif';
+        else if (urlLower.includes('.webp')) inferredType = 'image/webp';
+        
+        blob = new Blob([blob], { type: inferredType });
+      }
+    } catch (error) {
+      logger.error('Error descargando imagen para compartir', { error });
+      return false;
+    }
+
+    // Crear archivo para compartir
+    const file = new File([blob], fileName, { type: blob.type });
+
+    // Verificar si puede compartir archivos
+    if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+      logger.warn('No se pueden compartir archivos en este navegador');
+      return false;
+    }
+
+    // Compartir
+    await navigator.share({
+      files: [file],
+      title: 'Compartir imagen',
+      text: 'Imagen de CopyNPaste'
+    });
+
+    logger.info('Imagen compartida exitosamente');
+    return true;
+
+  } catch (error) {
+    // Si el usuario cancela, no es un error
+    if (error instanceof Error && error.name === 'AbortError') {
+      logger.info('Usuario canceló compartir');
+      return false;
+    }
+    
+    logger.error('Error compartiendo imagen', { error });
+    return false;
+  }
+}
+
+/**
  * Copia una imagen al portapapeles desde una URL
  */
 export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
@@ -258,12 +339,31 @@ export function isImageUrl(url: string, fileType?: string): boolean {
 export async function copyItemContent(
   content: string,
   fileUrl?: string,
-  fileType?: string
-): Promise<{ success: boolean; copiedAs: 'image' | 'text'; error?: string }> {
+  fileType?: string,
+  fileName?: string
+): Promise<{ success: boolean; copiedAs: 'image' | 'text' | 'shared'; error?: string }> {
   const urlToCopy = fileUrl || content;
   
   // Si es una imagen, FORZAR que se copie como imagen
   if (fileUrl && isImageUrl(fileUrl, fileType)) {
+    // En móvil, usar Share API
+    if (isMobileDevice()) {
+      logger.info('Dispositivo móvil detectado, usando Share API');
+      
+      const shareSuccess = await shareImage(fileUrl, fileName || 'image.png');
+      if (shareSuccess) {
+        return { success: true, copiedAs: 'shared' };
+      }
+      
+      // Si Share API falla o no está disponible, mostrar instrucciones
+      return { 
+        success: false, 
+        copiedAs: 'image', 
+        error: 'Para copiar la imagen, mantén presionada y selecciona "Copiar imagen"' 
+      };
+    }
+    
+    // En desktop, copiar directamente al portapapeles
     // Verificar compatibilidad del navegador
     if (!navigator.clipboard || !window.ClipboardItem) {
       return { 
