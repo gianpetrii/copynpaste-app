@@ -1,0 +1,11 @@
+Proprietary License
+
+Copyright (c) 2025 Gianluca Petri - DNI 41396210
+
+All rights reserved.
+
+This software and associated documentation files (the "Software") may not be 
+used, copied, modified, merged, published, distributed, sublicensed, and/or 
+sold without explicit written permission from the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
