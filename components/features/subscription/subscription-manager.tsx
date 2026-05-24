@@ -7,8 +7,10 @@ import type { Subscription } from '@/lib/firebase/subscription-manager';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCardIcon, CalendarIcon, XCircleIcon, CheckCircleIcon } from 'lucide-react';
+import { CreditCardIcon, CalendarIcon, XCircleIcon, ExternalLinkIcon } from 'lucide-react';
 import { PLAN_PRICES } from '@/lib/firebase/device-manager';
+import { getWebUrl } from '@/lib/utils/api-url';
+import { openExternalUrl } from '@/lib/native/platform';
 
 export default function SubscriptionManager() {
   const { user, userProfile, refreshUserProfile } = useAuth();
@@ -32,6 +34,10 @@ export default function SubscriptionManager() {
 
     loadSubscription();
   }, [user]);
+
+  const handleManageSubscription = async () => {
+    await openExternalUrl(getWebUrl('/pricing'));
+  };
 
   const handleCancelSubscription = async () => {
     if (!subscription) return;
@@ -174,12 +180,20 @@ export default function SubscriptionManager() {
           </div>
 
           {subscription.status === 'active' && (
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-3">
+              <Button
+                onClick={handleManageSubscription}
+                variant="outline"
+                className="w-full"
+              >
+                <ExternalLinkIcon className="h-4 w-4 mr-2" />
+                Gestionar suscripción en la web
+              </Button>
               <Button onClick={handleCancelSubscription} disabled={cancelling} className="bg-red-600 hover:bg-red-700 text-white">
                 <XCircleIcon className="h-4 w-4 mr-2" />
                 {cancelling ? 'Cancelando...' : 'Cancelar Suscripción'}
               </Button>
-              <p className="text-xs text-gray-500 mt-2">Tu suscripción seguirá activa hasta el final del período actual.</p>
+              <p className="text-xs text-gray-500">Tu suscripción seguirá activa hasta el final del período actual.</p>
             </div>
           )}
 

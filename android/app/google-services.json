@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "151064134430",
+    "project_id": "copynpaste-app-d4159",
+    "storage_bucket": "copynpaste-app-d4159.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151064134430:android:85e784f493e0383d0d7f0f",
+        "android_client_info": {
+          "package_name": "app.copynpaste.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "151064134430-gr7jpp284pvv6lofht972k939btt26la.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPgwL4S8MAl1vnfKkmy_XH6Q0dqrdTg1w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "151064134430-gr7jpp284pvv6lofht972k939btt26la.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,6 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:capacitor": "node scripts/build-capacitor.mjs",
+    "cap:sync": "npx cap sync",
+    "cap:configure": "node scripts/configure-native-permissions.mjs",
+    "cap:icons": "node scripts/generate-app-icons.mjs",
+    "cap:ios": "npx cap open ios",
+    "cap:android": "npx cap open android",
     "start": "next start",
     "lint": "next lint",
     "firebase:deploy": "firebase deploy",
@@ -12,6 +18,15 @@
     "deploy": "next build && firebase deploy"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/browser": "^8.0.3",
+    "@capacitor/cli": "^7.6.5",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/push-notifications": "^8.1.1",
+    "@capacitor/share": "^8.0.1",
+    "@capgo/capacitor-native-biometric": "^8.4.5",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",

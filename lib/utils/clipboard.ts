@@ -1,6 +1,8 @@
 'use client';
 
 import { logger } from './logger';
+import { getApiUrl } from './api-url';
+import { nativeShareFile } from '@/lib/native/share';
 
 /**
  * Detecta si estamos en un dispositivo móvil
@@ -27,7 +29,7 @@ export async function shareImage(imageUrl: string, fileName: string = 'image.png
     let blob: Blob;
     
     try {
-      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const proxyUrl = getApiUrl(`/api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
       const response = await fetch(proxyUrl);
       
       if (!response.ok) {
@@ -55,7 +57,13 @@ export async function shareImage(imageUrl: string, fileName: string = 'image.png
     // Crear archivo para compartir
     const file = new File([blob], fileName, { type: blob.type });
 
-    // Verificar si puede compartir archivos
+    const nativeShared = await nativeShareFile(file, 'Compartir imagen');
+    if (nativeShared) {
+      logger.info('Imagen compartida via native share');
+      return true;
+    }
+
+    // Verificar si puede compartir archivos via Web Share API
     if (navigator.canShare && !navigator.canShare({ files: [file] })) {
       logger.warn('No se pueden compartir archivos en este navegador');
       return false;
@@ -99,7 +107,7 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
       // Método 1: Usar proxy (funciona tanto en desarrollo como producción)
       logger.info('Descargando imagen via proxy', { imageUrl });
       
-      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+      const proxyUrl = getApiUrl(`/api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
       const proxyResponse = await fetch(proxyUrl);
       
       if (!proxyResponse.ok) {

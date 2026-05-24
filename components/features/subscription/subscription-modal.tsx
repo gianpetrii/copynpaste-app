@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { getApiUrl, getWebUrl } from '@/lib/utils/api-url';
+import { openExternalUrl, isNativePlatform } from '@/lib/native/platform';
 import { useAuth } from '@/lib/context/auth-context';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +16,7 @@ interface SubscriptionModalProps {
 }
 
 export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: SubscriptionModalProps) {
-  const { user, userProfile } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -31,8 +33,8 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
         'Búsqueda avanzada con filtros',
         'Organización por carpetas',
         'Backup automático',
-        'Sincronización instantánea'
-      ]
+        'Sincronización instantánea',
+      ],
     },
     enterprise: {
       name: 'Enterprise',
@@ -45,9 +47,9 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
         'Controles de privacidad avanzados',
         'Analytics detallados',
         'Soporte prioritario 24/7',
-        'Integración con APIs'
-      ]
-    }
+        'Integración con APIs',
+      ],
+    },
   };
 
   const plan = planDetails[selectedPlan];
@@ -62,7 +64,15 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
     setError('');
 
     try {
-      const response = await fetch('/api/mercadopago/create-subscription', {
+      const native = await isNativePlatform();
+
+      if (native) {
+        await openExternalUrl(getWebUrl(`/pricing?plan=${selectedPlan}`));
+        onClose();
+        return;
+      }
+
+      const response = await fetch(getApiUrl('/api/mercadopago/create-subscription'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,20 +80,19 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
         body: JSON.stringify({
           userId: user.uid,
           userEmail: user.email,
-          plan: selectedPlan
-        })
+          plan: selectedPlan,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success && data.initPoint) {
-        // Redireccionar a MercadoPago
         window.location.href = data.initPoint;
       } else {
         setError(data.error || 'Error creando suscripción');
       }
-    } catch (error) {
-      console.error('Error creando suscripción:', error);
+    } catch (err) {
+      console.error('Error creando suscripción:', err);
       setError('Error de conexión. Intenta nuevamente.');
     } finally {
       setLoading(false);
@@ -95,29 +104,24 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4" style={{ backdropFilter: 'none' }}>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4"
+      style={{ backdropFilter: 'none' }}
+    >
       <Card className="max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Suscripción {plan.name}</h2>
-          <Button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full"
-            variant="ghost"
-          >
+          <Button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full" variant="ghost">
             <XIcon className="h-5 w-5" />
           </Button>
         </div>
 
         <div className="text-center mb-6">
           <div className="mb-4">
-            <span className="text-4xl font-bold text-gray-900">
-              {formatPrice(plan.price)}
-            </span>
+            <span className="text-4xl font-bold text-gray-900">{formatPrice(plan.price)}</span>
             <span className="text-gray-500 text-lg">/mes</span>
           </div>
-          <p className="text-sm text-gray-600">
-            Precio de un café premium ☕ • Cancela cuando quieras
-          </p>
+          <p className="text-sm text-gray-600">Precio de un café premium ☕ • Cancela cuando quieras</p>
         </div>
 
         <div className="mb-6">
@@ -145,15 +149,10 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
           >
             <CreditCardIcon className="h-5 w-5 mr-2" />
-            {loading ? 'Procesando...' : `Suscribirme por ${formatPrice(plan.price)}/mes`}
+            {loading ? 'Procesando...' : `Continuar con ${formatPrice(plan.price)}/mes`}
           </Button>
 
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button onClick={onClose} variant="outline" className="w-full" disabled={loading}>
             Cancelar
           </Button>
         </div>
@@ -185,5 +184,3 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
     </div>
   );
 }
-
-

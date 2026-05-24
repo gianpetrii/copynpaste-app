@@ -1,105 +1,66 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { corsBlobResponse, corsJsonResponse, corsOptionsResponse } from '@/lib/utils/cors';
+
+export async function OPTIONS(request: NextRequest) {
+  return corsOptionsResponse(request);
+}
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const imageUrl = searchParams.get('url');
 
-    console.log('🔍 Proxy request received:', {
-      url: imageUrl,
-      searchParams: Object.fromEntries(searchParams.entries())
-    });
-
     if (!imageUrl) {
-      console.error('❌ No URL parameter provided');
-      return NextResponse.json(
-        { error: 'URL parameter is required' },
-        { status: 400 }
-      );
+      return corsJsonResponse({ error: 'URL parameter is required' }, request, { status: 400 });
     }
 
-    // Verificar que la URL sea de Firebase Storage (seguridad)
     if (!imageUrl.includes('firebasestorage.googleapis.com')) {
-      console.error('❌ Invalid URL domain:', imageUrl);
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Only Firebase Storage URLs are allowed' },
+        request,
         { status: 403 }
       );
     }
 
-    console.log('✅ URL validation passed, fetching image...');
-
-    // Descargar la imagen con headers apropiados
     const response = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'CopyNPaste-App/1.0',
       },
     });
-    
+
     if (!response.ok) {
-      console.error(`Failed to fetch image ${imageUrl}: ${response.status} ${response.statusText}`);
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: `Failed to fetch image: ${response.status} ${response.statusText}` },
+        request,
         { status: response.status }
       );
     }
 
     const blob = await response.blob();
-    
-    console.log(`Successfully fetched image: ${blob.size} bytes, type: ${blob.type}`);
-    
-    // Determinar el tipo de contenido
-    // Si Firebase no devuelve el tipo, inferirlo de la URL
+
     let contentType = blob.type;
     if (!contentType || contentType === 'application/octet-stream') {
-      // Inferir del nombre del archivo en la URL
       const urlLower = imageUrl.toLowerCase();
       if (urlLower.includes('.png')) contentType = 'image/png';
       else if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) contentType = 'image/jpeg';
       else if (urlLower.includes('.gif')) contentType = 'image/gif';
       else if (urlLower.includes('.webp')) contentType = 'image/webp';
       else if (urlLower.includes('.svg')) contentType = 'image/svg+xml';
-      else contentType = 'image/png'; // Default
-      
-      console.log(`Content-Type inferido de URL: ${contentType}`);
+      else contentType = 'image/png';
     }
 
-    // Retornar la imagen con headers CORS apropiados
-    return new NextResponse(blob, {
-      status: 200,
-      headers: {
-        'Content-Type': contentType,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Cache-Control': 'public, max-age=31536000', // Cache por 1 año
-      },
+    return corsBlobResponse(blob, request, {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=31536000',
     });
-
   } catch (error) {
-    console.error('Error in image proxy:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    return NextResponse.json(
-      { 
+    return corsJsonResponse(
+      {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
+      request,
       { status: 500 }
     );
   }
-}
-
-// Permitir CORS para OPTIONS request
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
 }

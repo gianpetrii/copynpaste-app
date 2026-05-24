@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createRecurringSubscription } from '@/lib/mercadopago/payments';
-import { activateSubscription } from '@/lib/firebase/subscription-manager';
 import { createSubscriptionAdmin } from '@/lib/server/subscription-admin';
 import { validateMPConfig } from '@/lib/mercadopago/config';
 import { logger } from '@/lib/utils/logger';
+import { corsJsonResponse, corsOptionsResponse } from '@/lib/utils/cors';
+
+export async function OPTIONS(request: NextRequest) {
+  return corsOptionsResponse(request);
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Validar configuración de MercadoPago
     if (!validateMPConfig()) {
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Configuración de MercadoPago incompleta' },
+        request,
         { status: 500 }
       );
     }
@@ -18,47 +22,47 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, userEmail, plan } = body;
 
-    // Validar datos requeridos
     if (!userId || !userEmail || !plan) {
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Datos requeridos faltantes: userId, userEmail, plan' },
+        request,
         { status: 400 }
       );
     }
 
-    // Validar plan válido
     if (!['premium', 'enterprise'].includes(plan)) {
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Plan no válido. Debe ser premium o enterprise' },
+        request,
         { status: 400 }
       );
     }
 
-    // Crear suscripción en MercadoPago primero
     const mpResult = await createRecurringSubscription({
       userId,
       userEmail,
       plan,
-      subscriptionId: null // Temporal, se generará en MercadoPago
+      subscriptionId: null,
     });
 
     if (!mpResult.success) {
-      logger.error('Error creando suscripción en MercadoPago', { 
+      logger.error('Error creando suscripción en MercadoPago', {
         error: mpResult.error,
-        userId
+        userId,
       });
-      
-      return NextResponse.json(
+
+      return corsJsonResponse(
         { error: mpResult.error || 'Error creando suscripción en MercadoPago' },
+        request,
         { status: 500 }
       );
     }
 
-    // Crear suscripción en Firestore con el ID de MercadoPago
     const subscriptionId = await createSubscriptionAdmin(userId, plan, mpResult.subscriptionId);
     if (!subscriptionId) {
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Error creando suscripción en base de datos' },
+        request,
         { status: 500 }
       );
     }
@@ -67,22 +71,20 @@ export async function POST(request: NextRequest) {
       subscriptionId,
       mpSubscriptionId: mpResult.subscriptionId,
       userId,
-      plan
+      plan,
     });
 
-    // Retornar URL de pago para redireccionar al usuario
-    return NextResponse.json({
-      success: true,
-      subscriptionId,
-      initPoint: mpResult.initPoint,
-      mpSubscriptionId: mpResult.subscriptionId
-    });
-
+    return corsJsonResponse(
+      {
+        success: true,
+        subscriptionId,
+        initPoint: mpResult.initPoint,
+        mpSubscriptionId: mpResult.subscriptionId,
+      },
+      request
+    );
   } catch (error) {
     logger.error('Error en API de creación de suscripción', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return corsJsonResponse({ error: 'Error interno del servidor' }, request, { status: 500 });
   }
 }

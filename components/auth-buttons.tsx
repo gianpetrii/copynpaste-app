@@ -6,7 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/use-toast"
 import { useAuth } from "@/lib/context/auth-context"
-import { LogOut, User, Chrome, Mail, Lock, ArrowLeft, KeyRound } from "lucide-react"
+import { LogOut, User, Chrome, Mail, Lock, ArrowLeft, KeyRound, Fingerprint } from "lucide-react"
+import {
+  authenticateWithBiometric,
+  enableBiometricLogin,
+  isBiometricAvailable,
+  isBiometricLoginEnabled,
+} from "@/lib/native/biometrics"
+import { isNativePlatform } from "@/lib/native/platform"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +41,8 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [biometricAvailable, setBiometricAvailable] = useState(false)
+  const [biometricEnabled, setBiometricEnabled] = useState(false)
   const { toast } = useToast()
   const { user, loginWithGoogle, loginWithEmail, registerWithEmail, resetPassword, logout } = useAuth()
 
@@ -57,6 +66,16 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
     checkMobile();
     loadSavedAuthMode();
     setMounted(true);
+
+    const checkBiometric = async () => {
+      const native = await isNativePlatform();
+      if (native) {
+        const available = await isBiometricAvailable();
+        setBiometricAvailable(available);
+        setBiometricEnabled(isBiometricLoginEnabled());
+      }
+    };
+    checkBiometric();
     
     // Configurar event listeners
     window.addEventListener('resize', checkMobile);
@@ -65,6 +84,30 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
       window.removeEventListener('resize', checkMobile);
     };
   }, [compact]);
+
+  const handleBiometricLogin = async () => {
+    try {
+      setIsLoading(true);
+      const credentials = await authenticateWithBiometric();
+      if (!credentials) return;
+
+      setEmail(credentials.email);
+      setPassword(credentials.password);
+      await loginWithEmail(credentials.email, credentials.password);
+      toast({
+        title: "🎉 ¡Bienvenido!",
+        description: "Sesión iniciada con biometría",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error biométrico",
+        description: error.message || "No se pudo iniciar sesión",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -99,6 +142,13 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
     try {
       setIsLoading(true)
       await loginWithEmail(email, password)
+
+      const native = await isNativePlatform();
+      if (native && (await isBiometricAvailable()) && !isBiometricLoginEnabled()) {
+        const enabled = await enableBiometricLogin(email, password);
+        if (enabled) setBiometricEnabled(true);
+      }
+
       toast({
         title: "🎉 ¡Bienvenido!",
         description: "Has iniciado sesión correctamente",
@@ -365,6 +415,18 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               Registrarse
             </Button>
           </div>
+
+          {biometricAvailable && biometricEnabled && (
+            <Button
+              variant="outline"
+              onClick={handleBiometricLogin}
+              disabled={isLoading}
+              className="w-full flex items-center gap-2"
+            >
+              <Fingerprint className="h-4 w-4" />
+              Iniciar con biometría
+            </Button>
+          )}
           
           <p className="text-xs lg:text-sm text-muted-foreground text-center max-w-xs">
             Gratis para siempre. No se requiere tarjeta de crédito.

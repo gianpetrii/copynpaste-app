@@ -1,74 +1,73 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { deleteUserAccount, getUserDataSummary } from '@/lib/firebase/account-deletion';
+import { NextRequest } from 'next/server';
+import { getUserDataSummary } from '@/lib/firebase/account-deletion';
 import { deleteUserAccountAdmin } from '@/lib/server/account-deletion-admin';
 import { adminAuth } from '@/lib/firebase/admin';
 import { logger } from '@/lib/utils/logger';
+import { corsJsonResponse, corsOptionsResponse } from '@/lib/utils/cors';
+
+export async function OPTIONS(request: NextRequest) {
+  return corsOptionsResponse(request);
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { user, confirmationText, idToken } = body;
 
-    // Validar datos requeridos
     if (!user || !user.uid) {
-      return NextResponse.json(
-        { error: 'Usuario requerido' },
-        { status: 400 }
-      );
+      return corsJsonResponse({ error: 'Usuario requerido' }, request, { status: 400 });
     }
 
-    // Validar texto de confirmación
     if (confirmationText !== 'ELIMINAR MI CUENTA') {
-      return NextResponse.json(
+      return corsJsonResponse(
         { error: 'Texto de confirmación incorrecto' },
+        request,
         { status: 400 }
       );
     }
 
-    logger.info('Solicitud de eliminación de cuenta recibida', { 
-      userId: user.uid, 
-      email: user.email 
+    logger.info('Solicitud de eliminación de cuenta recibida', {
+      userId: user.uid,
+      email: user.email,
     });
 
-    // Validar token del usuario para operar como Admin de forma segura
     try {
       if (!idToken || !adminAuth) throw new Error('ID token requerido');
       const decoded = await adminAuth.verifyIdToken(idToken);
       if (decoded.uid !== user.uid) throw new Error('Token inválido para este usuario');
-    } catch (e) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    } catch {
+      return corsJsonResponse({ error: 'No autorizado' }, request, { status: 401 });
     }
 
-    // Opcional: obtener resumen (via cliente ya se muestra). Aquí lo omitimos o lo capturamos best-effort
     let dataSummary = null;
-    try { dataSummary = await getUserDataSummary(user.uid); } catch {}
+    try {
+      dataSummary = await getUserDataSummary(user.uid);
+    } catch {
+      // best-effort
+    }
 
-    // Proceder con la eliminación
-    // Ejecutar eliminación con privilegios de servidor
     const deletionResult = await deleteUserAccountAdmin(user.uid);
 
-    // Log del resultado
     logger.info('Resultado de eliminación de cuenta', {
       userId: user.uid,
       success: deletionResult.success,
       deletedItems: deletionResult.deletedItems,
       errorsCount: deletionResult.errors.length,
-      dataSummary
+      dataSummary,
     });
 
-    return NextResponse.json({
-      success: deletionResult.success,
-      deletedItems: deletionResult.deletedItems,
-      errors: deletionResult.errors,
-      dataSummary
-    });
-
+    return corsJsonResponse(
+      {
+        success: deletionResult.success,
+        deletedItems: deletionResult.deletedItems,
+        errors: deletionResult.errors,
+        dataSummary,
+      },
+      request
+    );
   } catch (error) {
     logger.error('Error en API de eliminación de cuenta', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return corsJsonResponse({ error: 'Error interno del servidor' }, request, { status: 500 });
   }
 }
 
@@ -78,22 +77,13 @@ export async function GET(request: NextRequest) {
     const userId = url.searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'userId requerido' },
-        { status: 400 }
-      );
+      return corsJsonResponse({ error: 'userId requerido' }, request, { status: 400 });
     }
 
-    // Obtener resumen de datos para mostrar al usuario
     const dataSummary = await getUserDataSummary(userId);
-
-    return NextResponse.json(dataSummary);
-
+    return corsJsonResponse(dataSummary, request);
   } catch (error) {
     logger.error('Error obteniendo resumen de datos de usuario', error);
-    return NextResponse.json(
-      { error: 'Error obteniendo datos de usuario' },
-      { status: 500 }
-    );
+    return corsJsonResponse({ error: 'Error obteniendo datos de usuario' }, request, { status: 500 });
   }
 }

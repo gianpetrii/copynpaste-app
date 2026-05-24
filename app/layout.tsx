@@ -8,6 +8,7 @@ import { PWAInstaller } from "@/components/pwa-installer"
 import { PWAStatus } from "@/components/pwa-status"
 import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
 import DevSwCleanup from "@/components/dev-sw-cleanup"
+import { CapacitorProvider } from "@/components/native/capacitor-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -141,14 +142,16 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
-          <div className="mx-auto max-w-7xl px-4 py-4">
-            {children}
-          </div>
-          <Toaster />
-          {process.env.NODE_ENV !== 'production' && <DevSwCleanup />}
-          <PWAInstaller />
-          <PWAStatus />
-          <DeviceLimitWarning />
+          <CapacitorProvider>
+            <div className="mx-auto max-w-7xl px-4 py-4">
+              {children}
+            </div>
+            <Toaster />
+            {process.env.NODE_ENV !== 'production' && <DevSwCleanup />}
+            <PWAInstaller />
+            <PWAStatus />
+            <DeviceLimitWarning />
+          </CapacitorProvider>
         </AuthProvider>
       </body>
     </html>

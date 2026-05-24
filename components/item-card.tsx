@@ -75,6 +75,9 @@ export function ItemCard({ item }: ItemCardProps) {
       );
       
       if (result.success) {
+        const { triggerHaptic } = await import('@/lib/native/haptics');
+        await triggerHaptic(result.copiedAs === 'shared' ? 'success' : 'light');
+
         let description = "El contenido ha sido copiado al portapapeles";
         
         if (result.copiedAs === 'image') {

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { getApiUrl } from '@/lib/utils/api-url';
 import { useAuth } from '@/lib/context/auth-context';
 import { getUserDataSummary } from '@/lib/firebase/account-deletion';
 import { Card } from '@/components/ui/card';
@@ -71,7 +72,7 @@ export default function DeleteAccountModal({ isOpen, onClose }: DeleteAccountMod
 
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch('/api/account/delete', {
+      const response = await fetch(getApiUrl('/api/account/delete'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
