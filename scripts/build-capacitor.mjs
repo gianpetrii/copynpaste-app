@@ -16,14 +16,16 @@ function moveApiOut() {
   if (existsSync(apiPath)) {
     mkdirSync(join(root, '.capacitor-build'), { recursive: true });
     if (existsSync(backupPath)) rmSync(backupPath, { recursive: true, force: true });
-    renameSync(apiPath, backupPath);
+    cpSync(apiPath, backupPath, { recursive: true });
+    rmSync(apiPath, { recursive: true, force: true });
     console.log('📦 API routes moved to backup for static export');
   }
 }
 
 function restoreApi() {
   if (existsSync(backupPath) && !existsSync(apiPath)) {
-    renameSync(backupPath, apiPath);
+    cpSync(backupPath, apiPath, { recursive: true });
+    rmSync(backupPath, { recursive: true, force: true });
     console.log('✅ API routes restored');
   }
 }
