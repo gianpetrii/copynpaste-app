@@ -30,9 +30,10 @@ type AuthMode = "login" | "register" | "reset" | "google"
 
 interface AuthButtonsProps {
   compact?: boolean;
+  isNative?: boolean;
 }
 
-export function AuthButtons({ compact = false }: AuthButtonsProps) {
+export function AuthButtons({ compact = false, isNative = false }: AuthButtonsProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -360,15 +361,19 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const isHeroPage = !user;
 
   if (isHeroPage) {
+    const btnHeight = isNative ? "py-4" : ""
+
     if (authMode === "google") {
       return (
-        <div className="flex flex-col items-center space-y-6 w-full max-w-md mx-auto">
-          {/* Botón principal de Google */}
+        <div
+          key="google"
+          className="flex flex-col items-center space-y-6 w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300"
+        >
           <Button
-        onClick={handleGoogleSignIn}
-        disabled={isLoading}
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
             size="lg"
-            className="auth-button button-primary hero-cta w-full flex items-center gap-3 px-8 py-4"
+            className={`auth-button button-primary hero-cta w-full flex items-center gap-3 px-8 ${btnHeight}`}
           >
             {isLoading ? (
               <>
@@ -382,34 +387,26 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               </>
             )}
           </Button>
-          
-          {/* Divider */}
+
           <div className="flex items-center w-full">
             <div className="flex-1 h-px bg-border"></div>
             <span className="px-4 text-sm lg:text-base text-muted-foreground">o</span>
             <div className="flex-1 h-px bg-border"></div>
           </div>
-          
-          {/* Opciones alternativas */}
+
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <Button
               variant="outline"
-              onClick={() => {
-                setAuthMode("login")
-                resetForm()
-              }}
-              className="button-secondary flex items-center gap-2 flex-1"
+              onClick={() => { setAuthMode("login"); resetForm() }}
+              className={`button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <Mail className="h-4 w-4" />
               Iniciar sesión
-      </Button>
-      <Button 
+            </Button>
+            <Button
               variant="outline"
-              onClick={() => {
-                setAuthMode("register")
-                resetForm()
-              }}
-              className="button-secondary flex items-center gap-2 flex-1"
+              onClick={() => { setAuthMode("register"); resetForm() }}
+              className={`button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <User className="h-4 w-4" />
               Registrarse
@@ -421,13 +418,13 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               variant="outline"
               onClick={handleBiometricLogin}
               disabled={isLoading}
-              className="w-full flex items-center gap-2"
+              className={`w-full flex items-center gap-2 ${btnHeight}`}
             >
               <Fingerprint className="h-4 w-4" />
               Iniciar con biometría
             </Button>
           )}
-          
+
           <p className="text-xs lg:text-sm text-muted-foreground text-center max-w-xs">
             Gratis para siempre. No se requiere tarjeta de crédito.
           </p>
@@ -437,15 +434,15 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
 
     // Formularios de login/registro/reset
     return (
-      <div className="w-full max-w-md mx-auto space-y-6">
+      <div
+        key={authMode}
+        className="w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
+      >
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setAuthMode("google")
-              resetForm()
-            }}
+            onClick={() => { setAuthMode("google"); resetForm() }}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -464,10 +461,13 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             <Input
               id="email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
               placeholder="tu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
+              className={isNative ? "h-12 text-base" : ""}
             />
           </div>
 
@@ -477,10 +477,12 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               <Input
                 id="password"
                 type="password"
+                autoComplete={authMode === "register" ? "new-password" : "current-password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                className={isNative ? "h-12 text-base" : ""}
               />
             </div>
           )}
@@ -491,10 +493,12 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               <Input
                 id="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
+                className={isNative ? "h-12 text-base" : ""}
               />
             </div>
           )}
@@ -506,7 +510,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               else if (authMode === "reset") handlePasswordReset()
             }}
             disabled={isLoading}
-            className="w-full"
+            className={`w-full ${isNative ? "h-12 text-base" : ""}`}
           >
             {isLoading ? (
               <>
@@ -515,38 +519,19 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               </>
             ) : (
               <>
-                {authMode === "login" && (
-                  <>
-                    <Lock className="h-4 w-4 mr-2" />
-                    Iniciar sesión
-                  </>
-                )}
-                {authMode === "register" && (
-                  <>
-                    <User className="h-4 w-4 mr-2" />
-                    Crear cuenta
-                  </>
-                )}
-                {authMode === "reset" && (
-                  <>
-                    <KeyRound className="h-4 w-4 mr-2" />
-                    Enviar enlace
-                  </>
-                )}
+                {authMode === "login" && <><Lock className="h-4 w-4 mr-2" />Iniciar sesión</>}
+                {authMode === "register" && <><User className="h-4 w-4 mr-2" />Crear cuenta</>}
+                {authMode === "reset" && <><KeyRound className="h-4 w-4 mr-2" />Enviar enlace</>}
               </>
             )}
           </Button>
 
-          {/* Links de navegación */}
           <div className="text-center space-y-2">
             {authMode === "login" && (
               <>
                 <button
                   type="button"
-                  onClick={() => {
-                    setAuthMode("reset")
-                    resetForm()
-                  }}
+                  onClick={() => { setAuthMode("reset"); resetForm() }}
                   className="text-sm text-primary hover:underline"
                 >
                   ¿Olvidaste tu contraseña?
@@ -555,10 +540,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
                   ¿No tienes cuenta?{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      setAuthMode("register")
-                      resetForm()
-                    }}
+                    onClick={() => { setAuthMode("register"); resetForm() }}
                     className="text-primary hover:underline"
                   >
                     Regístrate
@@ -566,16 +548,13 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
                 </div>
               </>
             )}
-            
+
             {authMode === "register" && (
               <div className="text-sm text-muted-foreground">
                 ¿Ya tienes cuenta?{" "}
                 <button
                   type="button"
-                  onClick={() => {
-                    setAuthMode("login")
-                    resetForm()
-                  }}
+                  onClick={() => { setAuthMode("login"); resetForm() }}
                   className="text-primary hover:underline"
                 >
                   Inicia sesión

@@ -9,7 +9,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/context/auth-context"
 import { useItems } from "@/lib/hooks"
 import { 
-  ClipboardCopy, 
   Sparkles, 
   Shield, 
   Zap,
@@ -21,16 +20,17 @@ import {
 import { ClipboardIcon } from "@/components/ui/clipboard-icon"
 import UserPlanBanner from "@/components/features/banners/user-plan-banner"
 import Link from "next/link"
+import { isNativePlatform } from "@/lib/native/platform"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isNative, setIsNative] = useState(false)
   const { user } = useAuth()
   const { items, loading } = useItems(user?.uid || "")
 
   useEffect(() => {
-    // Solo ejecutar en el cliente después del montaje
     const savedTheme = localStorage.getItem('theme');
     
     if (savedTheme === 'dark') {
@@ -39,13 +39,12 @@ export default function Home() {
     } else {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
-      // Guardar explícitamente el tema claro si no hay preferencia
       if (!savedTheme) {
         localStorage.setItem('theme', 'light');
       }
     }
-    
-    // Marcar como montado
+
+    isNativePlatform().then(setIsNative);
     setMounted(true);
   }, []);
 
@@ -132,7 +131,8 @@ export default function Home() {
               </>
             )}
             <ThemeToggle onToggle={handleThemeToggle} isDark={isDarkMode} />
-            <AuthButtons compact={true} />
+            {/* En native sin usuario el form ya está visible, no necesitamos botones de nav */}
+            {(!isNative || user) && <AuthButtons compact={true} />}
           </div>
         </header>
 
@@ -249,8 +249,36 @@ export default function Home() {
               </div>
             </div>
           </div>
+        ) : isNative ? (
+          /* Pantalla de login nativa — limpia y centrada */
+          <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in zoom-in-95 duration-500">
+            <div className="w-full max-w-sm mx-auto flex flex-col items-center space-y-8 px-2">
+              {/* Logo */}
+              <div className="flex flex-col items-center space-y-4">
+                <ClipboardIcon className="text-primary hero-icon-banner" size={96} />
+                <div className="text-center space-y-1">
+                  <h1 className="text-3xl font-bold text-foreground tracking-tight">
+                    Copy &amp; Paste
+                  </h1>
+                  <p className="text-base text-muted-foreground">
+                    Tu portapapeles universal
+                  </p>
+                </div>
+              </div>
+
+              {/* Auth form */}
+              <div className="w-full">
+                <AuthButtons compact={false} isNative={true} />
+              </div>
+
+              {/* Tagline */}
+              <p className="text-xs text-muted-foreground text-center">
+                Simple. Seguro. Sincronizado.
+              </p>
+            </div>
+          </div>
         ) : (
-          /* Hero section para usuarios sin login */
+          /* Hero section web — landing completa */
           <div className="flex flex-col items-center justify-center py-12 sm:py-20 space-y-12">
             {/* Hero principal */}
             <div className="text-center space-y-6 max-w-4xl">
@@ -297,7 +325,7 @@ export default function Home() {
                 <h3 className="text-lg lg:text-xl font-semibold text-foreground">Totalmente Seguro</h3>
                 <p className="text-sm lg:text-base text-muted-foreground">
                   Tus datos están protegidos y solo tú puedes acceder a ellos
-            </p>
+                </p>
               </div>
               
               <div className="text-center space-y-4 p-6 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
