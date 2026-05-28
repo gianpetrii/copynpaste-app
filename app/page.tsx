@@ -251,11 +251,10 @@ export default function Home() {
           </div>
         ) : isNative ? (
           /* Pantalla de login nativa — limpia y centrada */
-          <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in zoom-in-95 duration-300">
             <div className="w-full max-w-sm mx-auto flex flex-col items-center space-y-8 px-2">
-              {/* Logo */}
               <div className="flex flex-col items-center space-y-4">
-                <ClipboardIcon className="text-primary hero-icon-banner" size={96} />
+                <ClipboardIcon className="text-primary hero-icon-banner" size={80} />
                 <div className="text-center space-y-1">
                   <h1 className="text-3xl font-bold text-foreground tracking-tight">
                     Copy &amp; Paste
@@ -266,12 +265,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Auth form */}
               <div className="w-full">
-                <AuthButtons compact={false} isNative={true} />
+                <AuthButtons compact={false} />
               </div>
 
-              {/* Tagline */}
               <p className="text-xs text-muted-foreground text-center">
                 Simple. Seguro. Sincronizado.
               </p>
@@ -279,80 +276,58 @@ export default function Home() {
           </div>
         ) : (
           /* Hero section web — landing completa */
-          <div className="flex flex-col items-center justify-center py-12 sm:py-20 space-y-12">
-            {/* Hero principal */}
-            <div className="text-center space-y-6 max-w-4xl">
-              <div className="flex items-center justify-center gap-6 sm:gap-8 mb-6">
-                <ClipboardIcon className="text-primary flex-shrink-0 hero-icon-banner" size={120} />
-                <div className="text-left">
-                  <h1 className="text-3xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-tight whitespace-nowrap">
-                    Tu portapapeles
-                  </h1>
-                  <h1 className="text-3xl sm:text-6xl lg:text-7xl font-bold text-primary leading-tight whitespace-nowrap">
-                    universal
-                  </h1>
-                </div>
-              </div>
-              
+          <div className="flex flex-col items-center justify-center py-16 sm:py-24 space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Hero principal — stack vertical centrado */}
+            <div className="text-center space-y-8 max-w-3xl">
+              <ClipboardIcon className="text-primary hero-icon-banner mx-auto" size={80} />
+
               <div className="space-y-4">
-                <p className="text-lg sm:text-2xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed hero-subtitle">
-                  Guarda, organiza y accede a tu información importante desde cualquier dispositivo. 
-                  <span className="block mt-2 text-primary font-medium">Simple. Seguro. Sincronizado.</span>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
+                  Tu portapapeles{" "}
+                  <span className="text-primary">universal</span>
+                </h1>
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                  Guarda, organiza y accede a tu información importante desde cualquier dispositivo.
                 </p>
               </div>
 
-              <div className="pt-4" id="auth-section">
-                <AuthButtons compact={false} />
+              <div className="pt-2 max-w-md mx-auto" id="auth-section">
+                <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
+                  <AuthButtons compact={false} />
+                </div>
               </div>
             </div>
 
             {/* Features */}
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl w-full features-grid">
-              <div className="text-center space-y-4 p-6 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
-                <div className="mx-auto w-12 h-12 bg-blue-500/10 rounded-full flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-blue-500" />
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl w-full">
+              <div className="text-center space-y-3 p-5 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
+                <div className="mx-auto w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-blue-500" />
                 </div>
-                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Acceso Rápido</h3>
-                <p className="text-sm lg:text-base text-muted-foreground">
-                  Copia cualquier contenido con un solo clic y accede desde cualquier dispositivo
+                <h3 className="text-base font-semibold text-foreground">Acceso Rápido</h3>
+                <p className="text-sm text-muted-foreground">
+                  Copia cualquier contenido con un solo clic desde cualquier dispositivo
                 </p>
               </div>
-              
-              <div className="text-center space-y-4 p-6 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
-                <div className="mx-auto w-12 h-12 bg-green-500/10 rounded-full flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-green-500" />
+
+              <div className="text-center space-y-3 p-5 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
+                <div className="mx-auto w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-green-500" />
                 </div>
-                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Totalmente Seguro</h3>
-                <p className="text-sm lg:text-base text-muted-foreground">
+                <h3 className="text-base font-semibold text-foreground">Totalmente Seguro</h3>
+                <p className="text-sm text-muted-foreground">
                   Tus datos están protegidos y solo tú puedes acceder a ellos
                 </p>
               </div>
-              
-              <div className="text-center space-y-4 p-6 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
-                <div className="mx-auto w-12 h-12 bg-purple-500/10 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-purple-500" />
+
+              <div className="text-center space-y-3 p-5 rounded-2xl bg-secondary/20 border border-border/50 feature-card">
+                <div className="mx-auto w-10 h-10 bg-purple-500/10 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-purple-500" />
                 </div>
-                <h3 className="text-lg lg:text-xl font-semibold text-foreground">Multi-formato</h3>
-                <p className="text-sm lg:text-base text-muted-foreground">
+                <h3 className="text-base font-semibold text-foreground">Multi-formato</h3>
+                <p className="text-sm text-muted-foreground">
                   Textos, enlaces, archivos y más. Todo en un solo lugar organizado
                 </p>
-              </div>
-            </div>
-
-            {/* CTA secondary */}
-            <div className="text-center space-y-4 p-8 rounded-2xl bg-primary/5 border border-primary/20 max-w-2xl">
-              <h3 className="text-xl lg:text-2xl font-semibold text-foreground">
-                ¿Listo para comenzar?
-              </h3>
-              <p className="text-base lg:text-lg text-muted-foreground">
-                Inicia sesión con Google y comienza a organizar tu información en segundos
-              </p>
-              <div className="mt-4">
-                <Link href="/pricing">
-                  <button className="px-6 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg border border-blue-200 transition-colors">
-                    Ver Planes Premium
-                  </button>
-                </Link>
               </div>
             </div>
           </div>

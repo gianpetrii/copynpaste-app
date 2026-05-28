@@ -15,6 +15,15 @@ async function getCapacitorCore() {
 }
 
 export async function isNativePlatform(): Promise<boolean> {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('native')) {
+      const value = params.get('native') !== '0';
+      localStorage.setItem('__native_preview', value ? '1' : '0');
+      return value;
+    }
+    if (localStorage.getItem('__native_preview') === '1') return true;
+  }
   const core = await getCapacitorCore();
   return core?.Capacitor.isNativePlatform() ?? false;
 }

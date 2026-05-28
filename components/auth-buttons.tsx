@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/use-toast"
 import { useAuth } from "@/lib/context/auth-context"
-import { LogOut, User, Chrome, Mail, Lock, ArrowLeft, KeyRound, Fingerprint } from "lucide-react"
+import { LogOut, User, Mail, Lock, ArrowLeft, KeyRound, Fingerprint } from "lucide-react"
 import {
   authenticateWithBiometric,
   enableBiometricLogin,
@@ -26,14 +26,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+function GoogleIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+    </svg>
+  )
+}
+
 type AuthMode = "login" | "register" | "reset" | "google"
 
 interface AuthButtonsProps {
   compact?: boolean;
-  isNative?: boolean;
 }
 
-export function AuthButtons({ compact = false, isNative = false }: AuthButtonsProps) {
+export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -361,28 +371,29 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
   const isHeroPage = !user;
 
   if (isHeroPage) {
-    const btnHeight = isNative ? "py-4" : ""
+    const btnHeight = isMobile ? "py-4" : ""
 
     if (authMode === "google") {
       return (
         <div
           key="google"
-          className="flex flex-col items-center space-y-6 w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-4 duration-300"
+          className="flex flex-col items-center space-y-5 w-full max-w-md mx-auto animate-in fade-in slide-in-from-bottom-3 duration-200"
         >
           <Button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
+            variant="outline"
             size="lg"
-            className={`auth-button button-primary hero-cta w-full flex items-center gap-3 px-8 ${btnHeight}`}
+            className={`w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-300 dark:bg-white dark:hover:bg-gray-50 dark:text-gray-700 dark:border-gray-300 font-medium ${btnHeight}`}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current" />
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-700" />
                 Iniciando...
               </>
             ) : (
               <>
-                <Chrome className="h-5 w-5" />
+                <GoogleIcon />
                 Continuar con Google
               </>
             )}
@@ -390,7 +401,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
 
           <div className="flex items-center w-full">
             <div className="flex-1 h-px bg-border"></div>
-            <span className="px-4 text-sm lg:text-base text-muted-foreground">o</span>
+            <span className="px-4 text-sm text-muted-foreground">o</span>
             <div className="flex-1 h-px bg-border"></div>
           </div>
 
@@ -398,7 +409,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
             <Button
               variant="outline"
               onClick={() => { setAuthMode("login"); resetForm() }}
-              className={`button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
+              className={`flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <Mail className="h-4 w-4" />
               Iniciar sesión
@@ -406,7 +417,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
             <Button
               variant="outline"
               onClick={() => { setAuthMode("register"); resetForm() }}
-              className={`button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
+              className={`flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <User className="h-4 w-4" />
               Registrarse
@@ -425,7 +436,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
             </Button>
           )}
 
-          <p className="text-xs lg:text-sm text-muted-foreground text-center max-w-xs">
+          <p className="text-xs text-muted-foreground text-center">
             Gratis para siempre. No se requiere tarjeta de crédito.
           </p>
         </div>
@@ -436,19 +447,19 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
     return (
       <div
         key={authMode}
-        className="w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
+        className="w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-200"
       >
-        <div className="flex items-center gap-3">
+        <div className="relative flex items-center justify-center h-10">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => { setAuthMode("google"); resetForm() }}
-            className="flex items-center gap-2"
+            className="absolute left-0 flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
           </Button>
-          <h2 className="text-xl lg:text-2xl font-semibold">
+          <h2 className="text-xl font-semibold">
             {authMode === "login" && "Iniciar sesión"}
             {authMode === "register" && "Crear cuenta"}
             {authMode === "reset" && "Recuperar contraseña"}
@@ -467,7 +478,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              className={isNative ? "h-12 text-base" : ""}
+              className={isMobile ? "h-12 text-base" : ""}
             />
           </div>
 
@@ -482,7 +493,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className={isNative ? "h-12 text-base" : ""}
+                className={isMobile ? "h-12 text-base" : ""}
               />
             </div>
           )}
@@ -498,7 +509,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                className={isNative ? "h-12 text-base" : ""}
+                className={isMobile ? "h-12 text-base" : ""}
               />
             </div>
           )}
@@ -510,7 +521,7 @@ export function AuthButtons({ compact = false, isNative = false }: AuthButtonsPr
               else if (authMode === "reset") handlePasswordReset()
             }}
             disabled={isLoading}
-            className={`w-full ${isNative ? "h-12 text-base" : ""}`}
+            className={`w-full ${isMobile ? "h-12 text-base" : ""}`}
           >
             {isLoading ? (
               <>
