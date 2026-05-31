@@ -1,13 +1,25 @@
 'use client';
 
 import { logger } from '@/lib/utils/logger';
+import { isNativePlatform } from './platform';
 
 const BIOMETRIC_ENABLED_KEY = 'biometric_login_enabled';
 const BIOMETRIC_CREDENTIALS_KEY = 'copynpaste_biometric_credentials';
 
-export async function isBiometricAvailable(): Promise<boolean> {
+let biometricAvailabilityPromise: Promise<boolean> | null = null;
+let biometricAvailabilityCached: boolean | null = null;
+
+async function loadNativeBiometric() {
+  const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+  return NativeBiometric;
+}
+
+async function checkBiometricAvailability(): Promise<boolean> {
+  const native = await isNativePlatform();
+  if (!native) return false;
+
   try {
-    const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+    const NativeBiometric = await loadNativeBiometric();
     const result = await NativeBiometric.isAvailable();
     return result.isAvailable;
   } catch {
@@ -15,9 +27,24 @@ export async function isBiometricAvailable(): Promise<boolean> {
   }
 }
 
+export async function isBiometricAvailable(): Promise<boolean> {
+  if (biometricAvailabilityCached !== null) {
+    return biometricAvailabilityCached;
+  }
+
+  if (!biometricAvailabilityPromise) {
+    biometricAvailabilityPromise = checkBiometricAvailability().then((value) => {
+      biometricAvailabilityCached = value;
+      return value;
+    });
+  }
+
+  return biometricAvailabilityPromise;
+}
+
 export async function enableBiometricLogin(email: string, password: string): Promise<boolean> {
   try {
-    const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+    const NativeBiometric = await loadNativeBiometric();
     await NativeBiometric.setCredentials({
       username: email,
       password,
@@ -33,7 +60,7 @@ export async function enableBiometricLogin(email: string, password: string): Pro
 
 export async function disableBiometricLogin(): Promise<void> {
   try {
-    const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+    const NativeBiometric = await loadNativeBiometric();
     await NativeBiometric.deleteCredentials({ server: 'copynpaste.app' });
   } catch {
     // ignore
@@ -48,7 +75,7 @@ export function isBiometricLoginEnabled(): boolean {
 
 export async function authenticateWithBiometric(): Promise<{ email: string; password: string } | null> {
   try {
-    const { NativeBiometric } = await import('@capgo/capacitor-native-biometric');
+    const NativeBiometric = await loadNativeBiometric();
 
     await NativeBiometric.verifyIdentity({
       reason: 'Iniciar sesión en CopyNPaste',

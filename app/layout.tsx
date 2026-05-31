@@ -121,6 +121,28 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
+        {/* En dev: limpiar SW/caches antes de cargar chunks (evita ChunkLoadError) */}
+        {process.env.NODE_ENV !== 'production' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function () {
+                  if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (regs) {
+                      regs.forEach(function (reg) { reg.unregister(); });
+                    });
+                  }
+                  if ('caches' in window) {
+                    caches.keys().then(function (keys) {
+                      keys.forEach(function (key) { caches.delete(key); });
+                    });
+                  }
+                })();
+              `,
+            }}
+          />
+        )}
+
         {/* Service Worker Registration - only in production */}
         {process.env.NODE_ENV === 'production' && (
         <script

@@ -21,12 +21,13 @@ import { ClipboardIcon } from "@/components/ui/clipboard-icon"
 import UserPlanBanner from "@/components/features/banners/user-plan-banner"
 import Link from "next/link"
 import { isNativePlatform } from "@/lib/native/platform"
+import { AnimatedPanel } from "@/components/page-transition"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"all" | "favorites">("all")
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [isNative, setIsNative] = useState(false)
+  const [isNative, setIsNative] = useState<boolean | null>(null)
   const { user } = useAuth()
   const { items, loading } = useItems(user?.uid || "")
 
@@ -68,8 +69,8 @@ export default function Home() {
   const fileItems = items.filter(item => item.type === 'file').length
   const urlItems = items.filter(item => item.type === 'url').length
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
+  // Prevent hydration mismatch and native/web flash before platform is detected
+  if (!mounted || isNative === null) {
     return (
       <main className="min-h-screen">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
@@ -241,9 +242,9 @@ export default function Home() {
                         Favoritos ({favoriteItems})
                   </TabsTrigger>
                 </TabsList>
-                    <div className="mt-2">
+                    <AnimatedPanel panelKey={activeTab} className="mt-2">
                 <ItemList filter={activeTab} />
-                    </div>
+                    </AnimatedPanel>
               </Tabs>
                 </div>
               </div>

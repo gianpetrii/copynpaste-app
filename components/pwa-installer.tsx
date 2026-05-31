@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { X, Download, Smartphone, Monitor } from 'lucide-react'
+import { isNativePlatform } from '@/lib/native/platform'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[]
@@ -25,8 +26,15 @@ export function PWAInstaller() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
+  const [isNativeApp, setIsNativeApp] = useState<boolean | null>(null)
 
   useEffect(() => {
+    isNativePlatform().then(setIsNativeApp)
+  }, [])
+
+  useEffect(() => {
+    if (isNativeApp) return
+
     // Detectar iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
     setIsIOS(iOS)
@@ -62,7 +70,7 @@ export function PWAInstaller() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
     }
-  }, [])
+  }, [isNativeApp])
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return
@@ -89,6 +97,9 @@ export function PWAInstaller() {
     // Volver a mostrar en 24 horas
     localStorage.setItem('pwa-install-dismissed', new Date().toISOString())
   }
+
+  // No mostrar en app nativa (Capacitor) ni mientras se detecta la plataforma
+  if (isNativeApp !== false) return null
 
   // No mostrar si ya está instalado
   if (isStandalone) return null

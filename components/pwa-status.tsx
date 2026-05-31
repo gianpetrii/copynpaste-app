@@ -3,13 +3,21 @@
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Smartphone, Monitor, Wifi, WifiOff } from 'lucide-react'
+import { isNativePlatform } from '@/lib/native/platform'
 
 export function PWAStatus() {
   const [isInstalled, setIsInstalled] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
   const [deviceType, setDeviceType] = useState<'mobile' | 'desktop' | 'unknown'>('unknown')
+  const [isNativeApp, setIsNativeApp] = useState<boolean | null>(null)
 
   useEffect(() => {
+    isNativePlatform().then(setIsNativeApp)
+  }, [])
+
+  useEffect(() => {
+    if (isNativeApp) return
+
     // Detectar si está instalado (modo standalone)
     const checkInstalled = () => {
       const standalone = window.matchMedia('(display-mode: standalone)').matches
@@ -44,7 +52,9 @@ export function PWAStatus() {
       window.removeEventListener('offline', updateOnlineStatus)
       mediaQuery.removeListener(checkInstalled)
     }
-  }, [])
+  }, [isNativeApp])
+
+  if (isNativeApp !== false) return null
 
   if (!isInstalled && isOnline) {
     return null // No mostrar nada si no está instalado y está online

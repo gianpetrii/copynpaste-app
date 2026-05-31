@@ -19,6 +19,7 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
+    scheme: 'CopyNPaste',
     contentInset: 'automatic',
   },
   android: {

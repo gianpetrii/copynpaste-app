@@ -1,6 +1,8 @@
 'use client';
 
 let capacitorCore: typeof import('@capacitor/core') | null = null;
+let nativePlatformPromise: Promise<boolean> | null = null;
+let nativePlatformCached: boolean | null = null;
 
 async function getCapacitorCore() {
   if (typeof window === 'undefined') return null;
@@ -14,7 +16,7 @@ async function getCapacitorCore() {
   return capacitorCore;
 }
 
-export async function isNativePlatform(): Promise<boolean> {
+async function detectNativePlatform(): Promise<boolean> {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search);
     if (params.has('native')) {
@@ -28,10 +30,27 @@ export async function isNativePlatform(): Promise<boolean> {
   return core?.Capacitor.isNativePlatform() ?? false;
 }
 
+export async function isNativePlatform(): Promise<boolean> {
+  if (nativePlatformCached !== null) {
+    return nativePlatformCached;
+  }
+
+  if (!nativePlatformPromise) {
+    nativePlatformPromise = detectNativePlatform().then((value) => {
+      nativePlatformCached = value;
+      return value;
+    });
+  }
+
+  return nativePlatformPromise;
+}
+
 export async function getNativePlatform(): Promise<'ios' | 'android' | 'web'> {
+  const native = await isNativePlatform();
+  if (!native) return 'web';
+
   const core = await getCapacitorCore();
-  if (!core?.Capacitor.isNativePlatform()) return 'web';
-  return core.Capacitor.getPlatform() as 'ios' | 'android';
+  return (core?.Capacitor.getPlatform() as 'ios' | 'android') ?? 'web';
 }
 
 export async function openExternalUrl(url: string): Promise<void> {
