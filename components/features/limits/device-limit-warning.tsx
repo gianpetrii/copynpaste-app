@@ -82,12 +82,12 @@ export default function DeviceLimitWarning() {
   if (showPricing) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div className="bg-background dark:bg-card rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Elige tu Plan</h2>
+            <h2 className="text-2xl font-bold text-foreground">Elige tu Plan</h2>
             <button
               onClick={() => setShowPricing(false)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-secondary rounded-full text-foreground"
             >
               ✕
             </button>
@@ -116,19 +116,19 @@ export default function DeviceLimitWarning() {
           <h2 className="text-2xl font-bold text-red-600 mb-2">
             ☕ Límite de Dispositivos Alcanzado
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             Tu plan gratuito permite hasta <strong>2 dispositivos</strong>. 
             Desconecta un dispositivo para continuar o mejora a Premium.
           </p>
         </div>
 
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-800">Dispositivos Conectados:</h3>
+          <h3 className="font-semibold text-foreground">Dispositivos Conectados:</h3>
           
           {loading ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-sm text-gray-500 mt-2">Cargando dispositivos...</p>
+              <p className="text-sm text-muted-foreground mt-2">Cargando dispositivos...</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -137,8 +137,8 @@ export default function DeviceLimitWarning() {
                   key={device.id} 
                   className={`p-3 rounded-lg border ${
                     device.id === currentDeviceId 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 bg-gray-50'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 dark:border-blue-700' 
+                      : 'border-border bg-muted/50 dark:bg-muted/20'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -151,7 +151,7 @@ export default function DeviceLimitWarning() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         Último uso: {formatLastActive(device.lastActive)}
                       </p>
                     </div>
@@ -172,11 +172,11 @@ export default function DeviceLimitWarning() {
         </div>
 
         <div className="pt-4 border-t">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <h4 className="font-semibold text-yellow-800 mb-2">
+          <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800/50 rounded-lg p-4">
+            <h4 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
               💡 ¿Necesitas más dispositivos?
             </h4>
-            <p className="text-sm text-yellow-700 mb-3">
+            <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
               Con <strong>Premium</strong> puedes conectar hasta 5 dispositivos por solo el precio de un café al mes.
             </p>
             <button 
