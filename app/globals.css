@@ -56,7 +56,7 @@
     --muted: 0 0% 5%;
     --muted-foreground: 0 0% 70%;
 
-    --accent: 0 0% 5%;
+    --accent: 0 0% 12%;
     --accent-foreground: 0 0% 90%;
 
     --destructive: 0 62.8% 30.6%;
@@ -371,6 +371,7 @@ button[size="icon"]:not(:disabled):hover {
 
 .dark .feature-card:hover {
   box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05);
+  border-color: hsl(var(--primary) / 0.4);
 }
 
 /* Avatar en navbar mejorado */
@@ -691,6 +692,59 @@ button.text-primary.underline.inline {
 .dark .button-secondary:not(:disabled):hover {
   background: hsl(var(--secondary));
   border-color: hsl(var(--primary));
+}
+
+/* Auth buttons: override Tailwind hover utilities for consistency */
+.auth-button.button-secondary:not(:disabled):hover {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+:not(.dark) .auth-button.button-secondary:not(:disabled):hover {
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .auth-button.button-secondary:not(:disabled):hover {
+  border-color: hsl(var(--primary)) !important;
+}
+
+.auth-button.button-primary:not(:disabled):hover {
+  color: hsl(var(--foreground)) !important;
+}
+
+:not(.dark) .auth-button.button-primary:not(:disabled):hover {
+  background-color: hsl(var(--foreground) / 0.9) !important;
+  border-color: hsl(var(--foreground)) !important;
+}
+
+.dark .auth-button.button-primary:not(:disabled):hover {
+  background-color: hsl(var(--secondary)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+/* Google button: white branding in light, consistent dark hover in dark */
+:not(.dark) .button-google:not(:disabled) {
+  background-color: white !important;
+  color: rgb(55 65 81) !important;
+  border-color: rgb(209 213 219) !important;
+}
+
+:not(.dark) .button-google:not(:disabled):hover {
+  background-color: rgb(249 250 251) !important;
+  border-color: rgb(209 213 219) !important;
+  color: rgb(55 65 81) !important;
+}
+
+.dark .button-google:not(:disabled) {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .button-google:not(:disabled):hover {
+  background-color: hsl(var(--secondary)) !important;
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* ===== ANIMACIÓN DE SALUDO ===== */

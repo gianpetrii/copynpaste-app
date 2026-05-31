@@ -119,12 +119,12 @@ export default function Home() {
             {user && (
               <>
                 <Link href="/pricing" className="hidden sm:block">
-                  <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors">
+                  <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10 rounded-md transition-colors">
                     Planes
                   </button>
                 </Link>
                 <Link href="/account" className="hidden sm:block">
-                  <button className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                  <button className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5 rounded-md transition-colors">
                     Cuenta
                   </button>
                 </Link>

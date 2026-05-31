@@ -384,11 +384,11 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             disabled={isLoading}
             variant="outline"
             size="lg"
-            className={`w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 border-gray-300 dark:bg-white dark:hover:bg-gray-50 dark:text-gray-700 dark:border-gray-300 font-medium ${btnHeight}`}
+            className={`auth-button button-secondary button-google w-full flex items-center justify-center gap-3 font-medium ${btnHeight}`}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-700" />
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current" />
                 Iniciando...
               </>
             ) : (
@@ -409,7 +409,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             <Button
               variant="outline"
               onClick={() => { setAuthMode("login"); resetForm() }}
-              className={`flex items-center gap-2 flex-1 ${btnHeight}`}
+              className={`auth-button button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <Mail className="h-4 w-4" />
               Iniciar sesión
@@ -417,7 +417,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             <Button
               variant="outline"
               onClick={() => { setAuthMode("register"); resetForm() }}
-              className={`flex items-center gap-2 flex-1 ${btnHeight}`}
+              className={`auth-button button-secondary flex items-center gap-2 flex-1 ${btnHeight}`}
             >
               <User className="h-4 w-4" />
               Registrarse
@@ -429,7 +429,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               variant="outline"
               onClick={handleBiometricLogin}
               disabled={isLoading}
-              className={`w-full flex items-center gap-2 ${btnHeight}`}
+              className={`auth-button button-secondary w-full flex items-center gap-2 ${btnHeight}`}
             >
               <Fingerprint className="h-4 w-4" />
               Iniciar con biometría
@@ -521,7 +521,7 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
               else if (authMode === "reset") handlePasswordReset()
             }}
             disabled={isLoading}
-            className={`w-full ${isMobile ? "h-12 text-base" : ""}`}
+            className={`auth-button button-primary w-full ${isMobile ? "h-12 text-base" : ""}`}
           >
             {isLoading ? (
               <>
