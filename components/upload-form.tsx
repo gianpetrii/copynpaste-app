@@ -160,11 +160,11 @@ export function AddItemForm() {
     <div className="w-full">
       <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-2 sm:p-3 mb-2">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "text" | "file")}>
-          <TabsList className="grid grid-cols-2 w-full bg-muted">
-            <TabsTrigger value="text" className="data-[state=active]:bg-background">
+          <TabsList className="grid grid-cols-2 w-full">
+            <TabsTrigger value="text">
               Texto
             </TabsTrigger>
-            <TabsTrigger value="file" className="data-[state=active]:bg-background">
+            <TabsTrigger value="file">
               Archivo
             </TabsTrigger>
           </TabsList>

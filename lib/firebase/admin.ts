@@ -1,3 +1,4 @@
+import '@/lib/server/node-buffer-polyfill';
 import { getApps, initializeApp, cert, App } from 'firebase-admin/app';
 import { getAuth as getAdminAuth, Auth } from 'firebase-admin/auth';
 import { getFirestore as getAdminFirestore, Firestore } from 'firebase-admin/firestore';
