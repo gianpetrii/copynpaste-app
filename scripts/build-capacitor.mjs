@@ -3,7 +3,7 @@
  * Build script for Capacitor: temporarily moves API routes out of app/
  * because Next.js static export fails when Route Handlers exist.
  */
-import { cpSync, existsSync, mkdirSync, renameSync, rmSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { join } from 'path';
 
@@ -30,6 +30,25 @@ function restoreApi() {
   }
 }
 
+function registerLocalIosPlugins() {
+  const capJsonPath = join(root, 'ios', 'App', 'App', 'capacitor.config.json');
+  if (!existsSync(capJsonPath)) return;
+
+  const capJson = JSON.parse(readFileSync(capJsonPath, 'utf8'));
+  const localPlugins = ['SystemBrowserPlugin'];
+  const list = Array.isArray(capJson.packageClassList) ? [...capJson.packageClassList] : [];
+
+  for (const pluginClass of localPlugins) {
+    if (!list.includes(pluginClass)) {
+      list.push(pluginClass);
+    }
+  }
+
+  capJson.packageClassList = list;
+  writeFileSync(capJsonPath, `${JSON.stringify(capJson, null, '\t')}\n`);
+  console.log('✅ Plugins locales iOS registrados en capacitor.config.json');
+}
+
 try {
   moveApiOut();
   execSync('next build', {
@@ -37,6 +56,7 @@ try {
     env: { ...process.env, CAPACITOR_BUILD: 'true' },
   });
   execSync('npx cap sync', { stdio: 'inherit' });
+  registerLocalIosPlugins();
 } catch (error) {
   console.error('❌ Capacitor build failed:', error.message);
   process.exitCode = 1;
