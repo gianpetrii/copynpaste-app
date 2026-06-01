@@ -6,6 +6,7 @@ import {
   User,
   GoogleAuthProvider,
   signInWithPopup,
+  getRedirectResult,
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from './firebase';
@@ -36,9 +37,37 @@ export const signIn = async (email: string, password: string) => {
   }
 };
 
-// Función para iniciar sesión con Google
-export const signInWithGoogle = async () => {
+/** Completa el login de Google tras volver del redirect (Capacitor / móvil). */
+export const completeGoogleRedirectSignIn = async (): Promise<User | null> => {
   try {
+    const result = await getRedirectResult(auth);
+    return result?.user ?? null;
+  } catch (error) {
+    logger.authError('Error al completar redirect de Google', error);
+    throw error;
+  }
+};
+
+// Función para iniciar sesión con Google
+export const signInWithGoogle = async (): Promise<User | null> => {
+  try {
+    if (typeof window !== 'undefined') {
+      const { agentLog } = await import('@/lib/debug/agent-log');
+      const { isNativePlatform } = await import('@/lib/native/platform');
+
+      agentLog({
+        hypothesisId: 'B',
+        location: 'auth.ts:signInWithGoogle',
+        message: 'Google sign-in requested',
+        data: { origin: window.location.origin },
+      });
+
+      if (await isNativePlatform()) {
+        const { signInWithGoogleNative } = await import('./google-auth-native');
+        return await signInWithGoogleNative();
+      }
+    }
+
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error) {
@@ -72,4 +101,4 @@ export const resetPassword = async (email: string) => {
     logger.authError('Error al enviar email de recuperación', error);
     throw error;
   }
-}; 
+};

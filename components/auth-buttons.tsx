@@ -123,7 +123,8 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true)
-      await loginWithGoogle()
+      const signedInUser = await loginWithGoogle()
+      if (!signedInUser) return
       toast({
         title: "🎉 ¡Bienvenido!",
         description: "Has iniciado sesión correctamente con Google",
@@ -384,19 +385,19 @@ export function AuthButtons({ compact = false }: AuthButtonsProps) {
             disabled={isLoading}
             variant="outline"
             size="lg"
-            className={`auth-button button-secondary button-google w-full flex items-center justify-center gap-3 font-medium ${btnHeight}`}
+            aria-busy={isLoading}
+            className={`auth-button button-secondary button-google relative w-full min-h-12 flex items-center justify-center gap-3 font-medium ${btnHeight}`}
           >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current" />
+            {isLoading && (
+              <span className="absolute inset-0 flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current shrink-0" />
                 Iniciando...
-              </>
-            ) : (
-              <>
-                <GoogleIcon />
-                Continuar con Google
-              </>
+              </span>
             )}
+            <span className={`flex items-center justify-center gap-3 ${isLoading ? "invisible" : ""}`}>
+              <GoogleIcon />
+              Continuar con Google
+            </span>
           </Button>
 
           <div className="flex items-center w-full">

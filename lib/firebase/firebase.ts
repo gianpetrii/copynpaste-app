@@ -1,8 +1,14 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  type Auth,
+} from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
@@ -17,16 +23,24 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-let firebaseApp;
-if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig);
-}
+const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Firebase services
-const db = getFirestore();
-const auth = getAuth();
-const storage = getStorage();
+const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
+
+let auth: Auth;
+if (typeof window !== 'undefined') {
+  try {
+    auth = initializeAuth(firebaseApp, {
+      persistence: browserLocalPersistence,
+      popupRedirectResolver: browserPopupRedirectResolver,
+    });
+  } catch {
+    auth = getAuth(firebaseApp);
+  }
+} else {
+  auth = getAuth(firebaseApp);
+}
 
 // Initialize Analytics only on client side
 let analytics: Analytics | null = null;
@@ -34,4 +48,4 @@ if (typeof window !== 'undefined') {
   analytics = getAnalytics(firebaseApp);
 }
 
-export { firebaseApp, db, auth, storage, analytics }; 
+export { firebaseApp, db, auth, storage, analytics };

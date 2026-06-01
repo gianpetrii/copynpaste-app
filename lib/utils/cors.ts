@@ -4,8 +4,8 @@ const ALLOWED_ORIGINS = [
   'capacitor://localhost',
   'http://localhost',
   'http://localhost:3000',
-  'https://copynpaste-app-d4159.web.app',
   'https://copynpaste.app',
+  'https://copynpaste-app.vercel.app',
 ];
 
 export function getCorsHeaders(origin: string | null): Record<string, string> {

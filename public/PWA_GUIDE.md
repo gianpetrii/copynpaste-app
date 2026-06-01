@@ -103,7 +103,7 @@ Una Progressive Web App (PWA) es una aplicación web que funciona como una aplic
 
 ## 🔗 Enlaces útiles
 
-- [Aplicación Web](https://copynpaste-app-d4159.web.app)
+- [Aplicación Web](https://copynpaste.app)
 - [¿Qué es una PWA?](https://web.dev/progressive-web-apps/)
 - [Soporte para navegadores](https://caniuse.com/serviceworkers)
 

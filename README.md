@@ -27,7 +27,13 @@ npm install
 npm run dev
 ```
 
-Scripts destacados: `build`, `start`, `lint`, `build:capacitor`, `cap:ios`, `cap:android`, `firebase:deploy`, `deploy`.
+Scripts destacados: `build`, `start`, `lint`, `build:capacitor`, `cap:ios`, `cap:android`, `firebase:deploy`, `firebase:rules`.
+
+## Deploy web (Vercel)
+
+La app web y las API routes se publican en **Vercel** (push a la rama conectada o deploy manual desde el dashboard).
+
+Firebase se usa solo para **Auth, Firestore y Storage** — no para hosting.
 
 ## Instalar como app (hoy)
 
@@ -39,7 +45,7 @@ Scripts destacados: `build`, `start`, `lint`, `build:capacitor`, `cap:ios`, `cap
 | **Android** | App nativa Capacitor (proyecto en `android/`) | 📋 Backlog |
 | **Mac / Windows nativo** | PWA hoy; wrapper nativo más adelante | 📋 Backlog |
 
-La app nativa usa build estático (`out/`) y llama a las APIs en la URL de producción (`NEXT_PUBLIC_BASE_URL` → Firebase Hosting).
+La app nativa usa build estático (`out/`) y llama a las APIs en la URL de producción (`NEXT_PUBLIC_BASE_URL` → Vercel).
 
 ## Roadmap multiplataforma
 
@@ -80,7 +86,7 @@ En Xcode deberías ver el proyecto **CopyNPaste** (scheme `CopyNPaste`). Team de
 
 > Capacitor sigue esperando `App.xcodeproj` y `App.xcworkspace` por convención; en este repo son symlinks al proyecto real `CopyNPaste.*`.
 
-Variables necesarias en `.env.local`: `NEXT_PUBLIC_BASE_URL` apuntando al deploy con APIs (ej. `https://copynpaste-app-d4159.web.app`).
+Variables necesarias en `.env.local`: `NEXT_PUBLIC_BASE_URL` apuntando al deploy en Vercel (ej. `https://copynpaste.app` o `https://copynpaste-app.vercel.app`).
 
 ## Variables de entorno
 

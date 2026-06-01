@@ -28,6 +28,11 @@ MERCADOPAGO_PUBLIC_KEY=
 NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=
 ```
 
+### App URL (Vercel — usada por Capacitor y OAuth nativo)
+```
+NEXT_PUBLIC_BASE_URL=https://copynpaste.app
+```
+
 ## Getting Firebase Admin Credentials
 
 1. Go to Firebase Console → Project Settings → Service Accounts
@@ -38,6 +43,14 @@ NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY=
    - `FIREBASE_CLIENT_EMAIL`: client_email from JSON
    - `FIREBASE_PRIVATE_KEY`: private_key from JSON (keep \n as \n)
    - `FIREBASE_STORAGE_BUCKET`: your-project.firebasestorage.app
+
+## Firebase (solo reglas e índices)
+
+El hosting **no** usa Firebase. Para publicar reglas de Firestore/Storage:
+
+```bash
+npm run firebase:deploy
+```
 
 ## Setting up in Vercel
 

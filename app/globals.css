@@ -74,19 +74,25 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-  
-  html {
     width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
     background-color: hsl(var(--background));
   }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
   
-  body {
+  html {
     width: 100%;
-    min-height: 100vh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/context/auth-context';
 import { initPushNotifications } from '@/lib/native/push-notifications';
 import { initHaptics } from '@/lib/native/haptics';
 import { isNativePlatform } from '@/lib/native/platform';
+import { registerGoogleAuthDeepLinkListener } from '@/lib/firebase/google-auth-native';
 
 export function CapacitorProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ export function CapacitorProvider({ children }: { children: React.ReactNode }) {
       const native = await isNativePlatform();
       if (!native) return;
 
+      await registerGoogleAuthDeepLinkListener();
       await initHaptics();
       if (user?.uid) {
         await initPushNotifications(user.uid);

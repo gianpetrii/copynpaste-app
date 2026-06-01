@@ -1,4 +1,4 @@
-const DEFAULT_BASE_URL = 'https://copynpaste-app-d4159.web.app';
+const DEFAULT_BASE_URL = 'https://copynpaste.app';
 
 /**
  * Resuelve la URL base del servidor API.

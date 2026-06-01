@@ -4,8 +4,6 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/lib/context/auth-context"
-import { PWAInstaller } from "@/components/pwa-installer"
-import { PWAStatus } from "@/components/pwa-status"
 import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
 import DevSwCleanup from "@/components/dev-sw-cleanup"
 import { CapacitorProvider } from "@/components/native/capacitor-provider"
@@ -13,7 +11,7 @@ import { CapacitorProvider } from "@/components/native/capacitor-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://copynpaste-app-d4159.web.app'),
+  metadataBase: new URL('https://copynpaste.app'),
   title: "CopyNPaste - Tu Portapapeles Universal",
   description: "Guarda, organiza y accede a tu información importante desde cualquier dispositivo. Simple. Seguro. Sincronizado.",
   keywords: ["portapapeles", "clipboard", "notas", "archivos", "sincronización", "productividad"],
@@ -67,7 +65,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: 'https://copynpaste-app-d4159.web.app',
+    url: 'https://copynpaste.app',
     siteName: 'CopyNPaste',
     title: 'CopyNPaste - Tu Portapapeles Universal',
     description: 'Guarda, organiza y accede a tu información importante desde cualquier dispositivo. Simple. Seguro. Sincronizado.',
@@ -165,13 +163,11 @@ export default function RootLayout({
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
           <CapacitorProvider>
-            <div className="mx-auto max-w-7xl px-4 py-4">
+            <div className="mx-auto max-w-7xl px-4 pb-4">
               {children}
             </div>
             <Toaster />
             {process.env.NODE_ENV !== 'production' && <DevSwCleanup />}
-            <PWAInstaller />
-            <PWAStatus />
             <DeviceLimitWarning />
           </CapacitorProvider>
         </AuthProvider>

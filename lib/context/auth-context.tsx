@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
-import { onAuthStateChange, signIn, signOut, registerUser, signInWithGoogle, resetPassword as firebaseResetPassword } from '@/lib/firebase/auth';
+import { onAuthStateChange, signIn, signOut, registerUser, signInWithGoogle, completeGoogleRedirectSignIn, resetPassword as firebaseResetPassword } from '@/lib/firebase/auth';
 import { registerDevice, canUseDevice, updateDeviceLastActive, generateDeviceId } from '@/lib/firebase/device-manager';
 import { createUserProfile, getUserProfile } from '@/lib/firebase/subscription-manager';
 import type { UserProfile } from '@/lib/firebase/subscription-manager';
@@ -15,7 +15,7 @@ interface AuthContextType {
   currentDeviceId: string | null;
   login: (email: string, password: string) => Promise<User>;
   loginWithEmail: (email: string, password: string) => Promise<User>; // Alias para login
-  loginWithGoogle: () => Promise<User>;
+  loginWithGoogle: () => Promise<User | null>;
   logout: () => Promise<boolean>;
   register: (email: string, password: string) => Promise<User>;
   registerWithEmail: (email: string, password: string) => Promise<User>; // Alias para register
@@ -50,6 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Mark as hydrated
     setIsHydrated(true);
+
+    completeGoogleRedirectSignIn().catch((error) => {
+      console.error('Google redirect sign-in failed:', error);
+    });
     
     const unsubscribe = onAuthStateChange(async (user) => {
       setUser(user);

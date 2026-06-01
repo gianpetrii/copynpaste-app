@@ -68,13 +68,14 @@ export default function Home() {
   const textItems = items.filter(item => item.type === 'text').length
   const fileItems = items.filter(item => item.type === 'file').length
   const urlItems = items.filter(item => item.type === 'url').length
+  const isNativeLogin = isNative === true && !user
 
   // Prevent hydration mismatch and native/web flash before platform is detected
   if (!mounted || isNative === null) {
     return (
       <main className="min-h-screen">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
-          <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
+          <header className="safe-area-top flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
             <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
               <ClipboardIcon className="text-primary" size={28} />
               <div>
@@ -100,10 +101,11 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen">
-      <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
-        {/* Navbar mejorado - más compacto en móvil */}
-        <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
+    <main className={isNativeLogin ? "flex flex-col h-dvh max-h-dvh overflow-hidden" : "min-h-screen"}>
+      <div className={`w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 ${isNativeLogin ? "flex flex-1 flex-col min-h-0" : ""}`}>
+        {/* Navbar — oculto en login nativo (pantalla propia con safe-area) */}
+        {!isNativeLogin && (
+        <header className="safe-area-top flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
           <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
             <ClipboardIcon className="text-primary" size={28} />
             <div>
@@ -136,6 +138,7 @@ export default function Home() {
             {(!isNative || user) && <AuthButtons compact={true} />}
           </div>
         </header>
+        )}
 
         {user ? (
           /* Dashboard para usuarios logueados - Layout responsive */
@@ -251,9 +254,9 @@ export default function Home() {
             </div>
           </div>
         ) : isNative ? (
-          /* Pantalla de login nativa — limpia y centrada */
-          <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in zoom-in-95 duration-300">
-            <div className="w-full max-w-sm mx-auto flex flex-col items-center space-y-8 px-2">
+          /* Pantalla de login nativa — sin scroll extra, safe-area solo arriba */
+          <div className="safe-area-top safe-area-bottom flex flex-1 flex-col items-center justify-center min-h-0 px-2 animate-in fade-in zoom-in-95 duration-300">
+            <div className="w-full max-w-sm mx-auto flex flex-col items-center space-y-8">
               <div className="flex flex-col items-center space-y-4">
                 <ClipboardIcon className="text-primary hero-icon-banner" size={80} />
                 <div className="text-center space-y-1">

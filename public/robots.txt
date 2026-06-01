@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://copynpaste-app-d4159.web.app/sitemap.xml 
+Sitemap: https://copynpaste.app/sitemap.xml 
