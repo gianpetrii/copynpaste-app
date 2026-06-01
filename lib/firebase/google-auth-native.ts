@@ -1,14 +1,11 @@
 'use client';
 
-import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithCustomToken,
-  type User,
-} from 'firebase/auth';
+import { GoogleAuthProvider, signInWithCredential, signInWithCustomToken, type User } from 'firebase/auth';
 import { auth } from './firebase';
 import { getWebUrl } from '@/lib/utils/api-url';
 import { agentLog } from '@/lib/debug/agent-log';
+import { getNativePlatform } from '@/lib/native/platform';
+import { openSystemBrowser } from '@/lib/native/system-browser';
 
 const AUTH_CALLBACK_PREFIX = 'copynpaste://auth/callback';
 const AUTH_TIMEOUT_MS = 5 * 60 * 1000;
@@ -110,8 +107,6 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
   });
 
   if (googleAuthCompleted) {
-    const { Browser } = await import('@capacitor/browser');
-    await Browser.close().catch(() => {});
     return true;
   }
 
@@ -163,6 +158,29 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
   return true;
 }
 
+async function openAuthBrowser(authUrl: string): Promise<'system' | 'in-app'> {
+  const platform = await getNativePlatform();
+
+  if (platform === 'ios') {
+    agentLog({
+      hypothesisId: 'H',
+      location: 'google-auth-native:openAuthBrowser',
+      message: 'Opening system Safari for Google auth',
+      data: { authUrl },
+      runId: 'post-fix',
+    });
+    await openSystemBrowser(authUrl);
+    return 'system';
+  }
+
+  const { Browser } = await import('@capacitor/browser');
+  await Browser.open({
+    url: authUrl,
+    presentationStyle: 'fullscreen',
+  });
+  return 'in-app';
+}
+
 export async function signInWithGoogleNative(): Promise<User> {
   await registerGoogleAuthDeepLinkListener();
   googleAuthCompleted = false;
@@ -195,45 +213,44 @@ export async function signInWithGoogleNative(): Promise<User> {
     pendingGoogleAuth = { resolve, reject, timeoutId };
 
     try {
-      const { Browser } = await import('@capacitor/browser');
-      pendingGoogleAuth.browserFinishedListener = await Browser.addListener('browserFinished', () => {
-        setTimeout(() => {
-          if (googleAuthCompleted || !pendingGoogleAuth) return;
+      const browserMode = await openAuthBrowser(authUrl);
 
-          if (auth.currentUser) {
+      if (browserMode === 'in-app') {
+        const { Browser } = await import('@capacitor/browser');
+        pendingGoogleAuth.browserFinishedListener = await Browser.addListener('browserFinished', () => {
+          setTimeout(() => {
+            if (googleAuthCompleted || !pendingGoogleAuth) return;
+
+            if (auth.currentUser) {
+              agentLog({
+                hypothesisId: 'C',
+                location: 'google-auth-native:browserFinished',
+                message: 'Browser closed after auth already completed',
+                data: { uid: auth.currentUser.uid },
+                runId: 'post-fix',
+              });
+              void finishGoogleAuth(auth.currentUser);
+              return;
+            }
+
             agentLog({
               hypothesisId: 'C',
               location: 'google-auth-native:browserFinished',
-              message: 'Browser closed after auth already completed',
-              data: { uid: auth.currentUser.uid },
-              runId: 'post-fix',
+              message: 'Browser closed before auth callback',
+              data: {},
             });
-            void finishGoogleAuth(auth.currentUser);
-            return;
-          }
-
-          agentLog({
-            hypothesisId: 'C',
-            location: 'google-auth-native:browserFinished',
-            message: 'Browser closed before auth callback',
-            data: {},
-          });
-          const { reject: rejectPending } = pendingGoogleAuth;
-          clearPendingGoogleAuth();
-          rejectPending(new Error('Inicio de sesión cancelado'));
-        }, 800);
-      });
-
-      await Browser.open({
-        url: authUrl,
-        presentationStyle: 'fullscreen',
-      });
+            const { reject: rejectPending } = pendingGoogleAuth;
+            clearPendingGoogleAuth();
+            rejectPending(new Error('Inicio de sesión cancelado'));
+          }, 800);
+        });
+      }
 
       agentLog({
         hypothesisId: 'B',
         location: 'google-auth-native:signIn',
-        message: 'Browser.open resolved',
-        data: { authUrl },
+        message: 'Auth browser opened',
+        data: { authUrl, browserMode },
       });
     } catch (error) {
       clearPendingGoogleAuth();
