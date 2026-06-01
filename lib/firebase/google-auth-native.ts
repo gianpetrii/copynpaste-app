@@ -1,6 +1,11 @@
 'use client';
 
-import { GoogleAuthProvider, signInWithCredential, type User } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithCustomToken,
+  type User,
+} from 'firebase/auth';
 import { auth } from './firebase';
 import { getWebUrl } from '@/lib/utils/api-url';
 import { agentLog } from '@/lib/debug/agent-log';
@@ -114,11 +119,26 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
   const error = parsed.searchParams.get('error');
   const idToken = parsed.searchParams.get('idToken');
   const accessToken = parsed.searchParams.get('accessToken');
+  const customToken = parsed.searchParams.get('customToken');
 
   try {
     if (error) {
       throw new Error(decodeURIComponent(error));
     }
+
+    if (customToken) {
+      agentLog({
+        hypothesisId: 'G',
+        location: 'google-auth-native:deepLink',
+        message: 'Signing in with custom token',
+        data: {},
+        runId: 'post-fix',
+      });
+      const result = await signInWithCustomToken(auth, decodeURIComponent(customToken));
+      await finishGoogleAuth(result.user);
+      return true;
+    }
+
     if (!idToken) {
       throw new Error('No se recibió el token de Google');
     }
@@ -147,13 +167,16 @@ export async function signInWithGoogleNative(): Promise<User> {
   await registerGoogleAuthDeepLinkListener();
   googleAuthCompleted = false;
 
+  const authSession = Date.now().toString();
+  const authUrl = getWebUrl(`/native-google-auth?session=${authSession}`);
+
   agentLog({
     hypothesisId: 'A',
     location: 'google-auth-native:signIn',
     message: 'Starting Browser Google auth',
     data: {
       origin: typeof window !== 'undefined' ? window.location.origin : 'ssr',
-      authUrl: getWebUrl('/native-google-auth'),
+      authUrl,
     },
   });
 
@@ -202,7 +225,7 @@ export async function signInWithGoogleNative(): Promise<User> {
       });
 
       await Browser.open({
-        url: getWebUrl('/native-google-auth'),
+        url: authUrl,
         presentationStyle: 'fullscreen',
       });
 
@@ -210,7 +233,7 @@ export async function signInWithGoogleNative(): Promise<User> {
         hypothesisId: 'B',
         location: 'google-auth-native:signIn',
         message: 'Browser.open resolved',
-        data: { authUrl: getWebUrl('/native-google-auth') },
+        data: { authUrl },
       });
     } catch (error) {
       clearPendingGoogleAuth();

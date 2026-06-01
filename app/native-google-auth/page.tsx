@@ -4,14 +4,29 @@ import { useEffect, useRef, useState } from 'react';
 import {
   GoogleAuthProvider,
   getRedirectResult,
+  onAuthStateChanged,
   signInWithRedirect,
+  type Auth,
+  type User,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase';
 import { agentLog } from '@/lib/debug/agent-log';
+import { getApiUrl } from '@/lib/utils/api-url';
 
-const AUTH_FLOW_KEY = 'cnp_native_google_auth';
+function getAuthFlowKey(): string {
+  const sessionId =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('session') ?? 'default'
+      : 'default';
+  return `cnp_native_google_auth_${sessionId}`;
+}
 
-function redirectToApp(params: { idToken?: string; accessToken?: string; error?: string }) {
+function redirectToApp(params: {
+  idToken?: string;
+  accessToken?: string;
+  customToken?: string;
+  error?: string;
+}) {
   if (params.error) {
     window.location.replace(`copynpaste://auth/callback?error=${encodeURIComponent(params.error)}`);
     return;
@@ -20,7 +35,50 @@ function redirectToApp(params: { idToken?: string; accessToken?: string; error?:
   const query = new URLSearchParams();
   if (params.idToken) query.set('idToken', params.idToken);
   if (params.accessToken) query.set('accessToken', params.accessToken);
+  if (params.customToken) query.set('customToken', params.customToken);
   window.location.replace(`copynpaste://auth/callback?${query.toString()}`);
+}
+
+function waitForAuthUser(authInstance: Auth, timeoutMs: number): Promise<User | null> {
+  return new Promise((resolve) => {
+    if (authInstance.currentUser) {
+      resolve(authInstance.currentUser);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      unsubscribe();
+      resolve(authInstance.currentUser);
+    }, timeoutMs);
+
+    const unsubscribe = onAuthStateChanged(authInstance, (user) => {
+      if (user) {
+        clearTimeout(timeout);
+        unsubscribe();
+        resolve(user);
+      }
+    });
+  });
+}
+
+async function createNativeSessionToken(user: User): Promise<string> {
+  const firebaseIdToken = await user.getIdToken();
+  const response = await fetch(getApiUrl('/api/auth/native-session'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken: firebaseIdToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error('No se pudo crear la sesión para la app');
+  }
+
+  const data = (await response.json()) as { customToken?: string };
+  if (!data.customToken) {
+    throw new Error('Respuesta de sesión inválida');
+  }
+
+  return data.customToken;
 }
 
 export default function NativeGoogleAuthPage() {
@@ -32,8 +90,10 @@ export default function NativeGoogleAuthPage() {
     started.current = true;
 
     const run = async () => {
+      const authFlowKey = getAuthFlowKey();
+
       try {
-        const flowState = sessionStorage.getItem(AUTH_FLOW_KEY);
+        const flowState = sessionStorage.getItem(authFlowKey);
 
         if (flowState === 'done') {
           setMessage('Volviendo a la app...');
@@ -65,7 +125,7 @@ export default function NativeGoogleAuthPage() {
             throw new Error('No se obtuvo credencial de Google');
           }
 
-          sessionStorage.setItem(AUTH_FLOW_KEY, 'done');
+          sessionStorage.setItem(authFlowKey, 'done');
 
           agentLog({
             hypothesisId: 'E',
@@ -85,18 +145,37 @@ export default function NativeGoogleAuthPage() {
 
         if (flowState === 'redirecting') {
           setMessage('Volviendo a la app...');
+
           agentLog({
-            hypothesisId: 'F',
-            location: 'native-google-auth:stuckRedirect',
-            message: 'Returned from Google without redirect result, not restarting loop',
+            hypothesisId: 'G',
+            location: 'native-google-auth:fallback',
+            message: 'No redirect result, waiting for auth user for custom token',
             data: {},
             runId: 'post-fix',
           });
-          redirectToApp({ error: 'No se pudo completar el inicio de sesión. Volvé a la app e intentá de nuevo.' });
-          return;
+
+          const user = await waitForAuthUser(auth, 8000);
+
+          if (user) {
+            const customToken = await createNativeSessionToken(user);
+            sessionStorage.setItem(authFlowKey, 'done');
+
+            agentLog({
+              hypothesisId: 'G',
+              location: 'native-google-auth:customToken',
+              message: 'Custom token created for native app',
+              data: { uid: user.uid },
+              runId: 'post-fix',
+            });
+
+            redirectToApp({ customToken });
+            return;
+          }
+
+          throw new Error('No se pudo completar el inicio de sesión');
         }
 
-        sessionStorage.setItem(AUTH_FLOW_KEY, 'redirecting');
+        sessionStorage.setItem(authFlowKey, 'redirecting');
 
         agentLog({
           hypothesisId: 'E',
@@ -109,7 +188,7 @@ export default function NativeGoogleAuthPage() {
         const provider = new GoogleAuthProvider();
         await signInWithRedirect(auth, provider);
       } catch (error) {
-        sessionStorage.removeItem(AUTH_FLOW_KEY);
+        sessionStorage.removeItem(authFlowKey);
         const errorMessage =
           error instanceof Error ? error.message : 'No se pudo iniciar sesión con Google';
 
