@@ -73,6 +73,7 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
   const parsed = new URL(url.replace('copynpaste://', 'https://local/'));
   const error = parsed.searchParams.get('error');
   const idToken = parsed.searchParams.get('idToken');
+  const accessToken = parsed.searchParams.get('accessToken');
 
   if (!pendingGoogleAuth) {
     agentLog({
@@ -94,7 +95,10 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
       throw new Error('No se recibió el token de Google');
     }
 
-    const credential = GoogleAuthProvider.credential(decodeURIComponent(idToken));
+    const credential = GoogleAuthProvider.credential(
+      decodeURIComponent(idToken),
+      accessToken ? decodeURIComponent(accessToken) : undefined
+    );
     const result = await signInWithCredential(auth, credential);
 
     const { Browser } = await import('@capacitor/browser');
