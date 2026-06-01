@@ -17,6 +17,7 @@ type PendingGoogleAuth = {
 
 let pendingGoogleAuth: PendingGoogleAuth | null = null;
 let appUrlListenerRegistered = false;
+let googleAuthCompleted = false;
 
 function clearPendingGoogleAuth(error?: Error) {
   if (!pendingGoogleAuth) return;
@@ -33,6 +34,39 @@ function clearPendingGoogleAuth(error?: Error) {
       data: { error: error.message },
     });
   }
+}
+
+async function finishGoogleAuth(user: User): Promise<void> {
+  googleAuthCompleted = true;
+
+  const { Browser } = await import('@capacitor/browser');
+  await Browser.close().catch(() => {});
+
+  if (pendingGoogleAuth) {
+    const { resolve } = pendingGoogleAuth;
+    clearPendingGoogleAuth();
+    resolve(user);
+  }
+
+  agentLog({
+    hypothesisId: 'D',
+    location: 'google-auth-native:finish',
+    message: 'Google sign-in completed',
+    data: { uid: user.uid },
+    runId: 'post-fix',
+  });
+}
+
+async function signInFromDeepLinkTokens(
+  idToken: string,
+  accessToken: string | null
+): Promise<User> {
+  const credential = GoogleAuthProvider.credential(
+    decodeURIComponent(idToken),
+    accessToken ? decodeURIComponent(accessToken) : undefined
+  );
+  const result = await signInWithCredential(auth, credential);
+  return result.user;
 }
 
 export async function registerGoogleAuthDeepLinkListener(): Promise<void> {
@@ -67,25 +101,19 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
     hypothesisId: 'D',
     location: 'google-auth-native:deepLink',
     message: 'Auth deep link received',
-    data: { hasPending: !!pendingGoogleAuth },
+    data: { hasPending: !!pendingGoogleAuth, alreadyCompleted: googleAuthCompleted },
   });
+
+  if (googleAuthCompleted) {
+    const { Browser } = await import('@capacitor/browser');
+    await Browser.close().catch(() => {});
+    return true;
+  }
 
   const parsed = new URL(url.replace('copynpaste://', 'https://local/'));
   const error = parsed.searchParams.get('error');
   const idToken = parsed.searchParams.get('idToken');
   const accessToken = parsed.searchParams.get('accessToken');
-
-  if (!pendingGoogleAuth) {
-    agentLog({
-      hypothesisId: 'D',
-      location: 'google-auth-native:deepLink',
-      message: 'Deep link received without pending auth',
-      data: { hasError: !!error, hasToken: !!idToken },
-    });
-    return true;
-  }
-
-  const { resolve, reject } = pendingGoogleAuth;
 
   try {
     if (error) {
@@ -95,28 +123,21 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
       throw new Error('No se recibió el token de Google');
     }
 
-    const credential = GoogleAuthProvider.credential(
-      decodeURIComponent(idToken),
-      accessToken ? decodeURIComponent(accessToken) : undefined
-    );
-    const result = await signInWithCredential(auth, credential);
-
-    const { Browser } = await import('@capacitor/browser');
-    await Browser.close().catch(() => {});
-
-    clearPendingGoogleAuth();
-    resolve(result.user);
-
-    agentLog({
-      hypothesisId: 'D',
-      location: 'google-auth-native:deepLink',
-      message: 'Google sign-in completed via deep link',
-      data: { uid: result.user.uid },
-      runId: 'post-fix',
-    });
+    const user = await signInFromDeepLinkTokens(idToken, accessToken);
+    await finishGoogleAuth(user);
   } catch (authError) {
-    clearPendingGoogleAuth();
-    reject(authError instanceof Error ? authError : new Error('Error de autenticación con Google'));
+    if (pendingGoogleAuth) {
+      const { reject } = pendingGoogleAuth;
+      clearPendingGoogleAuth();
+      reject(authError instanceof Error ? authError : new Error('Error de autenticación con Google'));
+    } else {
+      agentLog({
+        hypothesisId: 'D',
+        location: 'google-auth-native:deepLink',
+        message: 'Deep link error without pending auth',
+        data: { error: authError instanceof Error ? authError.message : 'unknown' },
+      });
+    }
   }
 
   return true;
@@ -124,6 +145,7 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
 
 export async function signInWithGoogleNative(): Promise<User> {
   await registerGoogleAuthDeepLinkListener();
+  googleAuthCompleted = false;
 
   agentLog({
     hypothesisId: 'A',
@@ -142,7 +164,7 @@ export async function signInWithGoogleNative(): Promise<User> {
     }
 
     const timeoutId = setTimeout(() => {
-      if (!pendingGoogleAuth) return;
+      if (!pendingGoogleAuth || googleAuthCompleted) return;
       clearPendingGoogleAuth();
       reject(new Error('Tiempo de espera agotado al iniciar sesión con Google'));
     }, AUTH_TIMEOUT_MS);
@@ -153,7 +175,20 @@ export async function signInWithGoogleNative(): Promise<User> {
       const { Browser } = await import('@capacitor/browser');
       pendingGoogleAuth.browserFinishedListener = await Browser.addListener('browserFinished', () => {
         setTimeout(() => {
-          if (!pendingGoogleAuth) return;
+          if (googleAuthCompleted || !pendingGoogleAuth) return;
+
+          if (auth.currentUser) {
+            agentLog({
+              hypothesisId: 'C',
+              location: 'google-auth-native:browserFinished',
+              message: 'Browser closed after auth already completed',
+              data: { uid: auth.currentUser.uid },
+              runId: 'post-fix',
+            });
+            void finishGoogleAuth(auth.currentUser);
+            return;
+          }
+
           agentLog({
             hypothesisId: 'C',
             location: 'google-auth-native:browserFinished',
@@ -168,7 +203,7 @@ export async function signInWithGoogleNative(): Promise<User> {
 
       await Browser.open({
         url: getWebUrl('/native-google-auth'),
-        presentationStyle: 'popover',
+        presentationStyle: 'fullscreen',
       });
 
       agentLog({
