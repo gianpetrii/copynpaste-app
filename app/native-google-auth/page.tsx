@@ -6,17 +6,15 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase';
-import { agentLog } from '@/lib/debug/agent-log';
 
-function redirectToApp(params: { idToken?: string; accessToken?: string; error?: string }) {
+function redirectToApp(params: { customToken?: string; error?: string }) {
   if (params.error) {
     window.location.replace(`copynpaste://auth/callback?error=${encodeURIComponent(params.error)}`);
     return;
   }
 
   const query = new URLSearchParams();
-  if (params.idToken) query.set('idToken', params.idToken);
-  if (params.accessToken) query.set('accessToken', params.accessToken);
+  if (params.customToken) query.set('customToken', params.customToken);
   window.location.replace(`copynpaste://auth/callback?${query.toString()}`);
 }
 
@@ -40,54 +38,55 @@ export default function NativeGoogleAuthPage() {
     setErrorMessage('');
 
     try {
-      agentLog({
-        hypothesisId: 'K',
-        location: 'native-google-auth:popup',
-        message: 'Starting Google popup (sending credentials directly)',
-        data: {},
-        runId: 'post-fix',
-      });
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:popup',message:'Starting Google popup with custom token flow',data:{},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
 
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const googleIdToken = credential?.idToken;
-      const googleAccessToken = credential?.accessToken;
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:popup-success',message:'Google popup succeeded, getting Firebase ID token',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
 
-      if (!googleIdToken) {
-        throw new Error('No se obtuvo el token de Google');
+      const firebaseIdToken = await result.user.getIdToken();
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:got-firebase-token',message:'Got Firebase ID token, requesting custom token',data:{tokenLength:firebaseIdToken.length},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
+
+      const apiUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      const response = await fetch(`${apiUrl}/api/auth/native-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: firebaseIdToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al obtener token de sesión');
       }
 
-      agentLog({
-        hypothesisId: 'K',
-        location: 'native-google-auth:success',
-        message: 'Google auth succeeded, sending tokens to app',
-        data: { 
-          uid: result.user.uid,
-          hasIdToken: !!googleIdToken,
-          hasAccessToken: !!googleAccessToken,
-        },
-        runId: 'post-fix',
-      });
+      const { customToken } = await response.json();
+      
+      if (!customToken) {
+        throw new Error('No se obtuvo el token de sesión');
+      }
+
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:got-custom-token',message:'Custom token obtained, redirecting to app',data:{customTokenLength:customToken.length},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
 
       setStatus('success');
-
-      redirectToApp({
-        idToken: googleIdToken,
-        accessToken: googleAccessToken ?? undefined,
-      });
+      redirectToApp({ customToken });
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'No se pudo iniciar sesión con Google';
       setStatus('error');
       setErrorMessage(msg);
 
-      agentLog({
-        hypothesisId: 'K',
-        location: 'native-google-auth:error',
-        message: 'Google auth failed',
-        data: { error: msg },
-      });
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:error',message:'Google auth flow failed',data:{error:msg},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
 
       setTimeout(() => {
         redirectToApp({ error: msg });

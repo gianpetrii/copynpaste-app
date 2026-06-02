@@ -127,12 +127,9 @@ export async function registerGoogleAuthDeepLinkListener(): Promise<void> {
 export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
   if (!url.startsWith(AUTH_CALLBACK_PREFIX)) return false;
 
-  agentLog({
-    hypothesisId: 'D',
-    location: 'google-auth-native:deepLink',
-    message: 'Auth deep link received',
-    data: { hasPending: !!pendingGoogleAuth, alreadyCompleted: googleAuthCompleted },
-  });
+  // #region agent log
+  fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:deepLink',message:'Auth deep link received',data:{hasPending:!!pendingGoogleAuth,alreadyCompleted:googleAuthCompleted,urlLength:url.length},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+  // #endregion
 
   if (googleAuthCompleted) {
     return true;
@@ -140,9 +137,13 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
 
   const parsed = new URL(url.replace('copynpaste://', 'https://local/'));
   const error = parsed.searchParams.get('error');
+  const customToken = parsed.searchParams.get('customToken');
   const idToken = parsed.searchParams.get('idToken');
   const accessToken = parsed.searchParams.get('accessToken');
-  const customToken = parsed.searchParams.get('customToken');
+
+  // #region agent log
+  fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:deepLink-parsed',message:'Deep link params parsed',data:{hasCustomToken:!!customToken,hasIdToken:!!idToken,hasError:!!error},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+  // #endregion
 
   try {
     if (error) {
@@ -151,27 +152,12 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
 
     if (customToken) {
       const decodedToken = decodeURIComponent(customToken);
-      agentLog({
-        hypothesisId: 'G',
-        location: 'google-auth-native:deepLink',
-        message: 'Signing in with custom token',
-        data: {
-          tokenLength: decodedToken.length,
-          tokenStart: decodedToken.substring(0, 50),
-          tokenEnd: decodedToken.substring(decodedToken.length - 20),
-        },
-        runId: 'post-fix',
-      });
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-start',message:'Starting signInWithCustomToken',data:{tokenLength:decodedToken.length,authReady:!!auth},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
 
       try {
-        agentLog({
-          hypothesisId: 'G',
-          location: 'google-auth-native:deepLink',
-          message: 'Calling signInWithCustomToken...',
-          data: { authReady: !!auth, currentUser: !!auth?.currentUser },
-          runId: 'post-fix',
-        });
-
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error('signInWithCustomToken timeout (15s)')), 15000);
         });
@@ -181,56 +167,47 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
           timeoutPromise,
         ]);
 
-        agentLog({
-          hypothesisId: 'G',
-          location: 'google-auth-native:deepLink',
-          message: 'signInWithCustomToken succeeded',
-          data: { uid: result.user.uid },
-          runId: 'post-fix',
-        });
+        // #region agent log
+        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-success',message:'signInWithCustomToken succeeded',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+        // #endregion
+
         await finishGoogleAuth(result.user);
       } catch (tokenError) {
-        agentLog({
-          hypothesisId: 'G',
-          location: 'google-auth-native:deepLink',
-          message: 'signInWithCustomToken failed',
-          data: { error: tokenError instanceof Error ? tokenError.message : 'unknown' },
-          runId: 'post-fix',
-        });
+        // #region agent log
+        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-error',message:'signInWithCustomToken failed',data:{error:tokenError instanceof Error?tokenError.message:'unknown'},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+        // #endregion
         throw tokenError;
       }
       return true;
     }
 
-    if (!idToken) {
-      throw new Error('No se recibió el token de Google');
+    if (idToken) {
+      try {
+        const user = await signInFromDeepLinkTokens(idToken, accessToken);
+        await finishGoogleAuth(user);
+      } catch (credentialError) {
+        agentLog({
+          hypothesisId: 'K',
+          location: 'google-auth-native:deepLink',
+          message: 'signInFromDeepLinkTokens failed',
+          data: { error: credentialError instanceof Error ? credentialError.message : 'unknown' },
+          runId: 'post-fix',
+        });
+        throw credentialError;
+      }
+      return true;
     }
 
-    try {
-      const user = await signInFromDeepLinkTokens(idToken, accessToken);
-      await finishGoogleAuth(user);
-    } catch (credentialError) {
-      agentLog({
-        hypothesisId: 'K',
-        location: 'google-auth-native:deepLink',
-        message: 'signInFromDeepLinkTokens failed',
-        data: { error: credentialError instanceof Error ? credentialError.message : 'unknown' },
-        runId: 'post-fix',
-      });
-      throw credentialError;
-    }
+    throw new Error('No se recibió token de autenticación');
   } catch (authError) {
     if (pendingGoogleAuth) {
       const { reject } = pendingGoogleAuth;
       clearPendingGoogleAuth();
       reject(authError instanceof Error ? authError : new Error('Error de autenticación con Google'));
     } else {
-      agentLog({
-        hypothesisId: 'D',
-        location: 'google-auth-native:deepLink',
-        message: 'Deep link error without pending auth',
-        data: { error: authError instanceof Error ? authError.message : 'unknown' },
-      });
+      // #region agent log
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:deepLink-error',message:'Deep link error without pending auth',data:{error:authError instanceof Error?authError.message:'unknown'},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      // #endregion
     }
   }
 
