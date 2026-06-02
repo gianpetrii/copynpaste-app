@@ -5,6 +5,7 @@ import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Paperclip, Info, Link as LinkIcon } from "lucide-react"
+
 import { useToast } from "@/components/use-toast"
 import { useItems } from "@/lib/hooks"
 import { useAuth } from "@/lib/context/auth-context"
@@ -13,13 +14,6 @@ import { logger } from "@/lib/utils/logger"
 import ItemLimitModal from "@/components/features/limits/item-limit-modal"
 import { useClipboardPaste, type ClipboardImageData } from "@/lib/hooks/use-clipboard-paste"
 import { ImagePreview } from "@/components/ui/image-preview"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
 export function AddItemForm() {
   const { toast } = useToast()
   const { user } = useAuth()
@@ -276,19 +270,14 @@ export function AddItemForm() {
                   </label>
                 )}
 
-                {/* Info tooltip de límites */}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="text-muted-foreground hover:text-foreground transition-colors p-1">
-                        <Info className="h-3 w-3" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs max-w-[180px]">
-                      Máx. 10 MB · Imágenes, docs, audio, video, zip
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {/* Info de límites */}
+                <button
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                  title="Máx. 10 MB · Imágenes, docs, audio, video, zip"
+                  type="button"
+                >
+                  <Info className="h-3 w-3" />
+                </button>
               </div>
 
               {/* Botón guardar */}
