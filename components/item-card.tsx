@@ -307,10 +307,10 @@ export function ItemCard({ item }: ItemCardProps) {
     // Count number of lines (by counting newline characters)
     const lineCount = (text.match(/\n/g) || []).length + 1;
     
-    if (isMobile) {
-      // For mobile: limit to 50 characters or 2 lines
+      if (isMobile) {
+      // For mobile: limit to 80 characters or 2 lines
       const exceedsLineLimit = lineCount > 2;
-      const exceedsCharLimit = text.length > 50;
+      const exceedsCharLimit = text.length > 80;
       
       if ((exceedsLineLimit || exceedsCharLimit) && !showFullText) {
         if (exceedsLineLimit) {
@@ -326,8 +326,8 @@ export function ItemCard({ item }: ItemCardProps) {
         
         // If we didn't truncate by lines or there aren't enough newlines,
         // truncate by character count
-        if (text.length > 50) {
-          return text.substring(0, 50) + "...";
+        if (text.length > 80) {
+          return text.substring(0, 80) + "...";
         }
       }
     } else {
@@ -366,7 +366,7 @@ export function ItemCard({ item }: ItemCardProps) {
     const lineCount = (content.match(/\n/g) || []).length + 1;
     
     if (isMobile) {
-      return lineCount > 2 || content.length > 50;
+      return lineCount > 2 || content.length > 80;
     } else {
       return lineCount > 3 || content.length > 300;
     }
@@ -673,7 +673,7 @@ export function ItemCard({ item }: ItemCardProps) {
       )}
       
       <div 
-        className={`item-card border border-border rounded-md p-2 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all relative ${
+        className={`group item-card border border-border rounded-md p-2 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all relative ${
           swipeHandlers.isSwipping ? 'scale-98 shadow-lg' : ''
         }`}
         style={{
@@ -803,15 +803,15 @@ export function ItemCard({ item }: ItemCardProps) {
           
           <div className="mt-0.5">
             {renderContent()}
-            <div className="text-xs lg:text-sm text-muted-foreground mt-1">
+            <div className={`text-[10px] text-muted-foreground/70 mt-0.5 transition-opacity ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {formatDate(item.createdAt)}
               {item.updatedAt && (
                 typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
                 typeof item.createdAt === 'object' && item.createdAt instanceof Date && 
                 item.updatedAt.getTime() !== item.createdAt.getTime() ? (
-                  <> • {formatDate(item.updatedAt)}</>
+                  <> · editado {formatDate(item.updatedAt)}</>
                 ) : (
-                  item.updatedAt !== item.createdAt && <> • {formatDate(item.updatedAt)}</>
+                  item.updatedAt !== item.createdAt && <> · editado {formatDate(item.updatedAt)}</>
                 )
               )}
             </div>

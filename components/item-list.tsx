@@ -188,58 +188,52 @@ export function ItemList({ filter = "all" }: ItemListProps) {
     <div className="w-full">
       <div className="bg-secondary/50 border border-border rounded-xl shadow-sm p-2 mb-2">
         
-        {/* Barra de búsqueda compacta */}
-        <div className="mb-2">
-          <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-3 w-3" />
+        {/* Barra única: búsqueda + filtros + eliminar */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground h-3 w-3" />
             <Input
               placeholder="Buscar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-7 h-8 text-sm lg:text-base bg-background border-border text-foreground"
+              className="pl-7 h-8 text-sm bg-background border-border text-foreground"
             />
           </div>
-        </div>
 
-        {/* Filtros compactos */}
-        <div className="flex flex-col gap-2 mb-3">
-          <div className="flex gap-2">
           <Select value={filterType} onValueChange={(value) => setFilterType(value as "all" | "text" | "url" | "file")}>
-              <SelectTrigger className="flex-1 h-8 text-sm lg:text-base bg-background border-border text-foreground">
-                <SelectValue placeholder="Tipo" />
+            <SelectTrigger className="w-20 h-8 text-xs bg-background border-border text-foreground shrink-0">
+              <SelectValue placeholder="Tipo" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
-                <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="text">Texto</SelectItem>
-              <SelectItem value="url">Enlaces</SelectItem>
-              <SelectItem value="file">Archivos</SelectItem>
+              <SelectItem value="url">Enlace</SelectItem>
+              <SelectItem value="file">Archivo</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
-              <SelectTrigger className="flex-1 h-8 text-sm lg:text-base bg-background border-border text-foreground">
-                <SelectValue placeholder="Orden" />
+            <SelectTrigger className="w-20 h-8 text-xs bg-background border-border text-foreground shrink-0">
+              <SelectValue placeholder="↕" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
-                <SelectItem value="newest">Reciente</SelectItem>
-                <SelectItem value="oldest">Antiguo</SelectItem>
-                <SelectItem value="modified">Modificado</SelectItem>
+              <SelectItem value="newest">Reciente</SelectItem>
+              <SelectItem value="oldest">Antiguo</SelectItem>
+              <SelectItem value="modified">Modificado</SelectItem>
             </SelectContent>
           </Select>
-        </div>
 
-          {/* Botón eliminar todos compacto */}
           {filteredAndSortedItems.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="h-8 text-sm lg:text-base text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
                   disabled={isDeleting}
+                  title={`Eliminar ${filteredAndSortedItems.length} elemento${filteredAndSortedItems.length === 1 ? '' : 's'}`}
                 >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  {isDeleting ? "Eliminando..." : `Eliminar (${filteredAndSortedItems.length})`}
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -249,7 +243,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
                     ¿Eliminar todos los elementos?
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta acción eliminará <strong>{filteredAndSortedItems.length}</strong> elemento{filteredAndSortedItems.length === 1 ? '' : 's'} 
+                    Esta acción eliminará <strong>{filteredAndSortedItems.length}</strong> elemento{filteredAndSortedItems.length === 1 ? '' : 's'}
                     {searchQuery && ` que coinciden con "${searchQuery}"`}
                     {filterType !== "all" && ` del tipo "${filterType}"`}
                     {filter === "favorites" && " de tus favoritos"}.
@@ -259,10 +253,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleDeleteAll}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
+                  <AlertDialogAction onClick={handleDeleteAll} className="bg-red-600 hover:bg-red-700 text-white">
                     Sí, eliminar todos
                   </AlertDialogAction>
                 </AlertDialogFooter>

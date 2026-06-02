@@ -82,7 +82,7 @@ export default function Home() {
               <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
                 Copy & Paste
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
+              <p className="hidden lg:block text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
                 Tu portapapeles universal
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function Home() {
               <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
                 Copy & Paste
               </h1>
-              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
+              <p className="hidden lg:block text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
                 Tu portapapeles universal
               </p>
             </div>
@@ -184,37 +184,6 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Mobile/Tablet: Saludo horizontal con iconos */}
-                    <div className="lg:hidden">
-                      <div className="flex items-center justify-between gap-1 text-left">
-                        <h2 className="text-sm sm:text-lg font-bold text-foreground">
-                          ¡Hola, {user.displayName?.split(' ')[0] || 'Usuario'}! <span className="wave-greeting">👋</span>
-                        </h2>
-                        {/* Stats horizontales con iconos */}
-                        {totalItems > 0 && (
-                          <div className="flex gap-1.5 sm:gap-2 text-xs sm:text-sm">
-                            <div className="flex items-center gap-0.5 text-muted-foreground">
-                              <FileText className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span>{textItems}</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 text-muted-foreground">
-                              <LinkIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span>{urlItems}</span>
-                            </div>
-                            <div className="flex items-center gap-0.5 text-muted-foreground">
-                              <Upload className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                              <span>{fileItems}</span>
-                            </div>
-                            {favoriteItems > 0 && (
-                              <div className="flex items-center gap-0.5 text-amber-600">
-                                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
-                                <span>{favoriteItems}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   {/* Formulario */}
