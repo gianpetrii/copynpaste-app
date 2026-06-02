@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/context/auth-context"
 import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
 import DevSwCleanup from "@/components/dev-sw-cleanup"
 import { CapacitorProvider } from "@/components/native/capacitor-provider"
+import { StatusBarCover } from "@/components/native/status-bar-cover"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -163,7 +164,8 @@ export default function RootLayout({
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
           <CapacitorProvider>
-            <div className="mx-auto max-w-7xl px-4 pb-4">
+            <StatusBarCover />
+            <div className="mx-auto max-w-7xl px-4 pb-4 has-status-bar-cover">
               {children}
             </div>
             <Toaster />

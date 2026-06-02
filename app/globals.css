@@ -90,6 +90,28 @@
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  /* Fixed status bar background for native apps */
+  .status-bar-cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: hsl(var(--background) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .dark .status-bar-cover {
+    background: hsl(0 0% 0% / 0.85);
+  }
+
+  /* Main content padding when using status bar cover */
+  .has-status-bar-cover {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
   
   html {
     width: 100%;
