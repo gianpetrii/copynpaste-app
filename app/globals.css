@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Tema claro - Fondo violeta suave */
-    --background: 270 40% 95%;
+    /* Tema claro */
+    --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -37,34 +37,34 @@
   }
 
   .dark {
-    /* Tema oscuro - Violeta muy oscuro */
+    /* Tema oscuro - Familia violeta */
     --background: 270 30% 7%;
     --foreground: 0 0% 100%;
 
-    --card: 0 0% 0%;
+    --card: 270 25% 10%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 0%;
+    --popover: 270 25% 10%;
     --popover-foreground: 0 0% 100%;
 
     --primary: 0 0% 90%;
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 270 30% 7%;
 
-    --secondary: 0 0% 5%;
+    --secondary: 270 20% 14%;
     --secondary-foreground: 0 0% 90%;
 
-    --muted: 0 0% 5%;
-    --muted-foreground: 0 0% 70%;
+    --muted: 270 20% 12%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 0 0% 12%;
+    --accent: 270 20% 16%;
     --accent-foreground: 0 0% 90%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 90%;
 
-    --border: 0 0% 30%;
-    --input: 0 0% 10%;
-    --ring: 0 0% 80%;
+    --border: 270 15% 28%;
+    --input: 270 20% 12%;
+    --ring: 270 30% 70%;
   }
 }
 
@@ -121,25 +121,11 @@
     background-color: hsl(var(--background));
   }
   
-  /* Asegurar que el body en modo oscuro sea negro puro */
-  .dark body {
-    background-color: black !important;
-  }
-
-  /* Asegurar que el html en modo oscuro también sea negro */
-  .dark html {
-    background-color: black !important;
-  }
-
-  /* Asegurar que el main en modo oscuro sea negro */
+  /* Fondo unificado dark: usa la variable del tema */
+  .dark body,
+  .dark html,
   .dark main {
-    background-color: black !important;
-  }
-
-  /* Asegurar que los contenedores en modo oscuro usen el background violeta */
-  .dark .container, 
-  .dark .bg-background {
-    background-color: hsl(270 30% 7%) !important;
+    background-color: hsl(var(--background)) !important;
   }
   
   /* Mejorar el manejo de texto para dispositivos móviles */

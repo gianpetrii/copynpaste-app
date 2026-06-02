@@ -18,7 +18,6 @@ import {
   Star
 } from "lucide-react"
 import { ClipboardIcon } from "@/components/ui/clipboard-icon"
-import UserPlanBanner from "@/components/features/banners/user-plan-banner"
 import { PlanNavBadge } from "@/components/features/banners/plan-nav-badge"
 import Link from "next/link"
 import { isNativePlatform } from "@/lib/native/platform"
@@ -145,10 +144,6 @@ export default function Home() {
         {user ? (
           /* Dashboard para usuarios logueados - Layout responsive */
           <div className="space-y-2 sm:space-y-3">
-            {/* Plan Banner — oculto en mobile (se muestra como badge en el navbar) */}
-            <div className="hidden sm:block">
-              <UserPlanBanner />
-            </div>
             {/* Layout mejorado - columna izquierda más ancha en desktop */}
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {/* Welcome section y form */}

@@ -23,7 +23,7 @@ export function PlanNavBadge() {
 
   if (isPremium) {
     return (
-      <Link href="/pricing" className="sm:hidden">
+      <Link href="/pricing">
         <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50">
           <CrownIcon className="h-3 w-3" />
           {currentPlan === 'enterprise' ? 'Ent.' : 'Pro'}
@@ -34,7 +34,7 @@ export function PlanNavBadge() {
 
   if (isNearLimit) {
     return (
-      <Link href="/pricing" className="sm:hidden">
+      <Link href="/pricing">
         <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50">
           <ZapIcon className="h-3 w-3" />
           {Math.round(usagePercent)}%
@@ -44,7 +44,7 @@ export function PlanNavBadge() {
   }
 
   return (
-    <Link href="/pricing" className="sm:hidden">
+    <Link href="/pricing">
       <span className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
         Free
       </span>
