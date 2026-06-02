@@ -154,27 +154,45 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
       const decodedToken = decodeURIComponent(customToken);
       
       // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-start',message:'Starting signInWithCustomToken',data:{tokenLength:decodedToken.length,authReady:!!auth},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-start',message:'Starting signInWithCustomToken',data:{tokenLength:decodedToken.length,authReady:!!auth,authConfig:auth?.config?.apiKey?.substring(0,10),currentUser:!!auth?.currentUser},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
       // #endregion
 
       try {
+        // #region agent log
+        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-calling',message:'Calling signInWithCustomToken now',data:{timestamp:Date.now()},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
+        // #endregion
+
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('signInWithCustomToken timeout (15s)')), 15000);
+          setTimeout(() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-timeout',message:'Timeout triggered - signInWithCustomToken did not resolve',data:{},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
+            // #endregion
+            reject(new Error('signInWithCustomToken timeout (15s)'));
+          }, 15000);
         });
 
-        const result = await Promise.race([
-          signInWithCustomToken(auth, decodedToken),
-          timeoutPromise,
-        ]);
+        const signInPromise = signInWithCustomToken(auth, decodedToken).then((result) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-resolved',message:'signInWithCustomToken promise resolved',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
+          // #endregion
+          return result;
+        }).catch((err) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-rejected',message:'signInWithCustomToken promise rejected',data:{error:err?.message,code:err?.code},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
+          // #endregion
+          throw err;
+        });
+
+        const result = await Promise.race([signInPromise, timeoutPromise]);
 
         // #region agent log
-        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-success',message:'signInWithCustomToken succeeded',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-success',message:'signInWithCustomToken succeeded',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
         // #endregion
 
         await finishGoogleAuth(result.user);
       } catch (tokenError) {
         // #region agent log
-        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-error',message:'signInWithCustomToken failed',data:{error:tokenError instanceof Error?tokenError.message:'unknown'},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'google-auth-native:customToken-error',message:'signInWithCustomToken failed',data:{error:tokenError instanceof Error?tokenError.message:'unknown'},timestamp:Date.now(),hypothesisId:'Q'})}).catch(()=>{});
         // #endregion
         throw tokenError;
       }

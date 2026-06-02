@@ -5,6 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import {
   getAuth,
   initializeAuth,
+  inMemoryPersistence,
   browserLocalPersistence,
   browserPopupRedirectResolver,
   type Auth,
@@ -28,12 +29,19 @@ const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp);
 
+function isCapacitorNative(): boolean {
+  if (typeof window === 'undefined') return false;
+  const win = window as Window & { Capacitor?: { isNativePlatform?: () => boolean } };
+  return win.Capacitor?.isNativePlatform?.() ?? false;
+}
+
 let auth: Auth;
 if (typeof window !== 'undefined') {
   try {
+    const isNative = isCapacitorNative();
     auth = initializeAuth(firebaseApp, {
-      persistence: browserLocalPersistence,
-      popupRedirectResolver: browserPopupRedirectResolver,
+      persistence: isNative ? inMemoryPersistence : browserLocalPersistence,
+      popupRedirectResolver: isNative ? undefined : browserPopupRedirectResolver,
     });
   } catch {
     auth = getAuth(firebaseApp);
