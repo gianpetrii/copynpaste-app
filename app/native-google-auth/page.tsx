@@ -1,10 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-} from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase';
 
 function redirectToApp(params: { customToken?: string; error?: string }) {
@@ -38,22 +35,9 @@ export default function NativeGoogleAuthPage() {
     setErrorMessage('');
 
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:popup',message:'Starting Google popup with custom token flow',data:{},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
-      // #endregion
-
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:popup-success',message:'Google popup succeeded, getting Firebase ID token',data:{uid:result.user.uid},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
-      // #endregion
-
       const firebaseIdToken = await result.user.getIdToken();
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:got-firebase-token',message:'Got Firebase ID token, requesting custom token',data:{tokenLength:firebaseIdToken.length},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
-      // #endregion
 
       const apiUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       const response = await fetch(`${apiUrl}/api/auth/native-session`, {
@@ -73,20 +57,12 @@ export default function NativeGoogleAuthPage() {
         throw new Error('No se obtuvo el token de sesión');
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:got-custom-token',message:'Custom token obtained, redirecting to app',data:{customTokenLength:customToken.length},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
-      // #endregion
-
       setStatus('success');
       redirectToApp({ customToken });
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'No se pudo iniciar sesión con Google';
       setStatus('error');
       setErrorMessage(msg);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'a0b6a1'},body:JSON.stringify({sessionId:'a0b6a1',location:'native-google-auth:error',message:'Google auth flow failed',data:{error:msg},timestamp:Date.now(),hypothesisId:'M'})}).catch(()=>{});
-      // #endregion
 
       setTimeout(() => {
         redirectToApp({ error: msg });

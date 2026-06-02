@@ -52,15 +52,7 @@ export const completeGoogleRedirectSignIn = async (): Promise<User | null> => {
 export const signInWithGoogle = async (): Promise<User | null> => {
   try {
     if (typeof window !== 'undefined') {
-      const { agentLog } = await import('@/lib/debug/agent-log');
       const { isNativePlatform } = await import('@/lib/native/platform');
-
-      agentLog({
-        hypothesisId: 'B',
-        location: 'auth.ts:signInWithGoogle',
-        message: 'Google sign-in requested',
-        data: { origin: window.location.origin },
-      });
 
       if (await isNativePlatform()) {
         const { signInWithGoogleNative } = await import('./google-auth-native');
@@ -79,6 +71,13 @@ export const signInWithGoogle = async (): Promise<User | null> => {
 // Función para cerrar sesión
 export const signOut = async () => {
   try {
+    if (typeof window !== 'undefined') {
+      const { isNativePlatform } = await import('@/lib/native/platform');
+      if (await isNativePlatform()) {
+        const { signOutNative } = await import('./google-auth-native');
+        await signOutNative();
+      }
+    }
     await firebaseSignOut(auth);
     return true;
   } catch (error) {

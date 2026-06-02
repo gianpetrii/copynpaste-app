@@ -55,6 +55,14 @@
 				<string>copynpaste</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Google Sign-In</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.151064134430-mua6shcnmijvlgr1m8nh97hr02m976iv</string>
+			</array>
+		</dict>
 	</array>
     <key>NSFaceIDUsageDescription</key>
     <string>CopyNPaste usa Face ID para iniciar sesión de forma segura.</string>
