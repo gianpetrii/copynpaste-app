@@ -4,46 +4,20 @@ import { useState } from 'react';
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  type User,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebase';
 import { agentLog } from '@/lib/debug/agent-log';
-import { getApiUrl } from '@/lib/utils/api-url';
 
-type CallbackPayload = {
-  customToken?: string;
-  error?: string;
-};
-
-function redirectToApp(params: CallbackPayload) {
+function redirectToApp(params: { idToken?: string; accessToken?: string; error?: string }) {
   if (params.error) {
     window.location.replace(`copynpaste://auth/callback?error=${encodeURIComponent(params.error)}`);
     return;
   }
 
   const query = new URLSearchParams();
-  if (params.customToken) query.set('customToken', params.customToken);
+  if (params.idToken) query.set('idToken', params.idToken);
+  if (params.accessToken) query.set('accessToken', params.accessToken);
   window.location.replace(`copynpaste://auth/callback?${query.toString()}`);
-}
-
-async function createNativeSessionToken(user: User): Promise<string> {
-  const firebaseIdToken = await user.getIdToken();
-  const response = await fetch(getApiUrl('/api/auth/native-session'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idToken: firebaseIdToken }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`No se pudo crear la sesión (${response.status})`);
-  }
-
-  const data = (await response.json()) as { customToken?: string };
-  if (!data.customToken) {
-    throw new Error('Respuesta de sesión inválida');
-  }
-
-  return data.customToken;
 }
 
 function GoogleIcon({ className = "h-5 w-5" }: { className?: string }) {
@@ -67,44 +41,49 @@ export default function NativeGoogleAuthPage() {
 
     try {
       agentLog({
-        hypothesisId: 'J',
+        hypothesisId: 'K',
         location: 'native-google-auth:popup',
-        message: 'Starting Google popup auth (user clicked)',
-        data: { userAgent: navigator.userAgent },
+        message: 'Starting Google popup (sending credentials directly)',
+        data: {},
         runId: 'post-fix',
       });
 
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const googleIdToken = credential?.idToken;
+      const googleAccessToken = credential?.accessToken;
+
+      if (!googleIdToken) {
+        throw new Error('No se obtuvo el token de Google');
+      }
 
       agentLog({
-        hypothesisId: 'J',
-        location: 'native-google-auth:popupSuccess',
-        message: 'Google popup auth succeeded',
-        data: { uid: result.user.uid },
+        hypothesisId: 'K',
+        location: 'native-google-auth:success',
+        message: 'Google auth succeeded, sending tokens to app',
+        data: { 
+          uid: result.user.uid,
+          hasIdToken: !!googleIdToken,
+          hasAccessToken: !!googleAccessToken,
+        },
         runId: 'post-fix',
       });
 
       setStatus('success');
 
-      const customToken = await createNativeSessionToken(result.user);
-
-      agentLog({
-        hypothesisId: 'J',
-        location: 'native-google-auth:customToken',
-        message: 'Custom token created',
-        data: { uid: result.user.uid },
-        runId: 'post-fix',
+      redirectToApp({
+        idToken: googleIdToken,
+        accessToken: googleAccessToken ?? undefined,
       });
-
-      redirectToApp({ customToken });
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'No se pudo iniciar sesión con Google';
       setStatus('error');
       setErrorMessage(msg);
 
       agentLog({
-        hypothesisId: 'J',
+        hypothesisId: 'K',
         location: 'native-google-auth:error',
         message: 'Google auth failed',
         data: { error: msg },

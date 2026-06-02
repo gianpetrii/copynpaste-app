@@ -63,11 +63,39 @@ async function signInFromDeepLinkTokens(
   idToken: string,
   accessToken: string | null
 ): Promise<User> {
+  agentLog({
+    hypothesisId: 'K',
+    location: 'google-auth-native:signInFromTokens',
+    message: 'Creating Google credential and signing in',
+    data: {
+      idTokenLength: idToken.length,
+      hasAccessToken: !!accessToken,
+    },
+    runId: 'post-fix',
+  });
+
   const credential = GoogleAuthProvider.credential(
     decodeURIComponent(idToken),
     accessToken ? decodeURIComponent(accessToken) : undefined
   );
-  const result = await signInWithCredential(auth, credential);
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('signInWithCredential timeout (15s)')), 15000);
+  });
+
+  const result = await Promise.race([
+    signInWithCredential(auth, credential),
+    timeoutPromise,
+  ]);
+
+  agentLog({
+    hypothesisId: 'K',
+    location: 'google-auth-native:signInFromTokens',
+    message: 'signInWithCredential succeeded',
+    data: { uid: result.user.uid },
+    runId: 'post-fix',
+  });
+
   return result.user;
 }
 
@@ -122,15 +150,55 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
     }
 
     if (customToken) {
+      const decodedToken = decodeURIComponent(customToken);
       agentLog({
         hypothesisId: 'G',
         location: 'google-auth-native:deepLink',
         message: 'Signing in with custom token',
-        data: {},
+        data: {
+          tokenLength: decodedToken.length,
+          tokenStart: decodedToken.substring(0, 50),
+          tokenEnd: decodedToken.substring(decodedToken.length - 20),
+        },
         runId: 'post-fix',
       });
-      const result = await signInWithCustomToken(auth, decodeURIComponent(customToken));
-      await finishGoogleAuth(result.user);
+
+      try {
+        agentLog({
+          hypothesisId: 'G',
+          location: 'google-auth-native:deepLink',
+          message: 'Calling signInWithCustomToken...',
+          data: { authReady: !!auth, currentUser: !!auth?.currentUser },
+          runId: 'post-fix',
+        });
+
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('signInWithCustomToken timeout (15s)')), 15000);
+        });
+
+        const result = await Promise.race([
+          signInWithCustomToken(auth, decodedToken),
+          timeoutPromise,
+        ]);
+
+        agentLog({
+          hypothesisId: 'G',
+          location: 'google-auth-native:deepLink',
+          message: 'signInWithCustomToken succeeded',
+          data: { uid: result.user.uid },
+          runId: 'post-fix',
+        });
+        await finishGoogleAuth(result.user);
+      } catch (tokenError) {
+        agentLog({
+          hypothesisId: 'G',
+          location: 'google-auth-native:deepLink',
+          message: 'signInWithCustomToken failed',
+          data: { error: tokenError instanceof Error ? tokenError.message : 'unknown' },
+          runId: 'post-fix',
+        });
+        throw tokenError;
+      }
       return true;
     }
 
@@ -138,8 +206,19 @@ export async function handleGoogleAuthDeepLink(url: string): Promise<boolean> {
       throw new Error('No se recibió el token de Google');
     }
 
-    const user = await signInFromDeepLinkTokens(idToken, accessToken);
-    await finishGoogleAuth(user);
+    try {
+      const user = await signInFromDeepLinkTokens(idToken, accessToken);
+      await finishGoogleAuth(user);
+    } catch (credentialError) {
+      agentLog({
+        hypothesisId: 'K',
+        location: 'google-auth-native:deepLink',
+        message: 'signInFromDeepLinkTokens failed',
+        data: { error: credentialError instanceof Error ? credentialError.message : 'unknown' },
+        runId: 'post-fix',
+      });
+      throw credentialError;
+    }
   } catch (authError) {
     if (pendingGoogleAuth) {
       const { reject } = pendingGoogleAuth;
