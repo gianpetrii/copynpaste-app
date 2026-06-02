@@ -5,7 +5,6 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/lib/context/auth-context"
 import DeviceLimitWarning from "@/components/features/limits/device-limit-warning"
-import DevSwCleanup from "@/components/dev-sw-cleanup"
 import { CapacitorProvider } from "@/components/native/capacitor-provider"
 import { StatusBarCover } from "@/components/native/status-bar-cover"
 
@@ -24,30 +23,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  manifest: "/manifest.json",
   icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/icons/icon-192x192.svg', sizes: '192x192', type: 'image/svg+xml' },
-      { url: '/icons/icon-512x512.svg', sizes: '512x512', type: 'image/svg+xml' }
-    ],
-    apple: [
-      { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
-    ],
-    other: [
-      { rel: 'mask-icon', url: '/icons/maskable-icon-512x512.svg', color: '#6D28D9' }
-    ]
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "CopyNPaste",
-    startupImage: [
-      { url: '/icons/icon-512x512.svg', media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)' },
-      { url: '/icons/icon-512x512.svg', media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)' },
-      { url: '/icons/icon-512x512.svg', media: '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)' },
-      { url: '/icons/icon-512x512.svg', media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)' },
-    ]
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
   },
   applicationName: "CopyNPaste",
   category: "productivity",
@@ -106,61 +83,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <head>
-        {/* PWA Meta Tags */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="CopyNPaste" />
-        
-        {/* iOS Meta Tags */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="CopyNPaste" />
-        
-        {/* Microsoft Meta Tags */}
-        <meta name="msapplication-TileColor" content="#6D28D9" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        
-        {/* En dev: limpiar SW/caches antes de cargar chunks (evita ChunkLoadError) */}
-        {process.env.NODE_ENV !== 'production' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function () {
-                  if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function (regs) {
-                      regs.forEach(function (reg) { reg.unregister(); });
-                    });
-                  }
-                  if ('caches' in window) {
-                    caches.keys().then(function (keys) {
-                      keys.forEach(function (key) { caches.delete(key); });
-                    });
-                  }
-                })();
-              `,
-            }}
-          />
-        )}
-
-        {/* Service Worker Registration - only in production */}
-        {process.env.NODE_ENV === 'production' && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                    console.log('✅ SW registered: ', registration);
-                  }, function(registrationError) {
-                    console.log('❌ SW registration failed: ', registrationError);
-                  });
-                });
-              }
-            `,
-          }}
-        />
-        )}
-      </head>
+      <head />
       <body className={`${inter.className} bg-background text-foreground`}>
         <AuthProvider>
           <CapacitorProvider>
@@ -169,7 +92,6 @@ export default function RootLayout({
               {children}
             </div>
             <Toaster />
-            {process.env.NODE_ENV !== 'production' && <DevSwCleanup />}
             <DeviceLimitWarning />
           </CapacitorProvider>
         </AuthProvider>
