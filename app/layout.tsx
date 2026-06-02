@@ -35,7 +35,7 @@ export const metadata: Metadata = {
       { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' }
     ],
     other: [
-      { rel: 'mask-icon', url: '/icons/maskable-icon-512x512.svg', color: '#000000' }
+      { rel: 'mask-icon', url: '/icons/maskable-icon-512x512.svg', color: '#6D28D9' }
     ]
   },
   appleWebApp: {
@@ -89,8 +89,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#000000' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
+    { media: '(prefers-color-scheme: light)', color: '#EBE5F7' },
+    { media: '(prefers-color-scheme: dark)', color: '#130E1C' }
   ],
   width: 'device-width',
   initialScale: 1,
@@ -117,7 +117,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="CopyNPaste" />
         
         {/* Microsoft Meta Tags */}
-        <meta name="msapplication-TileColor" content="#000000" />
+        <meta name="msapplication-TileColor" content="#6D28D9" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
         
         {/* En dev: limpiar SW/caches antes de cargar chunks (evita ChunkLoadError) */}
@@ -165,7 +165,7 @@ export default function RootLayout({
         <AuthProvider>
           <CapacitorProvider>
             <StatusBarCover />
-            <div className="mx-auto max-w-7xl px-4 pb-4 has-status-bar-cover">
+            <div className="mx-auto max-w-7xl px-1 sm:px-4 pb-4 has-status-bar-cover">
               {children}
             </div>
             <Toaster />

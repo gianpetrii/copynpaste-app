@@ -1,9 +1,20 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="86" fill="#000000"/>
-  <g transform="translate(-37, 11) scale(2.3)">
-    <path d="M64 42.667H53.333C48 42.667 42.667 48 42.667 53.333V181.333C42.667 186.667 48 192 53.333 192H202.667C208 192 213.333 186.667 213.333 181.333V53.333C213.333 48 208 42.667 202.667 42.667H192" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M64 42.667C64 32 74.667 21.333 85.333 21.333H170.667C181.333 21.333 192 32 192 42.667C192 53.333 181.333 64 170.667 64H85.333C74.667 64 64 53.333 64 42.667Z" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M64 106.667H192" stroke="#ffffff" stroke-width="5.7" stroke-linecap="round"/>
-    <path d="M64 138.667H192" stroke="#ffffff" stroke-width="5.7" stroke-linecap="round"/>
-  </g>
+  <!-- App background -->
+  <rect width="512" height="512" rx="88" fill="#6D28D9"/>
+  <!-- Back document -->
+  <rect x="168" y="182" width="218" height="258" rx="22" fill="#3B0764"/>
+  <!-- Front document body -->
+  <path d="M72 70 H305 L385 150 V432 Q385 455 362 455 H72 Q49 455 49 432 V93 Q49 70 72 70 Z" fill="#7C3AED"/>
+  <!-- Dog-ear fold -->
+  <path d="M305 70 L305 150 L385 150 Z" fill="#5B21B6"/>
+  <path d="M305 70 L305 150 L385 150" fill="none" stroke="#3B0764" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Front document border -->
+  <path d="M72 70 H305 L385 150 V432 Q385 455 362 455 H72 Q49 455 49 432 V93 Q49 70 72 70 Z" fill="none" stroke="#3B0764" stroke-width="18" stroke-linejoin="round"/>
+  <!-- Short header line -->
+  <rect x="95" y="196" width="120" height="24" rx="12" fill="white"/>
+  <!-- Content lines -->
+  <rect x="95" y="242" width="248" height="20" rx="10" fill="white" opacity="0.85"/>
+  <rect x="95" y="279" width="248" height="20" rx="10" fill="white" opacity="0.85"/>
+  <rect x="95" y="316" width="248" height="20" rx="10" fill="white" opacity="0.85"/>
+  <rect x="95" y="353" width="190" height="20" rx="10" fill="white" opacity="0.85"/>
 </svg>

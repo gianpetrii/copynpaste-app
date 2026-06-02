@@ -1,11 +1,20 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Safe zone background -->
-  <circle cx="256" cy="256" r="256" fill="#000000"/>
-  <!-- Icon centered in safe zone (20% padding from edges) -->
-  <g transform="translate(154, 154)">
-    <path d="M51.2 34.133H42.667C38.4 34.133 34.133 38.4 34.133 42.667V145.067C34.133 149.333 38.4 153.6 42.667 153.6H162.133C166.4 153.6 170.667 149.333 170.667 145.067V42.667C170.667 38.4 166.4 34.133 162.133 34.133H153.6" stroke="#ffffff" stroke-width="12.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M51.2 34.133C51.2 25.6 59.733 17.067 68.267 17.067H136.533C145.067 17.067 153.6 25.6 153.6 34.133C153.6 42.667 145.067 51.2 136.533 51.2H68.267C59.733 51.2 51.2 42.667 51.2 34.133Z" stroke="#ffffff" stroke-width="12.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M51.2 85.333H153.6" stroke="#ffffff" stroke-width="10.4" stroke-linecap="round"/>
-    <path d="M51.2 111.0667H153.6" stroke="#ffffff" stroke-width="10.4" stroke-linecap="round"/>
-  </g>
-</svg> 
+  <!-- Solid background for maskable icon (safe zone: inner 80%) -->
+  <rect width="512" height="512" fill="#6D28D9"/>
+  <!-- Back document -->
+  <rect x="188" y="200" width="200" height="235" rx="20" fill="#3B0764"/>
+  <!-- Front document body -->
+  <path d="M92 90 H310 L385 165 V420 Q385 440 365 440 H92 Q72 440 72 420 V110 Q72 90 92 90 Z" fill="#7C3AED"/>
+  <!-- Dog-ear fold -->
+  <path d="M310 90 L310 165 L385 165 Z" fill="#5B21B6"/>
+  <path d="M310 90 L310 165 L385 165" fill="none" stroke="#3B0764" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Front document border -->
+  <path d="M92 90 H310 L385 165 V420 Q385 440 365 440 H92 Q72 440 72 420 V110 Q72 90 92 90 Z" fill="none" stroke="#3B0764" stroke-width="17" stroke-linejoin="round"/>
+  <!-- Short header line -->
+  <rect x="114" y="210" width="110" height="22" rx="11" fill="white"/>
+  <!-- Content lines -->
+  <rect x="114" y="252" width="228" height="18" rx="9" fill="white" opacity="0.85"/>
+  <rect x="114" y="287" width="228" height="18" rx="9" fill="white" opacity="0.85"/>
+  <rect x="114" y="322" width="228" height="18" rx="9" fill="white" opacity="0.85"/>
+  <rect x="114" y="357" width="175" height="18" rx="9" fill="white" opacity="0.85"/>
+</svg>

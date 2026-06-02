@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { ClipboardIcon } from "@/components/ui/clipboard-icon"
 import UserPlanBanner from "@/components/features/banners/user-plan-banner"
+import { PlanNavBadge } from "@/components/features/banners/plan-nav-badge"
 import Link from "next/link"
 import { isNativePlatform } from "@/lib/native/platform"
 import { AnimatedPanel } from "@/components/page-transition"
@@ -75,23 +76,23 @@ export default function Home() {
     return (
       <main className="min-h-screen">
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
-          <header className="safe-area-top flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
-            <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
-              <ClipboardIcon className="text-primary" size={28} />
-              <div>
-                <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
-                  Copy & Paste
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
-                  Tu portapapeles universal
-                </p>
-              </div>
+        <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
+          <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
+            <ClipboardIcon className="text-primary" size={28} />
+            <div>
+              <h1 className="text-sm sm:text-base lg:text-xl font-bold text-foreground navbar-title tracking-tight">
+                Copy & Paste
+              </h1>
+              <p className="text-xs sm:text-sm lg:text-base text-muted-foreground navbar-subtitle">
+                Tu portapapeles universal
+              </p>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
-              <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-          </header>
+          </div>
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+            <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </header>
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
@@ -102,10 +103,10 @@ export default function Home() {
 
   return (
     <main className={isNativeLogin ? "flex flex-col h-dvh max-h-dvh overflow-hidden" : "min-h-screen"}>
-      <div className={`w-full max-w-7xl mx-auto px-2 sm:px-3 lg:px-4 ${isNativeLogin ? "flex flex-1 flex-col min-h-0" : ""}`}>
+      <div className={`w-full max-w-7xl mx-auto sm:px-2 lg:px-4 ${isNativeLogin ? "flex flex-1 flex-col min-h-0" : ""}`}>
         {/* Navbar — oculto en login nativo (pantalla propia con safe-area) */}
         {!isNativeLogin && (
-        <header className="safe-area-top flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
+        <header className="flex justify-between items-center py-1 sm:py-2 mb-2 sm:mb-3 border-b border-border/50">
           <div className="flex items-center space-x-2.5 sm:space-x-3.5 navbar-logo">
             <ClipboardIcon className="text-primary" size={28} />
             <div>
@@ -121,6 +122,7 @@ export default function Home() {
           <div className="flex items-center space-x-2 sm:space-x-3">
             {user && (
               <>
+                <PlanNavBadge />
                 <Link href="/pricing" className="hidden sm:block">
                   <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10 rounded-md transition-colors">
                     Planes
@@ -143,8 +145,10 @@ export default function Home() {
         {user ? (
           /* Dashboard para usuarios logueados - Layout responsive */
           <div className="space-y-2 sm:space-y-3">
-            {/* Plan Banner */}
-            <UserPlanBanner />
+            {/* Plan Banner — oculto en mobile (se muestra como badge en el navbar) */}
+            <div className="hidden sm:block">
+              <UserPlanBanner />
+            </div>
             {/* Layout mejorado - columna izquierda más ancha en desktop */}
             <div className="grid grid-cols-1 gap-2 sm:gap-3">
               {/* Welcome section y form */}

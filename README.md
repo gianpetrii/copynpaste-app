@@ -54,9 +54,25 @@ Objetivo final: **misma experiencia en Mac, iPhone, Android y Windows**.
 - ✅ Web responsive + PWA (manifest, service worker, instalación)
 - ✅ Capacitor: iOS + Android, biometría, push, share, haptics
 - 🚧 **iPhone App Store** — build, firma, prueba en dispositivo, Archive
-- 📋 Android Play Store
-- 📋 Windows (PWA / empaquetado nativo)
-- 📋 macOS (PWA en Safari/Chrome; app nativa opcional)
+- 📋 Android (Play Store) — proyecto Capacitor listo en `android/`
+- 📋 Windows — PWA instalable / empaquetado nativo (Electron o Tauri)
+- 📋 macOS — App nativa Capacitor / Electron para Mac App Store
+
+## Roadmap de features
+
+### Plataformas nativas
+- 📋 **Widget iOS** — widget de pantalla de inicio que muestra los últimos ítems del portapapeles y permite copiar con un tap, sin abrir la app (WidgetKit / Capacitor plugin)
+- 📋 **Widget Android** — widget equivalente para la pantalla de inicio de Android (Glance / AppWidget)
+- 📋 **App Mac nativa** — app standalone para macOS (menú bar icon + ventana principal) con sincronización en tiempo real con el resto de dispositivos
+- 📋 **App Android** — publicación en Play Store del proyecto Capacitor existente
+- 📋 **App Windows** — cliente nativo (PWA empaquetada o Electron) para Windows
+
+### Funcionalidades
+- 📋 **Historial sincronizado en tiempo real** — push automático de nuevos ítems entre dispositivos conectados
+- 📋 **Compartir ítem** — link público con expiración para compartir un ítem con cualquier persona
+- 📋 **Categorías y tags** — organización avanzada de ítems con filtros y búsqueda
+- 📋 **Ítems protegidos** — ítems con autenticación biométrica antes de mostrar el contenido (contraseñas, datos sensibles)
+- 📋 **Atajos de teclado globales** — hotkey de sistema para abrir la app y pegar el último ítem copiado
 
 ## iOS — próximos pasos (desarrollo)
 

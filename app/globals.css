@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Tema claro - Colores simples */
-    --background: 0 0% 100%;
+    /* Tema claro - Fondo violeta suave */
+    --background: 270 40% 95%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -37,8 +37,8 @@
   }
 
   .dark {
-    /* Tema oscuro - Negro puro con bordes blancos finos */
-    --background: 0 0% 0%; /* Negro puro */
+    /* Tema oscuro - Violeta muy oscuro */
+    --background: 270 30% 7%;
     --foreground: 0 0% 100%;
 
     --card: 0 0% 0%;
@@ -105,7 +105,7 @@
   }
 
   .dark .status-bar-cover {
-    background: hsl(0 0% 0% / 0.85);
+    background: hsl(270 30% 7% / 0.9);
   }
 
   /* Main content padding when using status bar cover */
@@ -136,13 +136,10 @@
     background-color: black !important;
   }
 
-  /* Asegurar que todos los contenedores en modo oscuro sean negros */
+  /* Asegurar que los contenedores en modo oscuro usen el background violeta */
   .dark .container, 
-  .dark .bg-background, 
-  .dark .bg-card, 
-  .dark .bg-secondary, 
-  .dark .bg-secondary\/50 {
-    background-color: black !important;
+  .dark .bg-background {
+    background-color: hsl(270 30% 7%) !important;
   }
   
   /* Mejorar el manejo de texto para dispositivos móviles */

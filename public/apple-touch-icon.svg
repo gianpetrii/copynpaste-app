@@ -1,0 +1,19 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" fill="#6D28D9"/>
+  <!-- Back document -->
+  <rect x="59" y="64" width="77" height="91" rx="8" fill="#3B0764"/>
+  <!-- Front document body -->
+  <path d="M25 24 H107 L135 52 V152 Q135 160 127 160 H25 Q17 160 17 152 V32 Q17 24 25 24 Z" fill="#7C3AED"/>
+  <!-- Dog-ear fold -->
+  <path d="M107 24 L107 52 L135 52 Z" fill="#5B21B6"/>
+  <path d="M107 24 L107 52 L135 52" fill="none" stroke="#3B0764" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Front document border -->
+  <path d="M25 24 H107 L135 52 V152 Q135 160 127 160 H25 Q17 160 17 152 V32 Q17 24 25 24 Z" fill="none" stroke="#3B0764" stroke-width="6.5" stroke-linejoin="round"/>
+  <!-- Short header line -->
+  <rect x="33" y="70" width="42" height="8.5" rx="4.25" fill="white"/>
+  <!-- Content lines -->
+  <rect x="33" y="86" width="87" height="7" rx="3.5" fill="white" opacity="0.85"/>
+  <rect x="33" y="99" width="87" height="7" rx="3.5" fill="white" opacity="0.85"/>
+  <rect x="33" y="112" width="87" height="7" rx="3.5" fill="white" opacity="0.85"/>
+  <rect x="33" y="125" width="67" height="7" rx="3.5" fill="white" opacity="0.85"/>
+</svg>
