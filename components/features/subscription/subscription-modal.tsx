@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getApiUrl, getWebUrl } from '@/lib/utils/api-url';
 import { openExternalUrl, isNativePlatform } from '@/lib/native/platform';
 import { useAuth } from '@/lib/context/auth-context';
@@ -19,8 +20,22 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const planDetails = {
     premium: {
@@ -103,42 +118,45 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
     return `$${price.toLocaleString('es-AR')} ARS`;
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[100] p-4"
-      style={{ backdropFilter: 'none' }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+      onClick={onClose}
     >
-      <Card className="max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto shadow-xl">
+      <Card
+        className="max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Suscripción {plan.name}</h2>
-          <Button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full" variant="ghost">
+          <h2 className="text-2xl font-bold text-foreground">Suscripción {plan.name}</h2>
+          <Button onClick={onClose} className="p-2 rounded-full" variant="ghost">
             <XIcon className="h-5 w-5" />
           </Button>
         </div>
 
         <div className="text-center mb-6">
           <div className="mb-4">
-            <span className="text-4xl font-bold text-gray-900">{formatPrice(plan.price)}</span>
-            <span className="text-gray-500 text-lg">/mes</span>
+            <span className="text-4xl font-bold text-foreground">{formatPrice(plan.price)}</span>
+            <span className="text-muted-foreground text-lg">/mes</span>
           </div>
-          <p className="text-sm text-gray-600">Precio de un café premium ☕ • Cancela cuando quieras</p>
+          <p className="text-sm text-muted-foreground">Precio de un café premium ☕ • Cancela cuando quieras</p>
         </div>
 
         <div className="mb-6">
-          <h3 className="font-semibold mb-3">✨ Todo lo que incluye:</h3>
+          <h3 className="font-semibold mb-3 text-foreground">✨ Todo lo que incluye:</h3>
           <div className="space-y-2">
             {plan.features.map((feature, index) => (
               <div key={index} className="flex items-center">
                 <CheckCircleIcon className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
-                <span className="text-sm text-gray-700">{feature}</span>
+                <span className="text-sm text-muted-foreground">{feature}</span>
               </div>
             ))}
           </div>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">{error}</p>
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-destructive text-sm">{error}</p>
           </div>
         )}
 
@@ -157,9 +175,9 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
           </Button>
         </div>
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold text-sm mb-2">🔒 Pago 100% Seguro</h4>
-          <div className="text-xs text-gray-600 space-y-1">
+        <div className="mt-6 p-4 bg-secondary rounded-lg">
+          <h4 className="font-semibold text-sm mb-2 text-foreground">🔒 Pago 100% Seguro</h4>
+          <div className="text-xs text-muted-foreground space-y-1">
             <p>• Procesado por MercadoPago (certificado PCI DSS)</p>
             <p>• Aceptamos tarjetas de crédito y débito</p>
             <p>• También transferencias bancarias</p>
@@ -169,7 +187,7 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
         </div>
 
         <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Al continuar aceptas nuestros{' '}
             <a href="/terms" className="text-blue-600 hover:underline">
               Términos de Servicio
@@ -181,6 +199,7 @@ export default function SubscriptionModal({ isOpen, onClose, selectedPlan }: Sub
           </p>
         </div>
       </Card>
-    </div>
+    </div>,
+    document.body
   );
 }

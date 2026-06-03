@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     description: 'Guarda, organiza y accede a tu información importante desde cualquier dispositivo. Simple. Seguro. Sincronizado.',
     images: [
       {
-        url: '/icons/icon-512x512.svg',
+        url: '/favicon.svg',
         width: 512,
         height: 512,
         alt: 'CopyNPaste Logo',
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'CopyNPaste - Tu Portapapeles Universal',
     description: 'Guarda, organiza y accede a tu información importante desde cualquier dispositivo. Simple. Seguro. Sincronizado.',
-    images: ['/icons/icon-512x512.svg'],
+    images: ['/favicon.svg'],
   },
 }
 

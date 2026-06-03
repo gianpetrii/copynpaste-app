@@ -100,11 +100,11 @@ export default function PricingPlans({ onSelectPlan, loading = false }: PricingP
     <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
       {plans.map((plan) => (
         <Card key={plan.id} className={`relative p-6 ${
-          plan.id === 'premium' ? 'border-blue-500 border-2 scale-105' : 'border-gray-200'
-        } ${isCurrentPlan(plan.id) ? 'bg-green-50' : ''}`}>
+          plan.id === 'premium' ? 'border-blue-500 border-2 md:scale-105' : 'border-border'
+        } ${isCurrentPlan(plan.id) ? 'bg-green-500/10 border-green-500/30' : ''}`}>
           
           {plan.badge && (
-            <Badge className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${plan.badgeColor} text-white`}>
+            <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${plan.badgeColor} text-white`}>
               {plan.badge}
             </Badge>
           )}
@@ -116,20 +116,20 @@ export default function PricingPlans({ onSelectPlan, loading = false }: PricingP
           )}
 
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-            <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+            <h3 className="text-2xl font-bold mb-2 text-foreground">{plan.name}</h3>
+            <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
             
             <div className="mb-2">
-              <span className="text-4xl font-bold text-gray-900">
+              <span className="text-4xl font-bold text-foreground">
                 {formatPrice(plan.price)}
               </span>
               {plan.price > 0 && (
-                <span className="text-gray-500 text-lg">/mes</span>
+                <span className="text-muted-foreground text-lg">/mes</span>
               )}
             </div>
             
             {plan.price > 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 ~$2.50 USD • Precio de un café ☕
               </p>
             )}
@@ -141,10 +141,10 @@ export default function PricingPlans({ onSelectPlan, loading = false }: PricingP
                 {feature.included ? (
                   <CheckIcon className="h-5 w-5 text-green-600 mr-3 flex-shrink-0" />
                 ) : (
-                  <XIcon className="h-5 w-5 text-gray-300 mr-3 flex-shrink-0" />
+                  <XIcon className="h-5 w-5 text-muted-foreground/40 mr-3 flex-shrink-0" />
                 )}
                 <span className={`text-sm ${
-                  feature.included ? 'text-gray-900' : 'text-gray-400'
+                  feature.included ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
                   {feature.text}
                 </span>
@@ -168,7 +168,8 @@ export default function PricingPlans({ onSelectPlan, loading = false }: PricingP
             ) : (
               <Button
                 disabled
-                className="w-full bg-gray-100 text-gray-500 cursor-not-allowed"
+                variant="secondary"
+                className="w-full cursor-not-allowed"
               >
                 {getButtonText(plan.id)}
               </Button>
