@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/context/auth-context';
-import { getUserSubscription, cancelSubscription } from '@/lib/firebase/subscription-manager';
+import { getUserSubscription } from '@/lib/firebase/subscription-manager';
 import type { Subscription } from '@/lib/firebase/subscription-manager';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CreditCardIcon, CalendarIcon, XCircleIcon, ExternalLinkIcon } from 'lucide-react';
 import { PLAN_PRICES } from '@/lib/firebase/device-manager';
-import { getWebUrl } from '@/lib/utils/api-url';
+import { getApiUrl, getWebUrl } from '@/lib/utils/api-url';
 import { openExternalUrl } from '@/lib/native/platform';
 
 export default function SubscriptionManager() {
@@ -40,19 +40,25 @@ export default function SubscriptionManager() {
   };
 
   const handleCancelSubscription = async () => {
-    if (!subscription) return;
-    
+    if (!subscription || !user) return;
+
     setCancelling(true);
-    
+
     try {
-      const success = await cancelSubscription(subscription.id, 'Cancelación solicitada por usuario');
-      
-      if (success) {
+      const response = await fetch(getApiUrl('/api/mercadopago/cancel-subscription'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscriptionId: subscription.id, userId: user.uid }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
         await refreshUserProfile();
         setSubscription(null);
         alert('Suscripción cancelada exitosamente');
       } else {
-        alert('Error cancelando suscripción. Intenta nuevamente.');
+        alert(data.error || 'Error cancelando suscripción. Intenta nuevamente.');
       }
     } catch (error) {
       console.error('Error cancelling subscription:', error);

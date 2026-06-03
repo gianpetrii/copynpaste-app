@@ -25,8 +25,7 @@ function SubscriptionSuccessContent() {
       }
 
       try {
-        // Activar la suscripción en Firestore
-        await activateSubscription(user.uid, subscriptionId);
+        await activateSubscription(subscriptionId);
         setLoading(false);
       } catch (error) {
         console.error('Error activando suscripción:', error);

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getSubscriptionStatus } from '@/lib/mercadopago/payments';
-import { activateSubscription, cancelSubscription } from '@/lib/firebase/subscription-manager';
+import { activateSubscriptionAdmin, cancelSubscriptionAdmin } from '@/lib/server/subscription-admin';
 import { logger } from '@/lib/utils/logger';
 import { corsJsonResponse, corsOptionsResponse } from '@/lib/utils/cors';
 
@@ -56,7 +56,7 @@ async function handlePreApprovalWebhook(webhookData: any) {
     switch (status) {
       case 'authorized':
         if (externalReference) {
-          await activateSubscription(externalReference);
+          await activateSubscriptionAdmin(externalReference);
           logger.info('Suscripción activada por webhook', {
             subscriptionId: externalReference,
             preApprovalId,
@@ -66,7 +66,7 @@ async function handlePreApprovalWebhook(webhookData: any) {
 
       case 'cancelled':
         if (externalReference) {
-          await cancelSubscription(externalReference, 'Cancelada por usuario en MercadoPago');
+          await cancelSubscriptionAdmin(externalReference, 'Cancelada por usuario en MercadoPago');
           logger.info('Suscripción cancelada por webhook', {
             subscriptionId: externalReference,
             preApprovalId,

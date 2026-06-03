@@ -69,8 +69,6 @@ Objetivo final: **misma experiencia en Mac, iPhone, Android y Windows**.
 
 ### Funcionalidades
 - 📋 **Historial sincronizado en tiempo real** — push automático de nuevos ítems entre dispositivos conectados
-- 📋 **Compartir ítem** — link público con expiración para compartir un ítem con cualquier persona
-- 📋 **Categorías y tags** — organización avanzada de ítems con filtros y búsqueda
 - 📋 **Ítems protegidos** — ítems con autenticación biométrica antes de mostrar el contenido (contraseñas, datos sensibles)
 - 📋 **Atajos de teclado globales** — hotkey de sistema para abrir la app y pegar el último ítem copiado
 
@@ -103,6 +101,81 @@ En Xcode deberías ver el proyecto **CopyNPaste** (scheme `CopyNPaste`). Team de
 > Capacitor sigue esperando `App.xcodeproj` y `App.xcworkspace` por convención; en este repo son symlinks al proyecto real `CopyNPaste.*`.
 
 Variables necesarias en `.env.local`: `NEXT_PUBLIC_BASE_URL` apuntando al deploy en Vercel (ej. `https://copynpaste.app` o `https://copynpaste-app.vercel.app`).
+
+## Flujo de pagos — Mercado Pago
+
+### Cómo funciona
+
+El flujo es browser-based (estilo Netflix/Spotify): el usuario selecciona un plan → se crea una PreApproval en MP → se redirige al checkout de MP → MP redirige de vuelta a `/subscription/success` o `/subscription/failure`. La suscripción también se activa automáticamente por webhook cuando MP confirma el pago.
+
+```
+Usuario → /pricing → SubscriptionModal
+  → POST /api/mercadopago/create-subscription
+    → Genera subscriptionId único (usado tanto en Firestore como en MP external_reference)
+    → Crea PreApproval en MP con notification_url y back_url
+    → Crea doc en Firestore con status: pending
+  → Redirect a MP init_point (checkout de MP)
+    → Usuario completa el pago en MP
+  → MP redirige a /subscription/success?subscription_id=...
+    → activateSubscription() → status: active, user.plan actualizado
+  → MP también envía webhook a /api/mercadopago/webhook
+    → Activa o cancela la suscripción como respaldo
+```
+
+### Testing con sandbox de Mercado Pago
+
+**Prerequisitos:**
+- Cuenta en [developers.mercadopago.com](https://developers.mercadopago.com)
+- Credenciales TEST en `.env.local` (ya configuradas: `TEST-...`)
+- App corriendo en Vercel o con ngrok para recibir webhooks
+
+**Pasos:**
+
+1. **Ir a `/pricing`** y elegir un plan Premium o Enterprise
+2. En el modal, hacer click en "Continuar"
+3. Se abre el checkout de MP → usar tarjeta de prueba:
+   - Número: `5031 7557 3453 0604`
+   - Vencimiento: cualquier fecha futura
+   - CVV: `123`
+   - Nombre: `APRO` (para aprobar) o `OTHE` (para rechazar)
+4. Completar el pago → MP redirige a `/subscription/success`
+5. Verificar en Firestore que el doc en `subscriptions/` tiene `status: active` y que el user tiene `plan: premium`
+
+**Tarjetas de prueba completas:** [https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/additional-content/your-integrations/test/cards](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/additional-content/your-integrations/test/cards)
+
+### Testing de webhooks en desarrollo local
+
+Para recibir webhooks de MP en local se necesita un túnel:
+
+```bash
+# Instalar ngrok (una vez)
+brew install ngrok
+
+# Exponer el servidor local
+ngrok http 3000
+```
+
+Copiar la URL HTTPS de ngrok y actualizar en `.env.local`:
+```
+NEXT_PUBLIC_BASE_URL=https://abc123.ngrok.io
+```
+
+Reiniciar el servidor. Los webhooks de MP llegarán a `https://abc123.ngrok.io/api/mercadopago/webhook`.
+
+### Variables de entorno para pagos
+
+| Variable | Descripción |
+|----------|-------------|
+| `MERCADOPAGO_ACCESS_TOKEN` | Token privado (empieza con `TEST-` en sandbox, `APP_USR-` en producción) |
+| `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` | Clave pública (empieza con `TEST-` en sandbox) |
+| `NEXT_PUBLIC_BASE_URL` | URL base de la app (callbacks de MP apuntan aquí) |
+
+### Pasar a producción
+
+1. Crear credenciales de producción en el panel de MP
+2. Reemplazar `MERCADOPAGO_ACCESS_TOKEN` y `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` con los valores `APP_USR-...`
+3. Configurar `NEXT_PUBLIC_BASE_URL` con el dominio final
+4. En el panel de MP, registrar la URL del webhook: `https://tudominio.com/api/mercadopago/webhook`
 
 ## Variables de entorno
 

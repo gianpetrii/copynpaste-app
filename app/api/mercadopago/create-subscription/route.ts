@@ -38,11 +38,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Pre-generar el ID para que coincida entre MP (external_reference) y Firestore
+    const subscriptionId = `sub_${userId}_${Date.now()}`;
+
     const mpResult = await createRecurringSubscription({
       userId,
       userEmail,
       plan,
-      subscriptionId: null,
+      subscriptionId,
     });
 
     if (!mpResult.success) {
@@ -58,8 +61,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscriptionId = await createSubscriptionAdmin(userId, plan, mpResult.subscriptionId);
-    if (!subscriptionId) {
+    const savedId = await createSubscriptionAdmin(userId, plan, mpResult.subscriptionId, subscriptionId);
+    if (!savedId) {
       return corsJsonResponse(
         { error: 'Error creando suscripción en base de datos' },
         request,
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
     return corsJsonResponse(
       {
         success: true,
-        subscriptionId,
+        subscriptionId: savedId,
         initPoint: mpResult.initPoint,
         mpSubscriptionId: mpResult.subscriptionId,
       },

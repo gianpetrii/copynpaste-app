@@ -88,13 +88,6 @@ export const createRecurringSubscription = async (data: CreateSubscriptionData):
     const tempReference = data.subscriptionId || `temp_${data.userId}_${Date.now()}`;
     const callbacks = getCallbackUrls(tempReference);
     
-    // Debug: Log de configuración
-    logger.info('DEBUG: Configuración MercadoPago', {
-      baseUrl: MP_CONFIG.baseUrl,
-      callbacks,
-      tempReference
-    });
-    
     const body = {
       reason: `Suscripción ${data.plan.charAt(0).toUpperCase() + data.plan.slice(1)} - CopyNPaste`,
       external_reference: tempReference,
@@ -106,11 +99,9 @@ export const createRecurringSubscription = async (data: CreateSubscriptionData):
         currency_id: 'ARS'
       },
       back_url: callbacks.success,
+      notification_url: `${MP_CONFIG.baseUrl}/api/mercadopago/webhook`,
       status: 'pending'
     };
-    
-    // Debug: Log del body que se envía
-    logger.info('DEBUG: Body enviado a MercadoPago', { body });
 
     const result = await preApproval.create({ body });
     
