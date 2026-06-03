@@ -91,7 +91,6 @@ export const createRecurringSubscription = async (data: CreateSubscriptionData):
     const body = {
       reason: `Suscripción ${data.plan.charAt(0).toUpperCase() + data.plan.slice(1)} - CopyNPaste`,
       external_reference: tempReference,
-      payer_email: data.userEmail,
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
