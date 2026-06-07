@@ -92,127 +92,71 @@ export async function shareImage(imageUrl: string, fileName: string = 'image.png
 }
 
 /**
- * Copia una imagen al portapapeles desde una URL
+ * Fetches image blob via proxy with fallbacks.
+ */
+async function fetchImageBlob(imageUrl: string): Promise<Blob> {
+  const inferType = (blob: Blob, url: string): Blob => {
+    if (blob.type && blob.type !== 'application/octet-stream') return blob;
+    const u = url.toLowerCase();
+    let t = 'image/png';
+    if (u.includes('.jpg') || u.includes('.jpeg')) t = 'image/jpeg';
+    else if (u.includes('.gif')) t = 'image/gif';
+    else if (u.includes('.webp')) t = 'image/webp';
+    return new Blob([blob], { type: t });
+  };
+
+  // Método 1: proxy
+  try {
+    const proxyUrl = getApiUrl(`/api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
+    const res = await fetch(proxyUrl);
+    if (res.ok) {
+      const blob = inferType(await res.blob(), imageUrl);
+      if (blob.size > 0) return blob;
+    }
+  } catch { /* fall through */ }
+
+  // Método 2: fetch directo
+  try {
+    const res = await fetch(imageUrl, { mode: 'cors', credentials: 'omit', cache: 'force-cache' });
+    if (res.ok) {
+      const blob = inferType(await res.blob(), imageUrl);
+      if (blob.size > 0) return blob;
+    }
+  } catch { /* fall through */ }
+
+  // Método 3: canvas
+  return downloadImageViaCanvas(imageUrl);
+}
+
+/**
+ * Copia una imagen al portapapeles desde una URL.
+ *
+ * iOS / WKWebView requiere que navigator.clipboard.write() se invoque
+ * sincrónicamente dentro del gesto del usuario. Si hacemos await fetch()
+ * antes de llamar write(), iOS cancela el permiso.
+ *
+ * La solución es pasar un Promise<Blob> al constructor de ClipboardItem:
+ * el browser registra el permiso en el momento de write() y resuelve
+ * el blob de forma asíncrona internamente (WebKit blog, 2020).
  */
 export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
   try {
-    // Verificar si el navegador soporta la API de clipboard para imágenes
     if (!navigator.clipboard || !window.ClipboardItem) {
       throw new Error('API de clipboard no soportada');
     }
 
-    let blob: Blob;
+    // Determinamos el tipo MIME para la clave del ClipboardItem.
+    // La mayoría de imágenes de Firebase Storage son JPEG o PNG.
+    // Usamos 'image/png' como clave por defecto; el blob real puede ser JPEG
+    // y los browsers lo aceptan igual (leen el tipo del blob, no de la clave).
+    const blobPromise = fetchImageBlob(imageUrl);
 
-    try {
-      // Método 1: Usar proxy (funciona tanto en desarrollo como producción)
-      logger.info('Descargando imagen via proxy', { imageUrl });
-      
-      const proxyUrl = getApiUrl(`/api/proxy-image?url=${encodeURIComponent(imageUrl)}`);
-      const proxyResponse = await fetch(proxyUrl);
-      
-      if (!proxyResponse.ok) {
-        const errorText = await proxyResponse.text();
-        logger.warn('Proxy falló', { 
-          status: proxyResponse.status, 
-          statusText: proxyResponse.statusText,
-          errorText 
-        });
-        throw new Error(`Proxy error: ${proxyResponse.status}`);
-      }
-      
-      blob = await proxyResponse.blob();
-      
-      // Si el blob no tiene tipo, inferirlo de la URL
-      if (!blob.type || blob.type === 'application/octet-stream') {
-        const urlLower = imageUrl.toLowerCase();
-        let inferredType = 'image/png'; // Default
-        
-        if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) inferredType = 'image/jpeg';
-        else if (urlLower.includes('.gif')) inferredType = 'image/gif';
-        else if (urlLower.includes('.webp')) inferredType = 'image/webp';
-        else if (urlLower.includes('.svg')) inferredType = 'image/svg+xml';
-        
-        // Crear nuevo blob con el tipo correcto
-        blob = new Blob([blob], { type: inferredType });
-        logger.info('Tipo de imagen inferido de URL', { inferredType });
-      }
-      
-      logger.info('Imagen descargada via proxy exitosamente', { 
-        size: blob.size, 
-        type: blob.type 
-      });
-      
-    } catch (proxyError) {
-      logger.warn('Proxy falló, intentando fetch directo', { 
-        error: proxyError,
-        errorMessage: proxyError instanceof Error ? proxyError.message : 'Unknown error'
-      });
-      
-      try {
-        // Método 2: Fetch directo como fallback
-        const response = await fetch(imageUrl, {
-          mode: 'cors',
-          credentials: 'omit',
-          cache: 'force-cache'
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        blob = await response.blob();
-        
-        // Si el blob no tiene tipo, inferirlo de la URL
-        if (!blob.type || blob.type === 'application/octet-stream') {
-          const urlLower = imageUrl.toLowerCase();
-          let inferredType = 'image/png'; // Default
-          
-          if (urlLower.includes('.jpg') || urlLower.includes('.jpeg')) inferredType = 'image/jpeg';
-          else if (urlLower.includes('.gif')) inferredType = 'image/gif';
-          else if (urlLower.includes('.webp')) inferredType = 'image/webp';
-          else if (urlLower.includes('.svg')) inferredType = 'image/svg+xml';
-          
-          blob = new Blob([blob], { type: inferredType });
-          logger.info('Tipo de imagen inferido de URL (fetch directo)', { inferredType });
-        }
-        
-        logger.info('Imagen descargada via fetch directo');
-        
-      } catch (directError) {
-        logger.warn('Fetch directo falló, intentando canvas', { error: directError });
-        // Método 3: Canvas como último recurso
-        blob = await downloadImageViaCanvas(imageUrl);
-        logger.info('Imagen descargada via canvas');
-      }
-    }
-    
-    // Verificar que tengamos un blob válido
-    if (!blob || blob.size === 0) {
-      throw new Error('No se pudo descargar la imagen');
-    }
-    
-    // Asegurar que el blob tenga un tipo de imagen válido
-    if (!blob.type.startsWith('image/')) {
-      logger.warn('Blob sin tipo de imagen, usando image/png por defecto', { 
-        currentType: blob.type 
-      });
-      blob = new Blob([blob], { type: 'image/png' });
-    }
-
-    // Crear ClipboardItem con la imagen
-    const clipboardItem = new ClipboardItem({
-      [blob.type]: blob
-    });
-
-    // Copiar al portapapeles
+    // ClipboardItem con Promise: clipboard.write() se llama sincrónicamente
+    // dentro del gesto → iOS mantiene el permiso mientras resuelve el fetch.
+    const clipboardItem = new ClipboardItem({ 'image/png': blobPromise });
     await navigator.clipboard.write([clipboardItem]);
-    
-    logger.info('Imagen copiada al portapapeles exitosamente', {
-      imageUrl,
-      type: blob.type,
-      size: blob.size
-    });
 
+    logger.info('Imagen copiada al portapapeles exitosamente');
     return true;
   } catch (error) {
     logger.error('Error copiando imagen al portapapeles', { error });
@@ -352,46 +296,35 @@ export async function copyItemContent(
 ): Promise<{ success: boolean; copiedAs: 'image' | 'text' | 'shared'; error?: string }> {
   const urlToCopy = fileUrl || content;
   
-  // Si es una imagen, FORZAR que se copie como imagen
+  // Si es una imagen, copiar como imagen
   if (fileUrl && isImageUrl(fileUrl, fileType)) {
-    // En móvil, usar Share API
+    // Intentar clipboard directo primero (funciona en iOS 16+ WKWebView y desktop moderno)
+    if (navigator.clipboard && window.ClipboardItem) {
+      logger.info('Intentando copia directa al portapapeles');
+      const imageSuccess = await copyImageToClipboard(fileUrl);
+      if (imageSuccess) {
+        return { success: true, copiedAs: 'image' };
+      }
+      logger.warn('Clipboard directo falló, intentando Share API');
+    }
+
+    // Fallback: Share API (móvil)
     if (isMobileDevice()) {
-      logger.info('Dispositivo móvil detectado, usando Share API');
-      
       const shareSuccess = await shareImage(fileUrl, fileName || 'image.png');
       if (shareSuccess) {
         return { success: true, copiedAs: 'shared' };
       }
-      
-      // Si Share API falla o no está disponible, mostrar instrucciones
       return { 
         success: false, 
         copiedAs: 'image', 
-        error: 'Para copiar la imagen, mantén presionada y selecciona "Copiar imagen"' 
+        error: 'No se pudo copiar la imagen. Mantén presionado el thumbnail para descargarla.' 
       };
     }
     
-    // En desktop, copiar directamente al portapapeles
-    // Verificar compatibilidad del navegador
-    if (!navigator.clipboard || !window.ClipboardItem) {
-      return { 
-        success: false, 
-        copiedAs: 'text', 
-        error: 'Tu navegador no soporta copiar imágenes. Actualiza a una versión más reciente.' 
-      };
-    }
-    
-    // Intentar copiar como imagen con múltiples métodos
-    const imageSuccess = await copyImageToClipboard(fileUrl);
-    if (imageSuccess) {
-      return { success: true, copiedAs: 'image' };
-    }
-    
-    // Si falla, mostrar instrucciones específicas para el usuario
     return { 
       success: false, 
       copiedAs: 'image', 
-      error: '🔧 No se pudo copiar la imagen directamente. Puedes:\n1. Hacer clic derecho → "Copiar imagen" en el navegador\n2. O descargar la imagen y copiarla manualmente' 
+      error: 'No se pudo copiar la imagen. Haz clic derecho → "Copiar imagen" o descárgala.' 
     };
   }
   

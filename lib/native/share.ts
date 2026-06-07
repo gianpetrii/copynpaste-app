@@ -45,5 +45,20 @@ export async function nativeShare(options: {
 }
 
 export async function nativeShareFile(file: File, title?: string): Promise<boolean> {
+  // Capacitor Share converts files to blob: URLs which iOS cannot sandbox-extend.
+  // Use Web Share API directly so iOS receives proper File objects.
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try {
+      const canShare = navigator.canShare?.({ files: [file] }) ?? true;
+      if (canShare) {
+        await navigator.share({ title, files: [file] });
+        return true;
+      }
+    } catch (error) {
+      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('cancel'))) {
+        return false;
+      }
+    }
+  }
   return nativeShare({ title, files: [file] });
 }
