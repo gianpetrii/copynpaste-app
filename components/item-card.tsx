@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/use-toast"
-import { formatDate } from "@/lib/utils"
 import { useItems } from "@/lib/hooks"
 import { useSwipe } from "@/lib/hooks/use-swipe"
 import type { Item } from "@/types"
@@ -17,7 +16,6 @@ import {
   Copy, 
   Download, 
   Star, 
-  MoreHorizontal,
   FileCode,
   AudioLines as FileAudio,
   Video as FileVideo,
@@ -31,6 +29,8 @@ interface ItemCardProps {
   item: Item
 }
 
+const LONG_PRESS_DURATION = 550
+
 export function ItemCard({ item }: ItemCardProps) {
   const { toast } = useToast()
   const { updateItem, deleteItem } = useItems(item.userId)
@@ -40,63 +40,48 @@ export function ItemCard({ item }: ItemCardProps) {
   const [isFavorite, setIsFavorite] = useState(item.favorite || false)
   const [showFullText, setShowFullText] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [showMobileActions, setShowMobileActions] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  // Check if we're on mobile
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressTriggeredRef = useRef(false)
+  const touchStartXRef = useRef(0)
+
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // ─── Actions ────────────────────────────────────────────────────────────────
 
   const handleCopy = async (e?: React.MouseEvent) => {
-    // If the event comes from a button click, stop propagation
-    if (e && e.currentTarget !== e.target) {
-      e.stopPropagation();
-    }
-    
+    if (e && e.currentTarget !== e.target) e.stopPropagation()
     try {
-      // Importar dinámicamente para evitar problemas de SSR
-      const { copyItemContent } = await import('@/lib/utils/clipboard');
-      
+      const { copyItemContent } = await import('@/lib/utils/clipboard')
       const result = await copyItemContent(
         item.content || "",
         item.fileUrl,
         item.fileType,
         item.fileName
-      );
-      
+      )
       if (result.success) {
-        const { triggerHaptic } = await import('@/lib/native/haptics');
-        await triggerHaptic(result.copiedAs === 'shared' ? 'success' : 'light');
-
-        let description = "El contenido ha sido copiado al portapapeles";
-        
+        const { triggerHaptic } = await import('@/lib/native/haptics')
+        await triggerHaptic(result.copiedAs === 'shared' ? 'success' : 'light')
+        let description = "El contenido ha sido copiado al portapapeles"
         if (result.copiedAs === 'image') {
-          description = "🖼️ La imagen ha sido copiada. Puedes pegarla en otras aplicaciones (Discord, WhatsApp, Paint, etc.)";
+          description = "🖼️ La imagen ha sido copiada. Puedes pegarla en otras aplicaciones"
         } else if (result.copiedAs === 'shared') {
-          description = "📤 Menú de compartir abierto. Selecciona 'Copiar' para copiar al portapapeles";
+          description = "📤 Menú de compartir abierto. Selecciona 'Copiar' para copiar al portapapeles"
         }
-          
         toast({
           title: result.copiedAs === 'shared' ? "📤 Compartir imagen" : "✅ Copiado al portapapeles",
           description,
         })
       } else {
-        // Para imágenes, mostrar opciones alternativas
         if (item.type === 'file' && item.fileUrl) {
           toast({
-            title: "⚠️ Copiar imagen (limitación técnica)",
+            title: "⚠️ Copiar imagen",
             description: "Por limitaciones de CORS, abre la imagen en nueva ventana y haz clic derecho → 'Copiar imagen'",
-            variant: "default",
             action: (
               <button
                 onClick={() => window.open(item.fileUrl, '_blank')}
@@ -107,39 +92,26 @@ export function ItemCard({ item }: ItemCardProps) {
             ),
           })
         } else {
-          // Error genérico para otros tipos
-          const errorMessage = result.error || "No se pudo copiar al portapapeles";
           toast({
             title: "❌ Error al copiar",
-            description: errorMessage,
+            description: result.error || "No se pudo copiar al portapapeles",
             variant: "destructive",
           })
         }
       }
-    } catch (error) {
-      toast({
-        title: "❌ Error inesperado",
-        description: "Hubo un problema al intentar copiar. Intenta nuevamente.",
-        variant: "destructive",
-      })
+    } catch {
+      toast({ title: "❌ Error inesperado", description: "Intenta nuevamente.", variant: "destructive" })
     }
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when clicking delete
+    e.stopPropagation()
     try {
       setIsLoading(true)
       await deleteItem(item.id)
-      toast({
-        title: "Elemento eliminado",
-        description: "El elemento ha sido eliminado correctamente",
-      })
-    } catch (error) {
-      toast({
-        title: "Error al eliminar",
-        description: "Ha ocurrido un error al eliminar el elemento",
-        variant: "destructive",
-      })
+      toast({ title: "Elemento eliminado", description: "El elemento ha sido eliminado correctamente" })
+    } catch {
+      toast({ title: "Error al eliminar", variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
@@ -150,299 +122,234 @@ export function ItemCard({ item }: ItemCardProps) {
       setIsLoading(true)
       await updateItem(item.id, { content: editedContent })
       setIsEditing(false)
-      toast({
-        title: "Elemento actualizado",
-        description: "El elemento ha sido actualizado correctamente",
-      })
-    } catch (error) {
-      toast({
-        title: "Error al actualizar",
-        description: "Ha ocurrido un error al actualizar el elemento",
-        variant: "destructive",
-      })
+      toast({ title: "Elemento actualizado" })
+    } catch {
+      toast({ title: "Error al actualizar", variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when clicking favorite
+    e.stopPropagation()
     try {
       setIsLoading(true)
-      const newFavoriteStatus = !isFavorite
-      await updateItem(item.id, { favorite: newFavoriteStatus })
-      setIsFavorite(newFavoriteStatus)
-      toast({
-        title: newFavoriteStatus ? "Añadido a favoritos" : "Eliminado de favoritos",
-        description: newFavoriteStatus 
-          ? "El elemento ha sido añadido a favoritos" 
-          : "El elemento ha sido eliminado de favoritos",
-      })
-    } catch (error) {
-      toast({
-        title: "Error al actualizar favoritos",
-        description: "Ha ocurrido un error al actualizar el estado de favoritos",
-        variant: "destructive",
-      })
+      const newFav = !isFavorite
+      await updateItem(item.id, { favorite: newFav })
+      setIsFavorite(newFav)
+      toast({ title: newFav ? "Añadido a favoritos" : "Eliminado de favoritos" })
+    } catch {
+      toast({ title: "Error al actualizar favoritos", variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when clicking download
-    if (item.fileUrl) {
-      window.open(item.fileUrl, "_blank")
-    }
+  const handleDownload = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    if (item.fileUrl) window.open(item.fileUrl, "_blank")
   }
 
   const handleCopyLink = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when clicking copy link
+    e.stopPropagation()
     try {
-      if (item.fileUrl) {
-        await navigator.clipboard.writeText(item.fileUrl);
-        toast({
-          title: "🔗 Enlace copiado",
-          description: "El enlace del archivo ha sido copiado al portapapeles",
-        });
-      } else if (item.content) {
-        await navigator.clipboard.writeText(item.content);
-        toast({
-          title: "✅ Copiado al portapapeles",
-          description: "El contenido ha sido copiado",
-        });
+      const text = item.fileUrl || item.content
+      if (text) {
+        await navigator.clipboard.writeText(text)
+        toast({ title: "🔗 Enlace copiado" })
       }
-    } catch (error) {
-      toast({
-        title: "Error al copiar",
-        description: "No se pudo copiar el enlace al portapapeles",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error al copiar", variant: "destructive" })
     }
   }
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when clicking edit
-    setIsEditing(true);
+    e.stopPropagation()
+    setIsEditing(true)
   }
 
-  const toggleMobileActions = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent copying when toggling actions
-    setShowMobileActions(!showMobileActions);
-  }
+  // ─── Long press ──────────────────────────────────────────────────────────────
 
-  // Swipe handlers para móvil
-  const handleSwipeLeft = async () => {
-    // Swipe izquierda = Eliminar directamente
-    if (!isMobile) return;
-    
-    try {
-      setIsLoading(true);
-      await deleteItem(item.id);
-      toast({
-        title: "✅ Elemento eliminado",
-        description: "El elemento ha sido eliminado correctamente",
-      });
-    } catch (error) {
-      toast({
-        title: "Error al eliminar",
-        description: "Ha ocurrido un error al eliminar el elemento",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+  const handleLongPress = useCallback(() => {
+    longPressTriggeredRef.current = true
+    import('@/lib/native/haptics').then(({ triggerHaptic }) => triggerHaptic('medium'))
+    if (item.type === 'text' || item.type === 'url') {
+      setIsEditing(true)
+    } else if (item.fileUrl) {
+      handleDownload()
     }
-  };
+  }, [item.type, item.fileUrl])
+
+  // ─── Swipe ───────────────────────────────────────────────────────────────────
+
+  const handleSwipeLeft = async () => {
+    if (!isMobile) return
+    try {
+      setIsLoading(true)
+      await deleteItem(item.id)
+      toast({ title: "✅ Elemento eliminado" })
+    } catch {
+      toast({ title: "Error al eliminar", variant: "destructive" })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSwipeRight = async () => {
-    // Swipe derecha = Toggle favorito
-    if (!isMobile) return;
-    
+    if (!isMobile) return
     try {
-      const newFavoriteStatus = !isFavorite;
-      await updateItem(item.id, { favorite: newFavoriteStatus });
-      setIsFavorite(newFavoriteStatus);
+      const newFav = !isFavorite
+      await updateItem(item.id, { favorite: newFav })
+      setIsFavorite(newFav)
       toast({
-        title: newFavoriteStatus ? "⭐ Añadido a favoritos" : "Favorito eliminado",
-        description: newFavoriteStatus 
-          ? "El elemento ha sido marcado como favorito" 
-          : "El elemento ya no es favorito",
+        title: newFav ? "⭐ Añadido a favoritos" : "Favorito eliminado",
         duration: 2000,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar favoritos",
-        variant: "destructive",
-      });
+      })
+    } catch {
+      toast({ title: "Error", variant: "destructive" })
     }
-  };
+  }
 
   const swipeHandlers = useSwipe({
     onSwipeLeft: handleSwipeLeft,
     onSwipeRight: handleSwipeRight,
     minSwipeDistance: 80,
     maxSwipeTime: 500,
-  });
+  })
+
+  // Combined touch handlers: long press + swipe
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX
+    longPressTriggeredRef.current = false
+    longPressTimerRef.current = setTimeout(() => {
+      handleLongPress()
+    }, LONG_PRESS_DURATION)
+    swipeHandlers.onTouchStart(e)
+  }, [swipeHandlers.onTouchStart, handleLongPress])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const deltaX = Math.abs(e.touches[0].clientX - touchStartXRef.current)
+    if (deltaX > 8 && longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+    swipeHandlers.onTouchMove(e)
+  }, [swipeHandlers.onTouchMove])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+    swipeHandlers.onTouchEnd()
+  }, [swipeHandlers.onTouchEnd])
+
+  // ─── Card click ──────────────────────────────────────────────────────────────
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false
+      return
+    }
+    handleCopy(e)
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────────────────
 
   const renderIcon = () => {
     switch (item.type) {
-      case "text":
-        return <FileText className="h-3 w-3 dark:text-white" />
-      case "file":
-        // No mostrar icono para archivos, ya que se muestra uno más grande en el contenido
-        return null;
-      case "url":
-        return <LinkIcon className="h-3 w-3 dark:text-white" />
-      default:
-        return <FileText className="h-3 w-3 dark:text-white" />
+      case "text": return <FileText className="h-3 w-3 dark:text-white" />
+      case "file": return null
+      case "url": return <LinkIcon className="h-3 w-3 dark:text-white" />
+      default: return <FileText className="h-3 w-3 dark:text-white" />
     }
   }
 
-  // Function to truncate text based on device size and line count
   const truncateText = (text: string) => {
-    if (!text) return "";
-    
-    // For explicit truncation (when CSS line-clamp might not be fully supported)
-    // Count number of lines (by counting newline characters)
-    const lineCount = (text.match(/\n/g) || []).length + 1;
-    
-      if (isMobile) {
-      // For mobile: limit to 80 characters or 2 lines
-      const exceedsLineLimit = lineCount > 2;
-      const exceedsCharLimit = text.length > 80;
-      
-      if ((exceedsLineLimit || exceedsCharLimit) && !showFullText) {
-        if (exceedsLineLimit) {
-          // Find the position of the second newline character
-          let pos = text.indexOf('\n');
+    if (!text) return ""
+    const lineCount = (text.match(/\n/g) || []).length + 1
+    if (isMobile) {
+      if ((lineCount > 2 || text.length > 80) && !showFullText) {
+        if (lineCount > 2) {
+          let pos = text.indexOf('\n')
           if (pos !== -1) {
-            pos = text.indexOf('\n', pos + 1);
-            if (pos !== -1) {
-              return text.substring(0, pos) + "...";
-            }
+            pos = text.indexOf('\n', pos + 1)
+            if (pos !== -1) return text.substring(0, pos) + "..."
           }
         }
-        
-        // If we didn't truncate by lines or there aren't enough newlines,
-        // truncate by character count
-        if (text.length > 80) {
-          return text.substring(0, 80) + "...";
-        }
+        if (text.length > 80) return text.substring(0, 80) + "..."
       }
     } else {
-      // For desktop: limit to 300 characters or 3 lines
-      const exceedsLineLimit = lineCount > 3;
-      const exceedsCharLimit = text.length > 300;
-      
-      if ((exceedsLineLimit || exceedsCharLimit) && !showFullText) {
-        if (exceedsLineLimit) {
-          // Find the position of the third newline character
-          let pos = text.indexOf('\n');
-          if (pos !== -1) {
-            pos = text.indexOf('\n', pos + 1);
-            if (pos !== -1) {
-              pos = text.indexOf('\n', pos + 1);
-              if (pos !== -1) {
-                return text.substring(0, pos) + "...";
-              }
-            }
-          }
+      if ((lineCount > 3 || text.length > 300) && !showFullText) {
+        if (lineCount > 3) {
+          let pos = text.indexOf('\n')
+          if (pos !== -1) { pos = text.indexOf('\n', pos + 1); if (pos !== -1) { pos = text.indexOf('\n', pos + 1); if (pos !== -1) return text.substring(0, pos) + "..." } }
         }
-        
-        // If we didn't truncate by lines or there aren't enough newlines,
-        // truncate by character count
-        if (text.length > 300) {
-          return text.substring(0, 300) + "...";
-        }
+        if (text.length > 300) return text.substring(0, 300) + "..."
       }
     }
-    return text;
-  };
+    return text
+  }
 
   const shouldShowExpandButton = (content: string) => {
-    if (!content) return false;
-    
-    const lineCount = (content.match(/\n/g) || []).length + 1;
-    
-    if (isMobile) {
-      return lineCount > 2 || content.length > 80;
-    } else {
-      return lineCount > 3 || content.length > 300;
-    }
-  };
+    if (!content) return false
+    const lineCount = (content.match(/\n/g) || []).length + 1
+    return isMobile ? lineCount > 2 || content.length > 80 : lineCount > 3 || content.length > 300
+  }
 
-  // Helper function to detect if a file is an image
   const isImageFile = () => {
-    // Method 1: Check fileType
-    if (item.fileType?.startsWith("image/")) {
-      return true;
-    }
-    
-    // Method 2: Check file extension if fileType is missing
+    if (item.fileType?.startsWith("image/")) return true
     if (item.fileName) {
-      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico'];
-      const lowerFileName = item.fileName.toLowerCase();
-      return imageExtensions.some(ext => lowerFileName.endsWith(ext));
+      const exts = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.ico']
+      return exts.some(ext => item.fileName!.toLowerCase().endsWith(ext))
     }
-    
-    // Method 3: Check if URL contains image indicators
-    if (item.fileUrl) {
-      const lowerUrl = item.fileUrl.toLowerCase();
-      return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico)(\?|$)/i.test(lowerUrl);
-    }
-    
-    return false;
-  };
+    if (item.fileUrl) return /\.(jpg|jpeg|png|gif|webp|bmp|svg|ico)(\?|$)/i.test(item.fileUrl)
+    return false
+  }
+
+  const getFileIcon = () => {
+    const t = item.fileType?.toLowerCase() || ''
+    if (t.startsWith('image/')) return <ImageIcon className="h-5 w-5 mr-2 text-primary" />
+    if (t.startsWith('audio/')) return <FileAudio className="h-5 w-5 mr-2 text-primary" />
+    if (t.startsWith('video/')) return <FileVideo className="h-5 w-5 mr-2 text-primary" />
+    if (t === 'application/pdf') return <FilePdf className="h-5 w-5 mr-2 text-primary" />
+    if (t.includes('zip') || t.includes('compressed') || t.includes('archive')) return <FileArchive className="h-5 w-5 mr-2 text-primary" />
+    if (t.includes('javascript') || t.includes('json') || t.includes('html') || t.includes('css') || t.includes('xml') || t.includes('text/plain')) return <FileCode className="h-5 w-5 mr-2 text-primary" />
+    return <File className="h-5 w-5 mr-2 text-primary" />
+  }
+
+  const getFileTypeDescription = () => {
+    const t = item.fileType?.toLowerCase() || ''
+    if (t.startsWith('image/')) return `Imagen ${t.split('/')[1]?.toUpperCase() || ''}`
+    if (t.startsWith('audio/')) return `Audio ${t.split('/')[1]?.toUpperCase() || ''}`
+    if (t.startsWith('video/')) return `Video ${t.split('/')[1]?.toUpperCase() || ''}`
+    if (t === 'application/pdf') return 'PDF'
+    if (t.includes('zip') || t.includes('compressed') || t.includes('archive')) return 'Comprimido'
+    if (t.includes('javascript')) return 'JavaScript'
+    if (t.includes('json')) return 'JSON'
+    if (t.includes('html')) return 'HTML'
+    if (t.includes('css')) return 'CSS'
+    if (t.includes('text/plain')) return 'Texto'
+    return t.split('/')[1]?.toUpperCase() || t
+  }
+
+  // ─── Content renderers ───────────────────────────────────────────────────────
 
   const renderContent = () => {
-    // Debug: Log file type for images to help troubleshoot
-    if (item.type === "file" && isImageFile()) {
-      console.log("🖼️ Image item:", {
-        fileName: item.fileName,
-        fileType: item.fileType,
-        hasUrl: !!item.fileUrl,
-        detectionMethod: item.fileType ? 'fileType' : 'extension/url'
-      });
-    }
-
     if (isEditing) {
-      const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter') {
-          if (e.altKey) {
-            // Alt+Enter: nueva línea (comportamiento por defecto)
-            return;
-          } else {
-            // Enter solo: guardar cambios
-          e.preventDefault();
-          handleUpdate();
-          }
-        }
-      };
-      
       return (
         <div className="mt-2" onClick={(e) => e.stopPropagation()}>
           <Textarea
             value={editedContent}
             onChange={(e) => setEditedContent(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.altKey) { e.preventDefault(); handleUpdate() }
+            }}
             className="mb-2 bg-background border-border text-foreground"
           />
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleUpdate} disabled={isLoading}>
-              Guardar
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditing(false);
-                setEditedContent(item.content || "");
-              }}
-              disabled={isLoading}
-              className="dark:text-white dark:border-white/30"
-            >
+            <Button size="sm" onClick={handleUpdate} disabled={isLoading}>Guardar</Button>
+            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setIsEditing(false); setEditedContent(item.content || "") }} disabled={isLoading} className="dark:text-white dark:border-white/30">
               Cancelar
             </Button>
           </div>
@@ -451,130 +358,51 @@ export function ItemCard({ item }: ItemCardProps) {
     }
 
     if (item.type === "url") {
-      const truncatedContent = truncateText(item.content);
-      const showButton = shouldShowExpandButton(item.content);
-      
+      const truncated = truncateText(item.content)
+      const showBtn = shouldShowExpandButton(item.content)
       return (
         <div>
-          <a
-            href={item.content}
-            target="_blank"
-            rel="noopener noreferrer"
+          <a href={item.content} target="_blank" rel="noopener noreferrer"
             className={`text-sm lg:text-base text-blue-600 hover:underline dark:text-blue-400 break-words ${!showFullText ? 'inline' : ''}`}
             onClick={(e) => e.stopPropagation()}
           >
-            {showFullText ? item.content : truncatedContent}
-            {showButton && !showFullText && (
+            {showFullText ? item.content : truncated}
+            {showBtn && !showFullText && (
               <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
-                (<button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowFullText(true);
-                  }}
-                  className="text-primary underline inline"
-                >
-                  ver más
-                </button>)
+                (<button onClick={(e) => { e.stopPropagation(); setShowFullText(true) }} className="text-primary underline inline">ver más</button>)
               </span>
             )}
           </a>
-          {showButton && showFullText && (
+          {showBtn && showFullText && (
             <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
-              (<button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowFullText(false);
-                }}
-                className="text-primary underline inline"
-              >
-                ver menos
-              </button>)
+              (<button onClick={(e) => { e.stopPropagation(); setShowFullText(false) }} className="text-primary underline inline">ver menos</button>)
             </span>
           )}
         </div>
       )
     }
 
+    // Image — compact thumbnail for both mobile and desktop
     if (item.type === "file" && isImageFile() && item.fileUrl) {
       return (
-        <div className="mt-2">
+        <div className="flex items-center gap-2.5 mt-1">
           <img
-            src={item.fileUrl || "/placeholder.svg"}
+            src={item.fileUrl}
             alt={item.fileName || "Imagen"}
-            className="max-h-40 rounded-md object-contain bg-secondary/30"
+            className="h-12 w-12 rounded-md object-cover flex-shrink-0 bg-secondary/30"
             onClick={(e) => e.stopPropagation()}
-            onError={(e) => {
-              // Fallback si la imagen no carga
-              console.error("Error loading image:", item.fileName);
-              e.currentTarget.style.display = 'none';
-            }}
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
           />
-          <p className="text-sm text-muted-foreground mt-1 break-words">
-            {item.fileName}
-            <span className="text-xs ml-2 text-muted-foreground/70">
-              ({item.fileType || 'imagen'})
-            </span>
-          </p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate text-foreground">{item.fileName}</p>
+            <p className="text-xs text-muted-foreground">{item.fileType?.split('/')[1]?.toUpperCase() || 'imagen'}</p>
+          </div>
         </div>
       )
     }
 
+    // Non-image file
     if (item.type === "file" && item.fileUrl) {
-      // Determinar el icono adecuado según el tipo de archivo
-      const getFileIcon = () => {
-        if (!item.fileType) return <File className="h-5 w-5 mr-2 text-primary" />;
-        
-        const fileType = item.fileType.toLowerCase();
-        
-        if (fileType.startsWith('image/')) {
-          return <ImageIcon className="h-5 w-5 mr-2 text-primary" />;
-        } else if (fileType.startsWith('audio/')) {
-          return <FileAudio className="h-5 w-5 mr-2 text-primary" />;
-        } else if (fileType.startsWith('video/')) {
-          return <FileVideo className="h-5 w-5 mr-2 text-primary" />;
-        } else if (fileType === 'application/pdf') {
-          return <FilePdf className="h-5 w-5 mr-2 text-primary" />;
-        } else if (fileType.includes('zip') || fileType.includes('compressed') || fileType.includes('archive')) {
-          return <FileArchive className="h-5 w-5 mr-2 text-primary" />;
-        } else if (fileType.includes('javascript') || fileType.includes('json') || fileType.includes('html') || 
-                  fileType.includes('css') || fileType.includes('xml') || fileType.includes('text/plain')) {
-          return <FileCode className="h-5 w-5 mr-2 text-primary" />;
-        } else {
-          return <File className="h-5 w-5 mr-2 text-primary" />;
-        }
-      };
-      
-      // Obtener una descripción amigable del tipo de archivo
-      const getFileTypeDescription = () => {
-        if (!item.fileType) return "";
-        
-        const fileType = item.fileType.toLowerCase();
-        
-        if (fileType.startsWith('image/')) {
-          return `Imagen ${fileType.split('/')[1]?.toUpperCase() || ''}`;
-        } else if (fileType.startsWith('audio/')) {
-          return `Audio ${fileType.split('/')[1]?.toUpperCase() || ''}`;
-        } else if (fileType.startsWith('video/')) {
-          return `Video ${fileType.split('/')[1]?.toUpperCase() || ''}`;
-        } else if (fileType === 'application/pdf') {
-          return 'Documento PDF';
-        } else if (fileType.includes('zip') || fileType.includes('compressed') || fileType.includes('archive')) {
-          return 'Archivo comprimido';
-        } else if (fileType.includes('javascript')) {
-          return 'Código JavaScript';
-        } else if (fileType.includes('json')) {
-          return 'Archivo JSON';
-        } else if (fileType.includes('html')) {
-          return 'Documento HTML';
-        } else if (fileType.includes('css')) {
-          return 'Hoja de estilos CSS';
-        } else if (fileType.includes('text/plain')) {
-          return 'Archivo de texto';
-        } else {
-          return fileType.split('/')[1]?.toUpperCase() || fileType;
-        }
-      };
-      
       return (
         <div className="mt-1">
           <div className="flex items-center">
@@ -591,296 +419,128 @@ export function ItemCard({ item }: ItemCardProps) {
       )
     }
 
-    const truncatedContent = truncateText(item.content);
-    const showButton = shouldShowExpandButton(item.content);
-    
+    // Text
+    const truncated = truncateText(item.content)
+    const showBtn = shouldShowExpandButton(item.content)
     return (
       <div>
         <p className={`text-sm lg:text-base text-foreground break-words whitespace-pre-wrap ${!showFullText ? 'inline' : ''}`}>
-          {showFullText ? item.content : truncatedContent}
-          {showButton && !showFullText && (
+          {showFullText ? item.content : truncated}
+          {showBtn && !showFullText && (
             <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
-              (<button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowFullText(true);
-                }}
-                className="text-primary underline inline"
-              >
-                ver más
-              </button>)
+              (<button onClick={(e) => { e.stopPropagation(); setShowFullText(true) }} className="text-primary underline inline">ver más</button>)
             </span>
           )}
         </p>
-        {showButton && showFullText && (
+        {showBtn && showFullText && (
           <span className="text-xs lg:text-sm text-primary ml-1 inline-flex items-center">
-            (<button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowFullText(false);
-              }}
-              className="text-primary underline inline"
-            >
-              ver menos
-            </button>)
+            (<button onClick={(e) => { e.stopPropagation(); setShowFullText(false) }} className="text-primary underline inline">ver menos</button>)
           </span>
         )}
       </div>
     )
   }
 
-  // Handler inteligente de tap en móvil
-  const handleCardClick = (e: React.MouseEvent) => {
-    if (!isMobile) {
-      // Desktop: siempre copia
-      handleCopy(e);
-      return;
-    }
-
-    // Móvil: comportamiento inteligente
-    if (item.type === 'text' || item.type === 'url') {
-      // Texto y Links: copia directamente
-      handleCopy(e);
-    } else {
-      // Archivo/Imagen: muestra barra de acciones
-      toggleMobileActions(e);
-    }
-  };
+  // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <div className="relative">
-      {/* Indicadores de swipe - solo móvil */}
+      {/* Swipe indicators — mobile only */}
       {isMobile && swipeHandlers.isSwipping && (
         <>
-          {/* Indicador izquierdo - Favorito */}
-          <div 
-            className={`absolute left-0 top-0 bottom-0 w-20 flex items-center justify-start pl-4 rounded-l-md transition-all ${
-              swipeHandlers.swipeDirection === 'right' ? 'opacity-100 bg-yellow-500' : 'opacity-0'
-            }`}
-          >
+          <div className={`absolute left-0 top-0 bottom-0 w-20 flex items-center justify-start pl-4 rounded-l-md transition-all ${swipeHandlers.swipeDirection === 'right' ? 'opacity-100 bg-yellow-500' : 'opacity-0'}`}>
             <Star className="h-7 w-7 text-white" fill="none" strokeWidth={2} />
           </div>
-          
-          {/* Indicador derecho - Eliminar */}
-          <div 
-            className={`absolute right-0 top-0 bottom-0 w-20 flex items-center justify-end pr-4 rounded-r-md transition-all ${
-              swipeHandlers.swipeDirection === 'left' ? 'opacity-100 bg-red-500' : 'opacity-0'
-            }`}
-          >
+          <div className={`absolute right-0 top-0 bottom-0 w-20 flex items-center justify-end pr-4 rounded-r-md transition-all ${swipeHandlers.swipeDirection === 'left' ? 'opacity-100 bg-red-500' : 'opacity-0'}`}>
             <Trash className="h-7 w-7 text-white" />
           </div>
         </>
       )}
-      
-      <div 
-        className={`group item-card border border-border rounded-md p-2 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all relative ${
-          swipeHandlers.isSwipping ? 'scale-98 shadow-lg' : ''
-        }`}
+
+      <div
+        className={`group item-card border border-border rounded-md p-2 bg-card text-card-foreground shadow-sm hover:shadow-md transition-all relative ${swipeHandlers.isSwipping ? 'scale-98 shadow-lg' : ''}`}
         style={{
-          transform: swipeHandlers.isSwipping 
-            ? `translateX(${swipeHandlers.swipeOffset}px)` 
-            : 'translateX(0)',
+          transform: swipeHandlers.isSwipping ? `translateX(${swipeHandlers.swipeOffset}px)` : 'translateX(0)',
           transition: swipeHandlers.isSwipping ? 'none' : 'transform 0.3s ease-out',
         }}
         onClick={handleCardClick}
+        onContextMenu={(e) => e.preventDefault()}
         {...(isMobile ? {
-          onTouchStart: swipeHandlers.onTouchStart,
-          onTouchMove: swipeHandlers.onTouchMove,
-          onTouchEnd: swipeHandlers.onTouchEnd,
+          onTouchStart: handleTouchStart,
+          onTouchMove: handleTouchMove,
+          onTouchEnd: handleTouchEnd,
         } : {})}
       >
-      <div className="flex items-start gap-2">
-        <div className="flex-1 overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-1.5">
-              {renderIcon() && <div className="text-primary">{renderIcon()}</div>}
-              {isMobile && (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={toggleMobileActions}
-                  className="text-muted-foreground ml-auto h-6 w-6"
-                >
-                  <MoreHorizontal className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-            
-            {/* Desktop actions */}
-            {!isMobile && (
-              <div className="flex gap-0.5">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleToggleFavorite}
-                  className={`h-6 w-6 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
-                >
-                  <Star className="h-3 w-3" fill={isFavorite ? "currentColor" : "none"} />
-                  <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
-                </Button>
-                {/* Orden: Favorito → Link/Editar → Descargar → Copiar → Eliminar */}
-                {isImageFile() ? (
-                  <>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={handleCopyLink}
-                      className="text-muted-foreground h-6 w-6"
-                      title="Copiar enlace"
-                    >
-                      <Link2 className="h-3 w-3" />
-                      <span className="sr-only">Copiar enlace</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={handleDownload}
-                      className="text-muted-foreground h-6 w-6"
-                      title="Descargar"
-                    >
-                      <Download className="h-3 w-3" />
-                      <span className="sr-only">Descargar</span>
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={handleCopy}
-                      className="text-muted-foreground h-6 w-6"
-                      title="Copiar imagen"
-                    >
-                      <Copy className="h-3 w-3" />
-                      <span className="sr-only">Copiar imagen</span>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    {!isEditing && item.type !== "file" && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleEdit}
-                        className="text-muted-foreground h-6 w-6"
-                      >
-                        <Edit className="h-3 w-3" />
-                        <span className="sr-only">Editar</span>
-                      </Button>
-                    )}
-                    {item.type === "file" && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleDownload}
-                        className="text-muted-foreground h-6 w-6"
-                      >
-                        <Download className="h-3 w-3" />
-                        <span className="sr-only">Descargar</span>
-                      </Button>
-                    )}
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={handleCopy}
-                      className="text-muted-foreground h-6 w-6"
-                    >
-                      <Copy className="h-3 w-3" />
-                      <span className="sr-only">Copiar</span>
-                    </Button>
-                  </>
+        <div className="flex items-start gap-2">
+          <div className="flex-1 overflow-hidden">
+
+            {/* Card header */}
+            <div className="flex justify-between items-center">
+              {/* Type icon + favorite star (mobile) */}
+              <div className="flex items-center gap-1.5">
+                {renderIcon() && <div className="text-primary">{renderIcon()}</div>}
+                {isMobile && isFavorite && (
+                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                 )}
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleDelete}
-                  disabled={isLoading}
-                  className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-6 w-6"
-                >
-                  <Trash className="h-3 w-3" />
-                  <span className="sr-only">Eliminar</span>
-                </Button>
               </div>
-            )}
-          </div>
-          
-          <div className="mt-0.5">
-            {renderContent()}
-            <div className={`text-[10px] text-muted-foreground/70 mt-0.5 transition-opacity ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-              {formatDate(item.createdAt)}
-              {item.updatedAt && (
-                typeof item.updatedAt === 'object' && item.updatedAt instanceof Date && 
-                typeof item.createdAt === 'object' && item.createdAt instanceof Date && 
-                item.updatedAt.getTime() !== item.createdAt.getTime() ? (
-                  <> · editado {formatDate(item.updatedAt)}</>
-                ) : (
-                  item.updatedAt !== item.createdAt && <> · editado {formatDate(item.updatedAt)}</>
-                )
+
+              {/* Desktop action buttons */}
+              {!isMobile && (
+                <div className="flex gap-0.5">
+                  <Button size="icon" variant="ghost" onClick={handleToggleFavorite}
+                    className={`h-6 w-6 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
+                  >
+                    <Star className="h-3 w-3" fill={isFavorite ? "currentColor" : "none"} />
+                    <span className="sr-only">{isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}</span>
+                  </Button>
+
+                  {isImageFile() ? (
+                    <>
+                      <Button size="icon" variant="ghost" onClick={handleCopyLink} className="text-muted-foreground h-6 w-6" title="Copiar enlace">
+                        <Link2 className="h-3 w-3" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={handleDownload} className="text-muted-foreground h-6 w-6" title="Descargar">
+                        <Download className="h-3 w-3" />
+                      </Button>
+                      <Button size="icon" variant="ghost" onClick={handleCopy} className="text-muted-foreground h-6 w-6" title="Copiar imagen">
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      {!isEditing && item.type !== "file" && (
+                        <Button size="icon" variant="ghost" onClick={handleEdit} className="text-muted-foreground h-6 w-6">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      )}
+                      {item.type === "file" && (
+                        <Button size="icon" variant="ghost" onClick={handleDownload} className="text-muted-foreground h-6 w-6">
+                          <Download className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" onClick={handleCopy} className="text-muted-foreground h-6 w-6">
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </>
+                  )}
+
+                  <Button size="icon" variant="ghost" onClick={handleDelete} disabled={isLoading}
+                    className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-6 w-6"
+                  >
+                    <Trash className="h-3 w-3" />
+                  </Button>
+                </div>
               )}
             </div>
+
+            {/* Content */}
+            <div className="mt-0.5">
+              {renderContent()}
+            </div>
+
           </div>
         </div>
-      </div>
-      
-      {/* Mobile actions - horizontal row at the bottom - solo iconos más importantes */}
-      {isMobile && showMobileActions && (
-        <div className="flex justify-center gap-4 mt-2 pt-1.5 border-t border-border" onClick={(e) => e.stopPropagation()}>
-          {/* Orden móvil: Favorito → Descargar (si aplica) → Copiar → Eliminar */}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleToggleFavorite}
-            className={`h-8 w-8 ${isFavorite ? 'text-yellow-500 dark:text-yellow-400' : 'text-muted-foreground'}`}
-            title={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
-          >
-            <Star className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
-          </Button>
-          
-          {!isEditing && item.type !== "file" && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleEdit}
-              className="text-muted-foreground h-8 w-8"
-              title="Editar"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
-          
-          {item.type === "file" && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleDownload}
-              className="text-muted-foreground h-8 w-8"
-              title="Descargar"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-          )}
-          
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={(e) => handleCopy(e)}
-            className="text-muted-foreground h-8 w-8"
-            title="Copiar"
-          >
-            <Copy className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleDelete}
-            disabled={isLoading}
-            className="text-red-500 hover:bg-destructive hover:text-white transition-colors h-8 w-8"
-            title="Eliminar"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
       </div>
     </div>
   )
 }
-

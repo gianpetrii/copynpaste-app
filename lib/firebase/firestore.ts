@@ -9,7 +9,7 @@ import {
   query, 
   where, 
   orderBy,
-  Timestamp,
+  limit as firestoreLimit,
   serverTimestamp,
   onSnapshot
 } from 'firebase/firestore';
@@ -22,7 +22,6 @@ export const addDocument = async (collectionName: string, data: any) => {
     const docRef = await addDoc(collection(db, collectionName), {
       ...data,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
     });
     return docRef.id;
   } catch (error) {
@@ -37,7 +36,6 @@ export const updateDocument = async (collectionName: string, docId: string, data
     const docRef = doc(db, collectionName, docId);
     await updateDoc(docRef, {
       ...data,
-      updatedAt: serverTimestamp()
     });
     return true;
   } catch (error) {
@@ -115,30 +113,32 @@ export const getDocuments = async (
 // Función para suscribirse a cambios en tiempo real en una colección
 export const subscribeToItems = (
   userId: string,
-  callback: (items: Item[]) => void
+  callback: (items: Item[], hasMore: boolean) => void,
+  limitCount?: number
 ) => {
   try {
-    // Crear una consulta para obtener los elementos del usuario ordenados por fecha de creación
-    const q = query(
+    const baseQuery = query(
       collection(db, 'items'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
     );
 
-    // Crear una suscripción a los cambios en la consulta
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const items: Item[] = [];
+    // Fetch limitCount + 1 to detect if there are more items beyond the page
+    const q = limitCount
+      ? query(baseQuery, firestoreLimit(limitCount + 1))
+      : baseQuery;
 
-      // Procesar cada documento en el resultado de la consulta
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const allItems: Item[] = [];
+
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        items.push({
+        allItems.push({
           id: doc.id,
           type: data.type,
           content: data.content || '',
           userId: data.userId,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
           fileUrl: data.fileUrl || '',
           fileName: data.fileName || '',
           fileType: data.fileType || '',
@@ -148,8 +148,9 @@ export const subscribeToItems = (
         });
       });
 
-      // Llamar al callback con los elementos actualizados
-      callback(items);
+      const hasMore = limitCount ? allItems.length > limitCount : false;
+      const items = hasMore ? allItems.slice(0, limitCount) : allItems;
+      callback(items, hasMore);
     });
 
     // Devolver la función para cancelar la suscripción

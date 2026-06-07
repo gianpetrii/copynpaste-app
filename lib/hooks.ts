@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { Item } from "@/types"
-import { addDocument, getDocuments, updateDocument, deleteDocument, subscribeToItems } from "@/lib/firebase/firestore"
+import { addDocument, updateDocument, deleteDocument, subscribeToItems } from "@/lib/firebase/firestore"
 import { uploadFile, deleteFile } from "@/lib/firebase/storage"
 import { sanitizeText } from "@/lib/utils/validation"
 import { logger } from "@/lib/utils/logger"
@@ -30,15 +30,6 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       // Parse the stored JSON
       const parsed = JSON.parse(item)
       
-      // If we're storing items, convert date strings back to Date objects
-      if (Array.isArray(parsed) && parsed.length > 0 && 'createdAt' in parsed[0]) {
-        return parsed.map((item: any) => ({
-          ...item,
-          createdAt: new Date(item.createdAt),
-          updatedAt: new Date(item.updatedAt)
-        }))
-      }
-      
       return parsed
     } catch (error) {
       console.error(error)
@@ -61,34 +52,38 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   return [storedValue, setValue] as const
 }
 
+const PAGE_SIZE = 50
+
 // Hook para gestionar los items
-export function useItems(userId: string) {
+export function useItems(userId: string, options?: { paginate?: boolean }) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
+  const [pageSize, setPageSize] = useState(options?.paginate ? PAGE_SIZE : undefined)
 
-  // Cargar los items del usuario desde Firestore con actualizaciones en tiempo real
+  const loadMore = () => {
+    setPageSize(prev => (prev ?? PAGE_SIZE) + PAGE_SIZE)
+  }
+
   useEffect(() => {
     if (!userId) {
       setItems([])
       setLoading(false)
-      return () => {}; // Retornar una función de limpieza vacía
+      return () => {};
     }
 
     setLoading(true)
     
-    // Usar subscribeToItems para obtener actualizaciones en tiempo real
-    const unsubscribe = subscribeToItems(userId, (updatedItems) => {
-      // Asegurarse de que solo se muestren los items del usuario actual
-      const userItems = updatedItems.filter(item => item.userId === userId);
-      setItems(userItems);
+    const unsubscribe = subscribeToItems(userId, (updatedItems, more) => {
+      setItems(updatedItems);
+      setHasMore(more);
       setLoading(false);
-    });
+    }, pageSize);
     
-    // Limpiar la suscripción cuando el componente se desmonte o cambie el userId
     return () => {
       unsubscribe();
     };
-  }, [userId]);
+  }, [userId, pageSize]);
 
   const addItem = async (itemData: Partial<Item>, onProgress?: (progress: number, fileName: string) => void) => {
     if (!userId) throw new Error("Usuario no autenticado")
@@ -188,6 +183,6 @@ export function useItems(userId: string) {
     }
   }
 
-  return { items, loading, addItem, updateItem, deleteItem }
+  return { items, loading, hasMore, loadMore, addItem, updateItem, deleteItem }
 }
 

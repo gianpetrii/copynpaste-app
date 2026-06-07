@@ -4,7 +4,6 @@ export interface Item {
   content: string
   userId: string
   createdAt: Date
-  updatedAt: Date
   fileUrl?: string
   fileName?: string
   fileType?: string

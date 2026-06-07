@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { Virtuoso } from "react-virtuoso"
 import { ItemCard } from "@/components/item-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -33,9 +34,9 @@ interface ItemListProps {
 export function ItemList({ filter = "all" }: ItemListProps) {
   const { user } = useAuth()
   const userId = user?.uid || ""
-  const { items, loading, deleteItem } = useItems(userId)
+  const { items, loading, hasMore, loadMore, deleteItem } = useItems(userId, { paginate: true })
   const { toast } = useToast()
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "modified">("newest")
+  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest")
   const [filterType, setFilterType] = useState<"all" | "text" | "url" | "file">("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
@@ -123,9 +124,6 @@ export function ItemList({ filter = "all" }: ItemListProps) {
   
   const filteredAndSortedItems = items
     .filter((item) => {
-      // Extra security check to ensure we only show items for the current user
-      if (item.userId !== userId) return false
-      
       if (filterType === "all") return true
       return item.type === filterType
     })
@@ -144,14 +142,10 @@ export function ItemList({ filter = "all" }: ItemListProps) {
       return content.includes(query) || fileName.includes(query)
     })
     .sort((a, b) => {
-      if (sortBy === "newest") {
-        return b.createdAt.getTime() - a.createdAt.getTime()
-      } else if (sortBy === "oldest") {
+      if (sortBy === "oldest") {
         return a.createdAt.getTime() - b.createdAt.getTime()
-      } else {
-        // modified
-        return b.updatedAt.getTime() - a.updatedAt.getTime()
       }
+      return b.createdAt.getTime() - a.createdAt.getTime()
     })
 
   if (loading) {
@@ -212,14 +206,13 @@ export function ItemList({ filter = "all" }: ItemListProps) {
             </SelectContent>
           </Select>
 
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest" | "modified")}>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as "newest" | "oldest")}>
             <SelectTrigger className="w-20 h-8 text-xs bg-background border-border text-foreground shrink-0">
               <SelectValue placeholder="↕" />
             </SelectTrigger>
             <SelectContent className="bg-popover text-popover-foreground border-border">
               <SelectItem value="newest">Reciente</SelectItem>
               <SelectItem value="oldest">Antiguo</SelectItem>
-              <SelectItem value="modified">Modificado</SelectItem>
             </SelectContent>
           </Select>
 
@@ -282,7 +275,7 @@ export function ItemList({ filter = "all" }: ItemListProps) {
             )}
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <>
             {searchQuery && (
               <div className="flex items-center justify-between text-xs text-muted-foreground mb-2 p-1.5 bg-muted/50 rounded-md">
                 <span>
@@ -299,22 +292,36 @@ export function ItemList({ filter = "all" }: ItemListProps) {
                 </Button>
               </div>
             )}
-            {filteredAndSortedItems.map((item, index) => (
-              <div 
-                key={item.id} 
-                className={`
-                  transition-all duration-1500 ease-out
-                  ${newItemIds.has(item.id) 
-                    ? 'animate-slide-down' 
-                    : animatingItems.has(item.id) && index > 0 
-                      ? 'animate-push-down' 
-                      : ''}
-                `}
-              >
-                <ItemCard item={item} />
-              </div>
-            ))}
-          </div>
+            <Virtuoso
+              useWindowScroll
+              data={filteredAndSortedItems}
+              overscan={400}
+              itemContent={(index, item) => (
+                <div
+                  className={`pb-1.5 transition-all duration-1500 ease-out ${
+                    newItemIds.has(item.id)
+                      ? 'animate-slide-down'
+                      : animatingItems.has(item.id) && index > 0
+                        ? 'animate-push-down'
+                        : ''
+                  }`}
+                >
+                  <ItemCard item={item} />
+                </div>
+              )}
+              endReached={() => {
+                if (hasMore && !searchQuery) loadMore()
+              }}
+              components={{
+                Footer: () =>
+                  hasMore && !searchQuery ? (
+                    <div className="py-3 flex justify-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-muted-foreground" />
+                    </div>
+                  ) : null,
+              }}
+            />
+          </>
         )}
       </div>
     </div>

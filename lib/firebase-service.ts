@@ -49,7 +49,6 @@ export async function addItem({
       content: type === "file" ? "" : content,
       userId,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
       fileUrl,
       fileName,
       fileType,
@@ -81,7 +80,6 @@ export async function updateItem(id: string, data: Partial<Item>) {
     const docRef = doc(db, "items", id)
     await updateDoc(docRef, {
       ...data,
-      updatedAt: serverTimestamp(),
     })
     // Log event to analytics
     if (typeof window !== "undefined") {
@@ -137,7 +135,6 @@ export async function getItems(userId: string) {
             content: data.content,
             userId: data.userId,
             createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date(),
             fileUrl: data.fileUrl || "",
             fileName: data.fileName || "",
             fileType: data.fileType || "",
@@ -176,7 +173,6 @@ export function subscribeToItems(userId: string, callback: (items: Item[]) => vo
           content: data.content,
           userId: data.userId,
           createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate() || new Date(),
           fileUrl: data.fileUrl || "",
           fileName: data.fileName || "",
           fileType: data.fileType || "",
