@@ -9,16 +9,16 @@ type AgentLogPayload = {
 };
 
 export function agentLog(payload: AgentLogPayload) {
+  if (process.env.NODE_ENV !== 'development') return;
+
   const entry = {
     sessionId: '8f92a2',
     timestamp: Date.now(),
     ...payload,
   };
 
-  // Visible en consola de Xcode / Safari Web Inspector
   console.log('[DBG-8f92a2]', JSON.stringify(entry));
 
-  // #region agent log
   if (typeof fetch !== 'undefined') {
     fetch('http://127.0.0.1:7734/ingest/a96e22fe-7db9-467b-a658-0c1b519fae26', {
       method: 'POST',
@@ -29,5 +29,4 @@ export function agentLog(payload: AgentLogPayload) {
       body: JSON.stringify(entry),
     }).catch(() => {});
   }
-  // #endregion
 }
