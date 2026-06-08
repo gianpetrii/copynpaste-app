@@ -49,32 +49,75 @@ La app nativa usa build estático (`out/`) y llama a las APIs en la URL de produ
 
 ## Roadmap multiplataforma
 
-Objetivo final: **misma experiencia en Mac, iPhone, Android y Windows**.
+Objetivo final: **misma experiencia en Mac, iPhone, Android y Windows**, con hotkey global en cada plataforma.
 
 - ✅ Web responsive + PWA (manifest, service worker, instalación)
 - ✅ Capacitor: iOS + Android, biometría, push, share, haptics
-- 🚧 **iPhone App Store** — build, firma, prueba en dispositivo, Archive
-- 📋 Android (Play Store) — proyecto Capacitor listo en `android/`
-- 📋 Windows — PWA instalable / empaquetado nativo (Electron o Tauri)
-- 📋 macOS — App nativa Capacitor / Electron para Mac App Store
+- 🚧 **iPhone App Store** — build listo; pendiente Archive → TestFlight → review
+- 📋 **Android (Play Store)** — proyecto Capacitor listo en `android/`
+- 📋 **macOS** — app nativa (menú bar icon + ventana) con hotkey global para pegar el último ítem
+- 📋 **Windows** — cliente nativo (PWA empaquetada o Electron) con hotkey global
 
 ## Roadmap de features
 
-### Plataformas nativas
-- 📋 **Widget iOS** — widget de pantalla de inicio que muestra los últimos ítems del portapapeles y permite copiar con un tap, sin abrir la app (WidgetKit / Capacitor plugin)
-- 📋 **Widget Android** — widget equivalente para la pantalla de inicio de Android (Glance / AppWidget)
-- 📋 **App Mac nativa** — app standalone para macOS (menú bar icon + ventana principal) con sincronización en tiempo real con el resto de dispositivos
-- 📋 **App Android** — publicación en Play Store del proyecto Capacitor existente
-- 📋 **App Windows** — cliente nativo (PWA empaquetada o Electron) para Windows
+### Plataformas y widgets
+- 📋 **Widget iOS (WidgetKit)** — widget de pantalla de inicio que muestra los últimos ítems y permite copiarlos con un tap sin abrir la app; hotkey / acción de Shortcuts
+- 📋 **Widget Android** — widget equivalente (Glance / AppWidget)
+- 📋 **Hotkey global macOS** — atajo de sistema (ej. `⌘⇧V`) para abrir la app y pegar el último ítem copiado; icono en la barra de menú
+- 📋 **Hotkey global Windows** — atajo configurable (ej. `Ctrl+Shift+V`) integrado con la bandeja del sistema
 
 ### Funcionalidades
-- 📋 **Historial sincronizado en tiempo real** — push automático de nuevos ítems entre dispositivos conectados
-- 📋 **Ítems protegidos** — ítems con autenticación biométrica antes de mostrar el contenido (contraseñas, datos sensibles)
-- 📋 **Atajos de teclado globales** — hotkey de sistema para abrir la app y pegar el último ítem copiado
+- 📋 **Búsqueda server-side** — actualmente la búsqueda es client-side sobre los ítems cargados; considerar Algolia o Typesense para búsqueda full-text en toda la colección
+- 📋 **Ítems protegidos** — autenticación biométrica antes de mostrar contenido sensible (contraseñas, tokens)
+- 📋 **Historial entre dispositivos en tiempo real** — push automático de nuevos ítems entre dispositivos conectados sin recargar
+- 📋 **Dominio propio** — configurar dominio en Vercel y actualizar `NEXT_PUBLIC_BASE_URL` + URL de webhook de Mercado Pago
 
-## iOS — próximos pasos (desarrollo)
+## Publicación App Store (iOS)
 
-Orden recomendado para validar cambios:
+### Pre-requisitos
+- Apple Developer Program activo ($99/año)
+- Bundle ID registrado en App Store Connect: debe coincidir con el de Xcode
+- Certificados y provisioning profiles configurados (Xcode puede gestionarlos automáticamente con "Automatically manage signing")
+
+### Flujo recomendado
+
+```bash
+# 1. Build estático + sync a ios/
+npm run build:capacitor
+
+# 2. Instalar dependencias nativas (solo si cambiaron plugins)
+cd ios/App && pod install && cd ../..
+
+# 3. Abrir Xcode
+npm run cap:ios
+```
+
+En Xcode:
+
+1. **Configurar versión**: General → Identity → Version (ej. `1.0.0`) y Build (ej. `1`)
+2. **Seleccionar "Any iOS Device (arm64)"** como destino (no un simulador)
+3. **Archive**: Product → Archive → esperar que termine el build
+4. En la ventana de Organizer → **Distribute App** → App Store Connect → Upload
+5. En [App Store Connect](https://appstoreconnect.apple.com):
+   - Crear nueva app con el Bundle ID correcto
+   - Completar metadata: nombre, descripción, capturas de pantalla, categoría (Productivity)
+   - Seleccionar el build subido → **Submit for Review**
+
+### TestFlight (beta antes de publicar)
+Después del Archive → Distribute → TestFlight (en lugar de App Store Connect). Los testers reciben un email y pueden instalar la beta desde la app TestFlight.
+
+### Capturas de pantalla requeridas
+Apple pide capturas de al menos dos tamaños:
+- iPhone 6.9" (iPhone 16 Pro Max): 1320 × 2868 px
+- iPhone 6.5" (iPhone 14 Plus): 1242 × 2688 px
+
+Se pueden generar desde el simulador de Xcode: `File → Take Screenshot`.
+
+---
+
+## iOS — desarrollo local
+
+Orden recomendado para validar cambios en desarrollo:
 
 ```bash
 # 1. Web: animaciones y UI en dev

@@ -129,6 +129,39 @@ async function fetchImageBlob(imageUrl: string): Promise<Blob> {
 }
 
 /**
+ * Copia una imagen usando el plugin nativo @capacitor/clipboard.
+ * No tiene restricciones de user gesture — llama a iOS/Android directamente.
+ * Retorna false si no está en plataforma nativa.
+ */
+async function copyImageViaCapacitorPlugin(imageUrl: string): Promise<boolean> {
+  try {
+    const { isNativePlatform } = await import('@/lib/native/platform');
+    if (!(await isNativePlatform())) return false;
+
+    const { Clipboard } = await import('@capacitor/clipboard');
+    const blob = await fetchImageBlob(imageUrl);
+
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        // Capacitor Clipboard espera solo la parte base64, sin el prefijo data URI
+        resolve(dataUrl.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    await Clipboard.write({ image: base64 });
+    logger.info('Imagen copiada via Capacitor Clipboard plugin');
+    return true;
+  } catch (error) {
+    logger.warn('Capacitor Clipboard falló', { error });
+    return false;
+  }
+}
+
+/**
  * Copia una imagen al portapapeles desde una URL.
  *
  * iOS / WKWebView requiere que navigator.clipboard.write() se invoque
@@ -145,14 +178,7 @@ export async function copyImageToClipboard(imageUrl: string): Promise<boolean> {
       throw new Error('API de clipboard no soportada');
     }
 
-    // Determinamos el tipo MIME para la clave del ClipboardItem.
-    // La mayoría de imágenes de Firebase Storage son JPEG o PNG.
-    // Usamos 'image/png' como clave por defecto; el blob real puede ser JPEG
-    // y los browsers lo aceptan igual (leen el tipo del blob, no de la clave).
     const blobPromise = fetchImageBlob(imageUrl);
-
-    // ClipboardItem con Promise: clipboard.write() se llama sincrónicamente
-    // dentro del gesto → iOS mantiene el permiso mientras resuelve el fetch.
     const clipboardItem = new ClipboardItem({ 'image/png': blobPromise });
     await navigator.clipboard.write([clipboardItem]);
 
@@ -298,22 +324,22 @@ export async function copyItemContent(
   
   // Si es una imagen, copiar como imagen
   if (fileUrl && isImageUrl(fileUrl, fileType)) {
-    // Intentar clipboard directo primero (funciona en iOS 16+ WKWebView y desktop moderno)
+    // 1. Plugin nativo de Capacitor — sin restricciones de user gesture, más confiable en iOS/Android
+    const nativeSuccess = await copyImageViaCapacitorPlugin(fileUrl);
+    if (nativeSuccess) return { success: true, copiedAs: 'image' };
+
+    // 2. Web ClipboardItem con Promise — funciona en iOS 16+ WKWebView y desktop moderno
     if (navigator.clipboard && window.ClipboardItem) {
-      logger.info('Intentando copia directa al portapapeles');
-      const imageSuccess = await copyImageToClipboard(fileUrl);
-      if (imageSuccess) {
-        return { success: true, copiedAs: 'image' };
-      }
+      logger.info('Intentando copia directa al portapapeles (ClipboardItem)');
+      const webSuccess = await copyImageToClipboard(fileUrl);
+      if (webSuccess) return { success: true, copiedAs: 'image' };
       logger.warn('Clipboard directo falló, intentando Share API');
     }
 
-    // Fallback: Share API (móvil)
+    // 3. Fallback: Share API (móvil)
     if (isMobileDevice()) {
       const shareSuccess = await shareImage(fileUrl, fileName || 'image.png');
-      if (shareSuccess) {
-        return { success: true, copiedAs: 'shared' };
-      }
+      if (shareSuccess) return { success: true, copiedAs: 'shared' };
       return { 
         success: false, 
         copiedAs: 'image', 
